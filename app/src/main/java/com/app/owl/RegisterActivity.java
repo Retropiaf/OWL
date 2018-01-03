@@ -52,7 +52,7 @@ public class RegisterActivity extends AppCompatActivity {
                             Toast.makeText(RegisterActivity.this, "Passwords do not Match", Toast.LENGTH_SHORT).show();
                         }
                     }else{
-                        Toast.makeText(RegisterActivity.this, "Please Register with Company Email", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(RegisterActivity.this, "Please Register with Valid Email", Toast.LENGTH_SHORT).show();
                     }
 
                 }else{
