@@ -5,16 +5,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
-import java.util.TimerTask;
-
 public class MainActivity extends AppCompatActivity {
 
-    TimerTask tt;
-    int counter = 0;
-
-    //startTime and offsetTime must be long and not float.
-    long startTime = 0;
-    long offsetTime = 10000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

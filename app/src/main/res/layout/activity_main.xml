@@ -23,8 +23,8 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/sign_up_btn"
-        android:text="@string/sign_in_button" />
+        android:id="@+id/login_btn"
+        android:text="@string/login_btn" />
 
 
 
