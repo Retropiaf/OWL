@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">OWL</string>
     <string name="tagline">sleep equality for all</string>
-    <string name="sign_in_button">Create account</string>
+    <string name="sign_in_button">Login</string>
 
 
     <!-- Strings related to login -->
