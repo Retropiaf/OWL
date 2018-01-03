@@ -1,6 +1,8 @@
 package com.app.owl;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -10,6 +12,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -30,7 +37,7 @@ public class RegisterActivity extends AppCompatActivity {
         mPassword = (EditText) findViewById(R.id.input_password);
         mConfirmPassword = (EditText) findViewById(R.id.input_confirm_password);
         mRegister = (Button) findViewById(R.id.btn_register);
-        //mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
+        mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
 
         mRegister.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -48,13 +55,14 @@ public class RegisterActivity extends AppCompatActivity {
                         //check if passwords match
                         if(doStringsMatch(mPassword.getText().toString(), mConfirmPassword.getText().toString())){
 
+                            //Initiate registration task
+                            registerNewEmail(mEmail.getText().toString(), mPassword.getText().toString());
                         }else{
                             Toast.makeText(RegisterActivity.this, "Passwords do not Match", Toast.LENGTH_SHORT).show();
                         }
                     }else{
                         Toast.makeText(RegisterActivity.this, "Please Register with Valid Email", Toast.LENGTH_SHORT).show();
                     }
-
                 }else{
                     Toast.makeText(RegisterActivity.this, "You must fill out all the fields", Toast.LENGTH_SHORT).show();
                 }
@@ -66,7 +74,41 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     /**
-     * Returns True if the user's email contains '@tabian.ca'
+     * Register a new email and password to Firebase Authentication
+     * @param email
+     * @param password
+     */
+
+    private void registerNewEmail(final String email, String password){
+
+        showDialog();
+
+        FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                @Override
+                public void onComplete(@NonNull Task<AuthResult> task) {
+                    Log.d(TAG, "createUserWithEmail:onComplete: " + task.isSuccessful());
+
+                    if(task.isSuccessful()) {
+                        Log.d(TAG, "onComplete: AuthState: " + FirebaseAuth.getInstance().getCurrentUser().getUid());
+
+                        FirebaseAuth.getInstance().signOut();
+
+                        //redirect the user to the login screen
+                        redirectLoginScreen();
+                    } else {
+                        Log.w(TAG, "createUserWithEmail:failure", task.getException());
+                        Toast.makeText(RegisterActivity.this, "Unable to Register", Toast.LENGTH_SHORT).show();
+                    }
+                    hideDialog();
+                }
+
+         });
+
+
+    }
+
+    /**
+     * Returns True if the user's email contains '@gmail.ca'
      * @param email
      * @return
      */
@@ -83,8 +125,8 @@ public class RegisterActivity extends AppCompatActivity {
     private void redirectLoginScreen(){
         Log.d(TAG, "redirectLoginScreen: redirecting to login screen.");
 
-        //Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
-       // startActivity(intent);
+        Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+        startActivity(intent);
         finish();
     }
     /**
