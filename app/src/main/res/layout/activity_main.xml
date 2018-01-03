@@ -26,6 +26,12 @@
         android:text="@string/login_btn"
         android:id="@+id/login_btn"/>
 
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/register_btn"
+        android:id="@+id/register_btn"/>
+
 
 
 </LinearLayout>

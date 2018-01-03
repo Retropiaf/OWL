@@ -17,6 +17,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -73,6 +74,25 @@ public class RegisterActivity extends AppCompatActivity {
 
     }
 
+    private void sendVerrificationEmail(){
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        if(user != null){
+            user.sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if(task.isSuccessful()) {
+                        Toast.makeText(RegisterActivity.this, "Sent Verification Email", Toast.LENGTH_SHORT).show();
+                    }else{
+                        Toast.makeText(RegisterActivity.this, "Couldn't Send Verification Email", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        }
+
+
+    }
+
     /**
      * Register a new email and password to Firebase Authentication
      * @param email
@@ -90,6 +110,8 @@ public class RegisterActivity extends AppCompatActivity {
 
                     if(task.isSuccessful()) {
                         Log.d(TAG, "onComplete: AuthState: " + FirebaseAuth.getInstance().getCurrentUser().getUid());
+
+                        sendVerrificationEmail();
 
                         FirebaseAuth.getInstance().signOut();
 
@@ -113,10 +135,14 @@ public class RegisterActivity extends AppCompatActivity {
      * @return
      */
     private boolean isValidDomain(String email){
+        /*
         Log.d(TAG, "isValidDomain: verifying email has correct domain: " + email);
         String domain = email.substring(email.indexOf("@") + 1).toLowerCase();
         Log.d(TAG, "isValidDomain: users domain: " + domain);
         return domain.equals(DOMAIN_NAME);
+        */
+        return true;
+        // TODO: Get rid of domain verification
     }
 
     /**
