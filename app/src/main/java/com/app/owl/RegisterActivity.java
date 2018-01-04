@@ -74,7 +74,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     }
 
-    private void sendVerrificationEmail(){
+    private void sendVerificationEmail(){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         if(user != null){
@@ -111,7 +111,7 @@ public class RegisterActivity extends AppCompatActivity {
                     if(task.isSuccessful()) {
                         Log.d(TAG, "onComplete: AuthState: " + FirebaseAuth.getInstance().getCurrentUser().getUid());
 
-                        sendVerrificationEmail();
+                        sendVerificationEmail();
 
                         FirebaseAuth.getInstance().signOut();
 
