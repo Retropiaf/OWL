@@ -3,7 +3,7 @@
     <string name="tagline">sleep equality for all</string>
     <string name="login_btn">Login</string>
     <string name="register_btn">Register</string>
-
+    <string name="set_circle">Create New Sleep Circle</string>
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>

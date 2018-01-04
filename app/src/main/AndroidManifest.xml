@@ -24,7 +24,8 @@
         </activity>
         <activity android:name=".RegisterActivity" />
         <activity android:name=".LoginActivity" />
-        <activity android:name=".UserMainActivity"></activity>
+        <activity android:name=".UserMainActivity" />
+        <activity android:name=".setNewCircleActivity"></activity>
     </application>
 
 </manifest>
