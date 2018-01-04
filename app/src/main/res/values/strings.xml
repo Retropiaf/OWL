@@ -4,6 +4,11 @@
     <string name="login_btn">Login</string>
     <string name="register_btn">Register</string>
     <string name="set_circle">Create New Sleep Circle</string>
+    <array name="genres">
+        <item>Rock</item>
+        <item>Pop</item>
+        <item>Folk</item>
+    </array>
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
