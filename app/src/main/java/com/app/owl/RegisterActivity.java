@@ -18,12 +18,19 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class RegisterActivity extends AppCompatActivity {
 
     private static final String TAG = "RegisterActivity";
 
     private static final String DOMAIN_NAME = "gmail.com";
+
+    // Firebase Database
+    DatabaseReference databaseMainUsers;
+
+
 
     //widgets
     private EditText mEmail, mPassword, mConfirmPassword;
@@ -39,6 +46,8 @@ public class RegisterActivity extends AppCompatActivity {
         mConfirmPassword = (EditText) findViewById(R.id.input_confirm_password);
         mRegister = (Button) findViewById(R.id.btn_register);
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
+
+        databaseMainUsers = FirebaseDatabase.getInstance().getReference("MainUsers");
 
         mRegister.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -110,6 +119,8 @@ public class RegisterActivity extends AppCompatActivity {
 
                     if(task.isSuccessful()) {
                         Log.d(TAG, "onComplete: AuthState: " + FirebaseAuth.getInstance().getCurrentUser().getUid());
+
+                        addUsertoDatabase();
 
                         sendVerificationEmail();
 
@@ -189,4 +200,28 @@ public class RegisterActivity extends AppCompatActivity {
     private void hideSoftKeyboard(){
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
     }
+
+    protected void addUsertoDatabase() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        if(user != null){
+            String uid = user.getUid();
+            String name = user.getDisplayName();
+            String email = user.getEmail();
+
+            String id = databaseMainUsers.push().getKey();
+
+            MainUser mainUser = new MainUser(id, uid, name, email);
+
+            databaseMainUsers.child(id).setValue(mainUser);
+
+            Log.d(TAG, "addUsertoDatabase: main user added! ");
+
+        }else{
+            Log.d(TAG, "addUsertoDatabase: failed to add main user to the database ");
+        }
+
+
+    }
+
 }

@@ -19,13 +19,16 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class LoginActivity extends AppCompatActivity {
 
     private static final String TAG = "LoginActivity";
 
-    //Firebase
+    //Firebase auth
     private FirebaseAuth.AuthStateListener mAuthListener;
+
 
 
     // widgets
@@ -41,6 +44,7 @@ public class LoginActivity extends AppCompatActivity {
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
 
         setupFirebaseAuth();
+
 
         Button signIn = (Button) findViewById(R.id.email_sign_in_button);
         signIn.setOnClickListener(new View.OnClickListener() {
@@ -141,6 +145,10 @@ public class LoginActivity extends AppCompatActivity {
                     if(user.isEmailVerified()){
                         Log.d(TAG, "onAuthStateChanged: signed_in: " + user.getUid());
                         Toast.makeText(LoginActivity.this, "Authenticated with: " + user.getEmail(), Toast.LENGTH_SHORT).show();
+
+
+
+
                         Intent intent = new Intent(LoginActivity.this, UserMainActivity.class);
                         startActivity(intent);
                         finish();
@@ -170,4 +178,7 @@ public class LoginActivity extends AppCompatActivity {
             FirebaseAuth.getInstance().removeAuthStateListener(mAuthListener);
         }
     }
+
+
+
 }

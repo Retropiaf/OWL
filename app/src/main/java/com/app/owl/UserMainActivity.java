@@ -22,7 +22,7 @@ public class UserMainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_main);
 
-        Button newCircle = (Button) findViewById(R.id.set_circle);
+        Button newCircle = (Button) findViewById(R.id.new_circle_btn);
 
         newCircle.setOnClickListener(new View.OnClickListener() {
 
