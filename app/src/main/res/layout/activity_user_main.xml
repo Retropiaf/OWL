@@ -8,10 +8,43 @@
 
 
     <Button
-        android:id="@+id/set_circle"
+        android:id="@+id/new_circle_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/set_circle"
+        android:text="@string/sleep_circles_btn"
         tools:layout_editor_absoluteX="39dp"
-        tools:layout_editor_absoluteY="77dp" />
+        tools:layout_editor_absoluteY="285dp" />
+
+    <Button
+        android:id="@+id/new_sleep_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/new_sleep_session"
+        tools:layout_editor_absoluteX="112dp"
+        tools:layout_editor_absoluteY="447dp" />
+
+    <Button
+        android:id="@+id/users_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/users_btn"
+        tools:layout_editor_absoluteX="39dp"
+        tools:layout_editor_absoluteY="135dp" />
+
+    <Button
+        android:id="@+id/menu_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Menu"
+        tools:layout_editor_absoluteX="280dp"
+        tools:layout_editor_absoluteY="16dp" />
+
+    <Button
+        android:id="@+id/sleep_session"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/sleep_session"
+        tools:layout_editor_absoluteX="39dp"
+        tools:layout_editor_absoluteY="209dp" />
+
 </android.support.constraint.ConstraintLayout>
