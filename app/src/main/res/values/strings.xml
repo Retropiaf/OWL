@@ -10,11 +10,18 @@
     <string name="sleep_session">Sleep Sessions</string>
     <string name="new_user">Add a User</string>
     <string name="users_btn">Users</string>
+    <string name="new_user_btn">New User</string>
+    <string name="add_user_btn">Add User</string>
+    <string name="enter_name">Enter a username</string>
+
+    <!-- Test -->
     <array name="genres">
         <item>Rock</item>
         <item>Pop</item>
         <item>Folk</item>
     </array>
+    <!-- Test -->
+
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>

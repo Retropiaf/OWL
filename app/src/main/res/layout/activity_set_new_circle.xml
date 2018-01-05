@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.widget.LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="com.app.owl.setNewCircleActivity">
 
     <EditText
@@ -33,4 +35,4 @@
         tools:layout_editor_absoluteX="91dp"
         tools:layout_editor_absoluteY="251dp" />
 
-</android.support.constraint.ConstraintLayout>
+</android.widget.LinearLayout>

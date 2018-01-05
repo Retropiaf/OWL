@@ -1,19 +1,14 @@
 package com.app.owl;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.UserProfileChangeRequest;
 
 public class UserMainActivity extends AppCompatActivity {
 
@@ -22,8 +17,19 @@ public class UserMainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_main);
 
-        Button newCircle = (Button) findViewById(R.id.new_circle_btn);
+        Button users = (Button) findViewById(R.id.users_btn);
+        users.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(UserMainActivity.this, UsersActivity.class);
+                startActivity(intent);
+            }
+        });
 
+        //Button newCircle = (Button) findViewById(R.id.new_circle_btn);
+
+
+        /*
         newCircle.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View v) {   Intent signUpIntent = new Intent(UserMainActivity.this, setNewCircleActivity.class);
@@ -32,8 +38,10 @@ public class UserMainActivity extends AppCompatActivity {
 
         });
 
+        */
+
         //getUserDetails();
-        setUserDetails();
+        //setUserDetails();
     }
 
 
@@ -65,6 +73,7 @@ public class UserMainActivity extends AppCompatActivity {
     }
 
 
+    /*
     private void setUserDetails(){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -96,4 +105,5 @@ public class UserMainActivity extends AppCompatActivity {
             Log.d(TAG, "getUserDetails: properties: \n" + properties);
         }
     }
+    */
 }

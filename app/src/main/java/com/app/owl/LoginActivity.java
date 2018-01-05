@@ -19,8 +19,6 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -147,10 +145,9 @@ public class LoginActivity extends AppCompatActivity {
                         Toast.makeText(LoginActivity.this, "Authenticated with: " + user.getEmail(), Toast.LENGTH_SHORT).show();
 
 
-
-
                         Intent intent = new Intent(LoginActivity.this, UserMainActivity.class);
                         startActivity(intent);
+                        Log.d(TAG, "Taking you to the Main user welcome screen, hopefully!");
                         finish();
                     }else{
                         Toast.makeText(LoginActivity.this, "Check Your Email Inbox for a Verification Link", Toast.LENGTH_SHORT).show();

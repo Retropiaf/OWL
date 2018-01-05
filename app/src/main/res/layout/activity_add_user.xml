@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.widget.LinearLayout
+    android:orientation="vertical" xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.app.owl.AddUserActivity">
+
+    <EditText
+        android:id="@+id/enterNameAddUser"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="@string/enter_name"
+        android:inputType="textPersonName"
+        tools:layout_editor_absoluteX="39dp"
+        tools:layout_editor_absoluteY="59dp" />
+
+    <Button
+        android:id="@+id/add_user_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/add_user_btn"
+        tools:layout_editor_absoluteX="39dp"
+        tools:layout_editor_absoluteY="146dp" />
+
+</android.widget.LinearLayout>
