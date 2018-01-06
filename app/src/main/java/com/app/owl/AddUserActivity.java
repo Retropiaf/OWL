@@ -1,5 +1,6 @@
 package com.app.owl;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -47,7 +48,10 @@ public class AddUserActivity extends AppCompatActivity {
 
             databaseSecondaryUsers.child(id).setValue(secondaryUser);
 
-            Toast.makeText(this, "Secondary user added. Name: " + name, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Adding secondary user. Name: " + name, Toast.LENGTH_SHORT).show();
+
+            Intent intent = new Intent(AddUserActivity.this, UsersActivity.class);
+            startActivity(intent);
 
         }else{
             Toast.makeText(this, "You need to enter a name", Toast.LENGTH_SHORT).show();
