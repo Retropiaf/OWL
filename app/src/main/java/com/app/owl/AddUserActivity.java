@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -25,7 +26,7 @@ public class AddUserActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_user);
 
-        databaseSecondaryUsers = FirebaseDatabase.getInstance().getReference("secondaryUsers");
+        databaseSecondaryUsers = FirebaseDatabase.getInstance().getReference("SecondaryUsers");
 
         editTextName = (EditText) findViewById(R.id.enterNameAddUser);
         buttonAdd = (Button) findViewById(R.id.add_user_btn);
@@ -44,6 +45,9 @@ public class AddUserActivity extends AppCompatActivity {
 
         if(!TextUtils.isEmpty(name)){
             String id = databaseSecondaryUsers.push().getKey();
+
+            Log.d("addSecondaryUser", id);
+
             SecondaryUser secondaryUser = new SecondaryUser(id, name);
 
             databaseSecondaryUsers.child(id).setValue(secondaryUser);

@@ -44,7 +44,7 @@ public class AllUsersList extends ArrayAdapter<SecondaryUser>{
 
 
         SecondaryUser user = secondaryUserList.get(position);
-        textViewName.setText(user.getUserName());
+        textViewName.setText(user.getSecondaryUserName());
 
         Log.d(TAG, "I'm in the list");
         return listViewItem;
