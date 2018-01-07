@@ -38,7 +38,7 @@ public class AllUsersList extends ArrayAdapter<SecondaryUser>{
         //return super.getView(position, convertView, parent);
         LayoutInflater inflater = context.getLayoutInflater();
 
-        View listViewItem = inflater.inflate(R.layout.activity_users, null, true);
+        View listViewItem = inflater.inflate(R.layout.list_layout, null, true);
 
         TextView textViewName = (TextView) listViewItem.findViewById(R.id.user_name);
 

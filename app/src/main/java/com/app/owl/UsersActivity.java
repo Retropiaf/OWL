@@ -3,6 +3,7 @@ package com.app.owl;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
@@ -28,7 +29,7 @@ public class UsersActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_users);
 
-        databaseSecondaryUsers = FirebaseDatabase.getInstance().getReference("secondaryUsers");
+        databaseSecondaryUsers = FirebaseDatabase.getInstance().getReference("SecondaryUsers");
 
         listViewSecondaryUsers = (ListView) findViewById(R.id.listViewSecondaryUsers);
 
@@ -55,10 +56,14 @@ public class UsersActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
+
                 secondaryUserList.clear();
 
-                for(DataSnapshot secondaryUserSnapshot : dataSnapshot.getChildren()){
+                Log.d("usersactivity", "this is happening");
+
+                for (DataSnapshot secondaryUserSnapshot: dataSnapshot.getChildren()){
                     SecondaryUser user = secondaryUserSnapshot.getValue(SecondaryUser.class);
+                    Log.d("usersactivity", "this is happening too");
                     secondaryUserList.add(user);
                 }
 
