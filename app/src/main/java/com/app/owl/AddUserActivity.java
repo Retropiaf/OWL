@@ -50,6 +50,8 @@ public class AddUserActivity extends AppCompatActivity {
     }
 
     private void addSecondaryUser(){
+
+
         //String name = editTextName.getText().toString().trim();
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -102,6 +104,19 @@ public class AddUserActivity extends AppCompatActivity {
             }
         });
 
+
+
+
+    /*
+        FindCurrentUser.findCurrentUser();
+
+        if ( != null){
+            saveSecondaryUser(id);
+        }else{
+            Log.d("Oops", "id was empty");
+        }
+    */
+
         /*
         if(id != null) {
             Log.d("Bef saveSecondaryUser", id);
@@ -127,6 +142,8 @@ public class AddUserActivity extends AppCompatActivity {
        // }else{
             //Toast.makeText(this, "You need to enter a name", Toast.LENGTH_SHORT).show();
         //}
+
+
     }
 
 
@@ -144,7 +161,7 @@ public class AddUserActivity extends AppCompatActivity {
 
             SecondaryUser secondaryUser = new SecondaryUser(secondUserId, name);
 
-            databaseSecondaryUsers.setValue(secondaryUser);
+            databaseSecondaryUsers.child(secondUserId).setValue(secondaryUser);
 
             Toast.makeText(this, "Adding secondary user. Name: " + name, Toast.LENGTH_SHORT).show();
 
