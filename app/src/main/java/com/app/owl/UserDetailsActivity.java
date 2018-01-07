@@ -5,9 +5,12 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
+import com.google.firebase.database.DatabaseReference;
+
 public class UserDetailsActivity extends AppCompatActivity {
 
     TextView userName;
+    DatabaseReference databaseReference; // Use if need to do something with the database
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
