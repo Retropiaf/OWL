@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 
@@ -18,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UsersActivity extends AppCompatActivity {
+    public static final String USERNAME = "username";
+    public static final String USER_ID = "userid";
 
     DatabaseReference databaseSecondaryUsers;
     ListView listViewSecondaryUsers;
@@ -42,6 +45,18 @@ public class UsersActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(UsersActivity.this, AddUserActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        listViewSecondaryUsers.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                SecondaryUser user = secondaryUserList.get(i);
+                Intent intent = new Intent(getApplicationContext(), UserDetailsActivity.class);
+                intent.putExtra(USERNAME, user.getSecondaryUserName());
+                intent.putExtra(USER_ID, user.getUserId());
+
                 startActivity(intent);
             }
         });

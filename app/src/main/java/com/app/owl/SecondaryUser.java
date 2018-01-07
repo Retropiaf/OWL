@@ -22,11 +22,11 @@ public class SecondaryUser {
         Log.d("SecondaryUser", "I'm creating a new user!!!!!!");
     }
 
-    /*
+
     public String getUserId() {
         return userId;
     }
-    */
+
 
     public String getSecondaryUserName() {
         return userName;

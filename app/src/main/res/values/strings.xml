@@ -13,6 +13,7 @@
     <string name="new_user_btn">New User</string>
     <string name="add_user_btn">Add User</string>
     <string name="enter_name">Enter a username</string>
+    <string name="info">User\'s info</string>
 
     <!-- Test -->
     <array name="genres">
