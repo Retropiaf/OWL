@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.widget.LinearLayout
+    android:orientation="vertical"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/testWireless"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.app.owl.WirelessTestActivity">
+
+
+    <Button
+        android:id="@+id/on_off"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="on/off"
+        tools:layout_editor_absoluteX="29dp"
+        tools:layout_editor_absoluteY="107dp" />
+
+    <Button
+        android:id="@+id/discoverable"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="discoverable"
+        tools:layout_editor_absoluteX="29dp"
+        tools:layout_editor_absoluteY="231dp" />
+
+    <TextView
+        android:id="@+id/text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Turn on Bluethooth"
+        tools:layout_editor_absoluteX="79dp"
+        tools:layout_editor_absoluteY="351dp" />
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+</android.widget.LinearLayout>

@@ -30,7 +30,8 @@
         <activity android:name=".UserMainActivity" />
         <activity android:name=".AddUserActivity" />
         <activity android:name=".UsersActivity" />
-        <activity android:name=".UserDetailsActivity"></activity>
+        <activity android:name=".UserDetailsActivity" />
+        <activity android:name=".WirelessTestActivity"></activity>
     </application>
 
 </manifest>

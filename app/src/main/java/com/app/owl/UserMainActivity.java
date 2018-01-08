@@ -30,6 +30,15 @@ public class UserMainActivity extends AppCompatActivity {
             }
         });
 
+        Button testWireless = (Button) findViewById(R.id.new_sleep_btn);
+        testWireless.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(UserMainActivity.this, WirelessTestActivity.class);
+                startActivity(intent);
+            }
+        });
+
         //Button newCircle = (Button) findViewById(R.id.new_circle_btn);
 
 
