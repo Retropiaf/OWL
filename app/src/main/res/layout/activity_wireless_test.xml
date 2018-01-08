@@ -26,6 +26,14 @@
         tools:layout_editor_absoluteX="29dp"
         tools:layout_editor_absoluteY="231dp" />
 
+    <Button
+        android:id="@+id/discover"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="discover"
+        tools:layout_editor_absoluteX="29dp"
+        tools:layout_editor_absoluteY="231dp" />
+
     <TextView
         android:id="@+id/text"
         android:layout_width="wrap_content"
@@ -36,5 +44,6 @@
 
     <ListView
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="wrap_content"
+        android:id="@+id/lvNewDevices"/>
 </android.widget.LinearLayout>
