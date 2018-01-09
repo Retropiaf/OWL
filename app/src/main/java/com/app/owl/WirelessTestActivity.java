@@ -5,36 +5,30 @@ import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Set;
 
-public class WirelessTestActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
+public class WirelessTestActivity extends AppCompatActivity {
     private static final String TAG = "WirelessTestActivity";
 
     ProgressDialog mProgressDlg;
     private static final int REQUEST_ENABLE_BT=1;
     TextView on_off;
     BluetoothA2dp mBluetoothEarbuds;
-    BluetoothAdapter myBluetoothAdapter;
+    //BluetoothAdapter myBluetoothAdapter;
     Set<BluetoothDevice> pairedDevices;
     TextView text;
     TextView discoverable;
     TextView discover;
+    BluetoothAdapter mBluetoothAdapter;
 
     public ArrayList<BluetoothDevice> mBTDevices = new ArrayList<>();
     public DeviceListAdapter mDeviceListAdapter;
@@ -43,85 +37,7 @@ public class WirelessTestActivity extends AppCompatActivity implements AdapterVi
     ListView lvNewDevices;
 
 
-    // Create a BroadcastReceiver for ACTION_FOUND.
-    private final BroadcastReceiver mBroadcastReceiver1 = new BroadcastReceiver() {
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action.equals(myBluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)) {
-                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, myBluetoothAdapter.ERROR);
-                switch(state){
-                    case BluetoothAdapter.STATE_OFF:
-                        Log.d(TAG, "onReceive: STATE OFF");
 
-                        break;
-                    case BluetoothAdapter.STATE_TURNING_OFF:
-                        Log.d(TAG, "onReceive: STATE TURNING OFF");
-                        break;
-                    case BluetoothAdapter.STATE_ON:
-                        Log.d(TAG, "onReceive: STATE ON");
-                        break;
-                    case BluetoothAdapter.STATE_TURNING_ON:
-                        Log.d(TAG, "onReceive: STATE TURNING ON");
-                        break;
-                }
-            }
-        }
-    };
-
-    /**
-     * Broadcast Receiver for listing devices that are not yet paired.
-     * Executed by btnDiscover() method.
-     */
-    private BroadcastReceiver mBroadcastReceiver3 = new BroadcastReceiver(){
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
-            Log.d(TAG, "onReceive: ACTION FOUND");
-
-            if(action.equals(BluetoothDevice.ACTION_FOUND)){
-                BluetoothDevice device = intent.getParcelableExtra (BluetoothDevice.EXTRA_DEVICE);
-                mBTDevices.add(device);
-                Log.d(TAG, "onReceive: " + device.getName() + ": " + device.getAddress());
-                mDeviceListAdapter = new DeviceListAdapter(context, R.layout.device_adapter_view, mBTDevices);
-                lvNewDevices.setAdapter(mDeviceListAdapter);
-            }
-        }
-    };
-
-    private BroadcastReceiver  mBroadcastReceiver4 = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
-
-            if(action.equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED)){
-                BluetoothDevice mDevice = intent.getParcelableExtra (BluetoothDevice.EXTRA_DEVICE);
-                if(mDevice.getBondState() == BluetoothDevice.BOND_BONDED){
-                    Log.d(TAG, "BroadcastRceiver: BOND_BONDED.");
-                }
-                if(mDevice.getBondState() == BluetoothDevice.BOND_BONDING){
-                    Log.d(TAG, "BroadcastRceiver: BOND_BONDING.");
-
-                }
-                if(mDevice.getBondState() == BluetoothDevice.BOND_NONE){
-                    Log.d(TAG, "BroadcastRceiver: BOND_NONE.");
-
-                }
-            }
-        }
-    };
-
-
-
-
-    @Override
-    protected void onDestroy() {
-        Log.d(TAG, "onDestroy: called");
-        super.onDestroy();
-        unregisterReceiver(mBroadcastReceiver1);
-        unregisterReceiver(mBroadcastReceiver3);
-        unregisterReceiver(mBroadcastReceiver4);
-        //myBluetoothAdapter.closeProfileProxy(mBluetoothEarbuds);
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,19 +52,11 @@ public class WirelessTestActivity extends AppCompatActivity implements AdapterVi
         discover = (TextView) findViewById(R.id.discover);
         mBTDevices = new ArrayList<>();
 
-        //Broadcasts when bond state changes (pairing)
-        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
-        registerReceiver(mBroadcastReceiver4, filter);
+        // Get the default adapter
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-        myBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-
-        lvNewDevices.setOnItemClickListener(WirelessTestActivity.this);
-
-        if(!myBluetoothAdapter.isEnabled()){
-            showDisabled();
-        }else{
-            showEnabled();
-        }
+        // Establish connection to the proxy.
+        mBluetoothAdapter.getProfileProxy(WirelessTestActivity.this, mProfileListener, BluetoothProfile.A2DP);
 
         mProgressDlg = new ProgressDialog(this);
         mProgressDlg.setMessage("Scanning...");
@@ -165,7 +73,7 @@ public class WirelessTestActivity extends AppCompatActivity implements AdapterVi
         discoverable.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                makeDiscoverable();
+                //makeDiscoverable();
 
             }
         });
@@ -174,7 +82,7 @@ public class WirelessTestActivity extends AppCompatActivity implements AdapterVi
             @Override
             public void onClick(View view) {
                 Log.d(TAG, "onClick: enable/disable");
-                enableDisableBT();
+                //enableDisableBT();
             }
         });
 
@@ -182,12 +90,39 @@ public class WirelessTestActivity extends AppCompatActivity implements AdapterVi
             @Override
             public void onClick(View view) {
                 Log.d(TAG, "onClick: btnDiscover");
-                btnDiscover();
+                //btnDiscover();
             }
         });
 
 
     } // End of OnCreate
+
+    @Override
+    protected void onDestroy() {
+        Log.d(TAG, "onDestroy: called");
+        super.onDestroy();
+
+        // Close proxy connection after use.
+        //mBluetoothAdapter.closeProfileProxy(mBluetoothEarbuds);
+
+    }
+
+    private BluetoothProfile.ServiceListener mProfileListener = new BluetoothProfile.ServiceListener() {
+        public void onServiceConnected(int profile, BluetoothProfile proxy) {
+            if (profile == BluetoothProfile.A2DP) {
+                Log.d(TAG, "profile == BluetoothProfile.A2DP - Connecting");
+                mBluetoothEarbuds = (BluetoothA2dp) proxy;
+            }
+        }
+        public void onServiceDisconnected(int profile) {
+            if (profile == BluetoothProfile.A2DP) {
+                Log.d(TAG, "profile == BluetoothProfile.A2DP - Disconnecting");
+                mBluetoothEarbuds = null;
+            }
+        }
+    };
+
+    /*
 
     public void enableDisableBT(){
         if(myBluetoothAdapter == null){
@@ -213,7 +148,8 @@ public class WirelessTestActivity extends AppCompatActivity implements AdapterVi
             registerReceiver(mBroadcastReceiver1, BTIntent);
         }
     }
-
+    */
+    /*
     public void btnDiscover(){
         Log.d(TAG, "btnDiscover: Looking for unpaired devices.");
 
@@ -240,12 +176,13 @@ public class WirelessTestActivity extends AppCompatActivity implements AdapterVi
             myBluetoothAdapter.getProfileProxy(WirelessTestActivity.this, mProfileListener, BluetoothProfile.A2DP);
         }
     }
-
+*/
 
 
     /**
      * *This method is required for all devices running API23+
      */
+    /*
     private void checkBTPermission(){
         if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M){
             int permissionCheck = this.checkSelfPermission("Manifest.permission.Access_FINE_LOCATION");
@@ -259,7 +196,9 @@ public class WirelessTestActivity extends AppCompatActivity implements AdapterVi
 
         }
     }
+    */
 
+    /*
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode==REQUEST_ENABLE_BT){
@@ -320,20 +259,7 @@ public class WirelessTestActivity extends AppCompatActivity implements AdapterVi
         }
     }
 
-    private BluetoothProfile.ServiceListener mProfileListener = new BluetoothProfile.ServiceListener() {
-        public void onServiceConnected(int profile, BluetoothProfile proxy) {
-            if (profile == BluetoothProfile.A2DP) {
-                Log.d(TAG, "profile == BluetoothProfile.A2DP - Connecting");
-                mBluetoothEarbuds = (BluetoothA2dp) proxy;
-            }
-        }
-        public void onServiceDisconnected(int profile) {
-            if (profile == BluetoothProfile.A2DP) {
-                Log.d(TAG, "profile == BluetoothProfile.A2DP - Disconnecting");
-                mBluetoothEarbuds = null;
-            }
-        }
-    };
 
+*/
 
 }
