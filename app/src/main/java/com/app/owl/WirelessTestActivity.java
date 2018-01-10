@@ -5,7 +5,6 @@ import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -57,7 +56,7 @@ public class WirelessTestActivity extends AppCompatActivity {
 
         // Establish connection to the proxy.
         mBluetoothAdapter.getProfileProxy(WirelessTestActivity.this, mProfileListener, BluetoothProfile.A2DP);
-
+        /*
         mProgressDlg = new ProgressDialog(this);
         mProgressDlg.setMessage("Scanning...");
         mProgressDlg.setCancelable(false);
@@ -68,7 +67,7 @@ public class WirelessTestActivity extends AppCompatActivity {
 
             }
         });
-
+        */
 
         discoverable.setOnClickListener(new View.OnClickListener() {
             @Override
