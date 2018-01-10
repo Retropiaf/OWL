@@ -8,6 +8,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelUuid;
@@ -19,7 +21,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 public class SetSleepSessionActivity extends AppCompatActivity  implements AdapterView.OnItemClickListener {
@@ -32,8 +37,12 @@ public class SetSleepSessionActivity extends AppCompatActivity  implements Adapt
     //Set<BluetoothDevice> pairedDevices;
     TextView chooseDevice;
     TextView discoverBtn;
+    String clickedDevice = null;
 
     BluetoothAdapter mBluetoothAdapter;
+
+    AudioManager mAudioManager;
+    MediaPlayer mPlayer;
 
     public ArrayList<BluetoothDevice> mBTDevices = new ArrayList<>();
     public DeviceListAdapter mDeviceListAdapter;
@@ -48,88 +57,120 @@ public class SetSleepSessionActivity extends AppCompatActivity  implements Adapt
     public static final ParcelUuid AdvAudioDist =
             ParcelUuid.fromString("0000110D-0000-1000-8000-00805F9B34FB");
 
-    /*
-    private final BroadcastReceiver mBroadcastReceiver2 = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
+    BroadcastReceiver mReceiver = new BroadcastReceiver() {
 
-            if(action.equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED)){
-                BluetoothDevice mDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                //3 cases:
-                //case1: bonded already
-                if (mDevice.getBondState() == BluetoothDevice.BOND_BONDED){
-                    Log.d(TAG, "BroadcastReceiver: BOND_BONDED.");
+        @Override
+        public void onReceive(Context ctx, Intent intent) {
+            String action = intent.getAction();
+            Log.d(TAG, "in mReceiver ");
+            //Log.d(TAG, "receive intent for action : " + action);
+            if (action.equals(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED)) {
+                int state = intent.getIntExtra(BluetoothA2dp.EXTRA_STATE, BluetoothA2dp.STATE_DISCONNECTED);
+                if (state == BluetoothA2dp.STATE_CONNECTED) {
+                    setIsA2dpReady(true);
+                } else if (state == BluetoothA2dp.STATE_DISCONNECTED) {
+                    setIsA2dpReady(false);
                 }
-                //case2: creating a bone
-                if (mDevice.getBondState() == BluetoothDevice.BOND_BONDING) {
-                    Log.d(TAG, "BroadcastReceiver: BOND_BONDING.");
-                }
-                //case3: breaking a bond
-                if (mDevice.getBondState() == BluetoothDevice.BOND_NONE) {
-                    Log.d(TAG, "BroadcastReceiver: BOND_NONE.");
+            } else if (action.equals(BluetoothA2dp.ACTION_PLAYING_STATE_CHANGED)) {
+                int state = intent.getIntExtra(BluetoothA2dp.EXTRA_STATE, BluetoothA2dp.STATE_NOT_PLAYING);
+                if (state == BluetoothA2dp.STATE_PLAYING) {
+                    Log.d(TAG, "A2DP start playing");
+                    Toast.makeText(SetSleepSessionActivity.this, "A2dp is playing", Toast.LENGTH_SHORT).show();
+                } else {
+                    Log.d(TAG, "A2DP stop playing");
+                    Toast.makeText(SetSleepSessionActivity.this, "A2dp is stopped", Toast.LENGTH_SHORT).show();
                 }
             }
-
         }
+
     };
-    */
 
     private BroadcastReceiver mBroadcastReceiver3 = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
 
-            if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-                mDeviceListAdapter = new DeviceListAdapter(SetSleepSessionActivity.this, R.layout.device_adapter_view, mBTDevices);
-                lvNewDevices.setAdapter(mDeviceListAdapter);
+            BluetoothDevice device = intent.getParcelableExtra (BluetoothDevice.EXTRA_DEVICE);
+
+            String deviceName = setName(device);
+
+            Log.d(TAG, "been called");
+
+            /*
+
+            // Set anonymous name or address if the device name or address is null
+            String deviceName;
+            String deviceAddress;
+            if(device.getName() == null) {
+                deviceName = "anonymous device";
+            }else{
+                deviceName = device.getName();
             }
+            if(device.getAddress() == null) {
+                deviceAddress = "anonymous address";
+            }else{
+                deviceAddress = device.getAddress();
+            }
+
+            */
+
             if (action.equals(BluetoothDevice.ACTION_FOUND)){
-                Log.d(TAG, "mBroadcastReceiver3 - onReceive: ACTION FOUND.");
+                Log.d(TAG, "BroadcastReceiver: ACTION_FOUND.");
 
-                BluetoothDevice device = intent.getParcelableExtra (BluetoothDevice.EXTRA_DEVICE);
+                addCompatibleDevice(device);
 
+                /*
+
+                // Check if the device is a pair of earbuds, headphones or a headset
                 device.fetchUuidsWithSdp();
-
                 ParcelUuid[] uuids = device.getUuids();
 
-                if(uuids != null && uuids.length != 0 && inArray(uuids) == true){
-                    if(isInList(mBTDevices, device) == false){
+                if(uuids != null && uuids.length != 0 && inArray(uuids)){
+
+                    // Check if the device has already been found and added to the list
+                    if(!isInList(mBTDevices, device)){
                         mBTDevices.add(device);
                         mDeviceListAdapter = new DeviceListAdapter(SetSleepSessionActivity.this, R.layout.device_adapter_view, mBTDevices);
                         lvNewDevices.setAdapter(mDeviceListAdapter);
-                        Log.d(TAG, "onReceive: " + device.getName() + ": " + device.getAddress());
-
-
+                        Log.d(TAG, "Added a new device to mBTDevices: " + deviceName + " - " + deviceAddress);
                     }else{
-                        Log.d(TAG, "Device" + device.getName() + " " + device.getAddress() + " is alredy in the list.");
+                        Log.d(TAG, "Device" + deviceName + " " + deviceAddress + " has already been found and added to the mBTDevices list.");
                     }
-
-
-
                 }else{
-                    Log.d(TAG, "This device does not support A2DP " + device.getName());
+                    Log.d(TAG, "This device does not support A2DP (is not a pair of earbuds, headphones or a headset). Device:" + deviceName);
                 }
+                */
+            } // End of ACTION_FOUND
 
-
-
-            }
+            /*
 
             if(action.equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED)){
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                //3 cases:
-                //case1: bonded already
+
                 if (device.getBondState() == BluetoothDevice.BOND_BONDED){
                     Log.d(TAG, "BroadcastReceiver: BOND_BONDED.");
-                    device.fetchUuidsWithSdp();
 
+                    // Establish connection to the proxy.
+                    //mBluetoothAdapter.getProfileProxy(SetSleepSessionActivity.this, mProfileListener, BluetoothProfile.A2DP);
+
+                    //Toast toast = Toast.makeText(SetSleepSessionActivity.this, "Connected to " + deviceName, Toast.LENGTH_LONG);
+                    //toast.show();
+
+                    //addCompatibleDevice(device);
+
+
+                    // Check if the device is a pair of earbuds, headphones or a headset
+                    device.fetchUuidsWithSdp();
                     ParcelUuid[] uuids = device.getUuids();
 
                     if(uuids != null && uuids.length != 0 && inArray(uuids) == true){
+
+                        // Check if the device has already been found and added to the list
                         if(isInList(mBTDevices, device) == false){
                             mBTDevices.add(device);
                             mDeviceListAdapter = new DeviceListAdapter(SetSleepSessionActivity.this, R.layout.device_adapter_view, mBTDevices);
                             lvNewDevices.setAdapter(mDeviceListAdapter);
+
+
 
                             Log.d(TAG, "onReceive: " + device.getName() + ": " + device.getAddress());
 
@@ -142,6 +183,7 @@ public class SetSleepSessionActivity extends AppCompatActivity  implements Adapt
                     }else{
                         Log.d(TAG, "This device does not support A2DP " + device.getName());
                     }
+
                 }
                 //case2: creating a bone
                 if (device.getBondState() == BluetoothDevice.BOND_BONDING) {
@@ -149,50 +191,39 @@ public class SetSleepSessionActivity extends AppCompatActivity  implements Adapt
                 }
                 //case3: breaking a bond
 
-            }
-            /*
-            if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)) {
-                Log.d(TAG, "mBroadcastReceiver3 - onReceive: ACTION_ACL_CONNECTED.");
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-
-                device.fetchUuidsWithSdp();
-
-                ParcelUuid[] uuids = device.getUuids();
-
-                if(uuids != null && uuids.length != 0 && inArray(uuids) == true){
-                    if(isInList(mBTDevices, device) == false){
-                        mBTDevices.add(device);
-                        mDeviceListAdapter = new DeviceListAdapter(SetSleepSessionActivity.this, R.layout.device_adapter_view, mBTDevices);
-                        lvNewDevices.setAdapter(mDeviceListAdapter);
-                        Log.d(TAG, "onReceive: " + device.getName() + ": " + device.getAddress());
-
-                    }else{
-                        Log.d(TAG, "Device" + device.getName() + " " + device.getAddress() + " is alredy in the list.");
-                    }
 
 
-
-                }else{
-                    Log.d(TAG, "This device does not support A2DP");
-                }
             }
             */
+
         }
     };
+
+
+
 
     private BroadcastReceiver mBroadcastReceiver4 = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
+
+            BluetoothDevice device = intent.getParcelableExtra (BluetoothDevice.EXTRA_DEVICE);
+
             Log.d(TAG, "mBroadcastReceiver4");
 
-            if (action.equals(BluetoothDevice.BOND_BONDED)){
-                Log.d(TAG, "mBroadcastReceiver4 - onReceive: BOND_BONDED.");
+            if(action.equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED)) {
 
-                Log.d(TAG, "Establishing connection to the proxy.");
+                if (device.getBondState() == BluetoothDevice.BOND_BONDED) {
+                    Log.d(TAG, "mBroadcastReceiver4 - onReceive: BOND_BONDED.");
 
-                // Establish connection to the proxy.
-                mBluetoothAdapter.getProfileProxy(SetSleepSessionActivity.this, mProfileListener, BluetoothProfile.A2DP);
+                    //Log.d(TAG, "Establishing connection to the proxy.");
+
+                    // Establish connection to the proxy.
+                    //mBluetoothAdapter.getProfileProxy(SetSleepSessionActivity.this, mProfileListener, BluetoothProfile.A2DP);
+                }
+                if (device.getBondState() == BluetoothDevice.BOND_BONDING) {
+                    Log.d(TAG, "BroadcastReceiver: BOND_BONDING.");
+                }
             }
         }
     };
@@ -201,7 +232,7 @@ public class SetSleepSessionActivity extends AppCompatActivity  implements Adapt
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
-            Log.d(TAG, "mBroadcastReceiver&");
+            Log.d(TAG, "mBroadcastReceiver1");
 
             if (action.equals(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)){
                 Toast toast = Toast.makeText(SetSleepSessionActivity.this, "Search over. " + String.valueOf(mBTDevices.size()) + " device(s) found.", Toast.LENGTH_LONG);
@@ -219,13 +250,11 @@ public class SetSleepSessionActivity extends AppCompatActivity  implements Adapt
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_set_sleep_session);
 
-        Log.d(TAG, "in onCreate!");
+        chooseDevice = (TextView) findViewById(R.id.chooseDevice); // Text indication
 
-        chooseDevice = (TextView) findViewById(R.id.chooseDevice);
+        lvNewDevices = (ListView) findViewById(R.id.lvNewDevices); // Device list
 
-        lvNewDevices = (ListView) findViewById(R.id.lvNewDevices);
-
-        discoverBtn = (TextView) findViewById(R.id.discover);
+        discoverBtn = (TextView) findViewById(R.id.discover); // Button
 
         discoverBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -234,61 +263,33 @@ public class SetSleepSessionActivity extends AppCompatActivity  implements Adapt
             }
         });
 
-        mBTDevices = new ArrayList<>();
+        mBTDevices = new ArrayList<>(); // Create an empty list of bluetooth devices
 
-        //Broadcasts when bond state changes (ie:pairing)
-        //IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
-        //registerReceiver(mBroadcastReceiver2, filter);
+        lvNewDevices.setOnItemClickListener(SetSleepSessionActivity.this); // Set an onItemClick listener for elements of the bluetooth device list
 
-        lvNewDevices.setOnItemClickListener(SetSleepSessionActivity.this);
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter(); // Get the default adapter
 
-        // Get the default adapter
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-
-        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
-
-        /*
-        if (pairedDevices.size() > 0) {
-            for (BluetoothDevice device : pairedDevices) {
-
-                if(){
-                    Log.d(TAG, "found connected bonded device");
-                    mBTDevices.add(device);
-                }else{
-                    Log.d(TAG, "found unconnected bonded device");
-                }
-
-
-
-            }
-        }
-        */
-/*
-        if (mBluetoothAdapter.getBondedDevices().size() > 0) {
-            for (BluetoothDevice device : mBluetoothAdapter.getBondedDevices()) {
-                try {
-                    Method m = device.getClass()
-                            .getMethod("removeBond", (Class[]) null);
-                    m.invoke(device, (Object[]) null);
-                } catch (Exception e) {
-                    Log.e("Removing has failed.", e.getMessage());
-                }
-            }
-        }
-
-*/
+        // Check if the user's device has bluetooth
         if(mBluetoothAdapter == null){
             Log.d(TAG, "No bluetooth functionality");
-            Toast toast = Toast.makeText(SetSleepSessionActivity.this, "This device doesn't support bluetooth connection", Toast.LENGTH_LONG);
+            Toast toast = Toast.makeText(SetSleepSessionActivity.this, "This device doesn't support bluetooth connections", Toast.LENGTH_LONG);
             toast.show();
-        }
-        if(mBluetoothAdapter != null){
-            discoverDevices();
+            finish();
         }
 
+        mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
 
 
+        IntentFilter discoverDevicesIntent = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+        discoverDevicesIntent.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
+        registerReceiver(mBroadcastReceiver3, discoverDevicesIntent);
+
+        //if(mBluetoothAdapter != null){
+            //discoverDevices();
+        //}
+
+        // Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
 
     } // End of OnCreate
 
@@ -303,60 +304,73 @@ public class SetSleepSessionActivity extends AppCompatActivity  implements Adapt
         if (mBroadcastReceiver4 != null) {unregisterReceiver(mBroadcastReceiver3);}
         //if (mBroadcastReceiver4 != null) {unregisterReceiver(mBroadcastReceiver4);}
         mBluetoothAdapter.cancelDiscovery();
+        releaseMediaPlayer();
+    } // End of onDestroy
 
+    protected void onPause() {
+        releaseMediaPlayer();
+        super.onPause();
     }
 
+    private void releaseMediaPlayer() {
+        if (mPlayer != null) {
+            mPlayer.release();
+            mPlayer = null;
+        }
+    }
 
     public void discoverDevices(){
-        //mBTDevices.clear();
-        //mDeviceListAdapter = new DeviceListAdapter(SetSleepSessionActivity.this, R.layout.device_adapter_view, mBTDevices);
-        //lvNewDevices.setAdapter(mDeviceListAdapter);
-
         if (!mBluetoothAdapter.isEnabled()){mBluetoothAdapter.enable();}
-        //mBluetoothAdapter.closeProfileProxy(BluetoothProfile.A2DP, mBluetoothEarbuds);
-
-
-        Log.d(TAG, "btnDiscover: Looking for unpaired devices.");
+            Log.d(TAG, "btnDiscover: Looking for unpaired devices.");
 
         if (mBluetoothAdapter.isDiscovering()) {
+            Log.d(TAG, "been called 2");
             mBluetoothAdapter.cancelDiscovery();
-            Log.d(TAG, "btnDiscover: Cancelling discovery.");
-
             checkBTPermission();
 
             mBluetoothAdapter.startDiscovery();
+
+
+
             IntentFilter discoverDevicesIntent = new IntentFilter(BluetoothDevice.ACTION_FOUND);
             discoverDevicesIntent.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
             registerReceiver(mBroadcastReceiver3, discoverDevicesIntent);
+            IntentFilter endDiscoveryIntent = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+            registerReceiver(mBroadcastReceiver1, endDiscoveryIntent);
 
         }
         if (!mBluetoothAdapter.isDiscovering()) {
+            Log.d(TAG, "been called 3");
             checkBTPermission();
 
             mBluetoothAdapter.startDiscovery();
+
 
             IntentFilter discoverDevicesIntent = new IntentFilter(BluetoothDevice.ACTION_FOUND);
             discoverDevicesIntent.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
             registerReceiver(mBroadcastReceiver3, discoverDevicesIntent);
 
+            IntentFilter endDiscoveryIntent = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+            registerReceiver(mBroadcastReceiver1, endDiscoveryIntent);
+
         }
 
-        IntentFilter discoverDevicesIntent = new IntentFilter(BluetoothDevice.ACTION_ACL_CONNECTED);
+        Set<BluetoothDevice> bondedDevices = mBluetoothAdapter.getBondedDevices();
+
+        for (BluetoothDevice mBluetoothDevice : bondedDevices){
+            Log.d(TAG, "found a bounder device");
+            addCompatibleDevice(mBluetoothDevice);
+
+        }
+
+        IntentFilter discoverDevicesIntent = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         discoverDevicesIntent.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         registerReceiver(mBroadcastReceiver3, discoverDevicesIntent);
 
+
         IntentFilter endDiscoveryIntent = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         registerReceiver(mBroadcastReceiver1, endDiscoveryIntent);
-
-
-
-
-
-
-        //mDeviceListAdapter = new DeviceListAdapter(SetSleepSessionActivity.this, R.layout.device_adapter_view, mBTDevices);
-        //lvNewDevices.setAdapter(mDeviceListAdapter);
-
-    }
+    } // End of discoverDevices
 
     private void checkBTPermission(){
         if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M){
@@ -364,11 +378,7 @@ public class SetSleepSessionActivity extends AppCompatActivity  implements Adapt
             permissionCheck += this.checkSelfPermission("Manifest.permission.Access_COARSE_LOCATION");
             if (permissionCheck != 0) {
                 this.requestPermissions(new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION}, 1001); //Any number
-            }else{
-                Log.d(TAG, "No need to check permission: SDK version < LOLLIPOP");
             }
-
-
         }
     }
 
@@ -379,6 +389,7 @@ public class SetSleepSessionActivity extends AppCompatActivity  implements Adapt
 
         Log.d(TAG, "onItemClick: You clicked on a device.");
         String deviceName = mBTDevices.get(i).getName();
+        clickedDevice = deviceName;
         String deviceAddress = mBTDevices.get(i).getAddress();
         Log.d(TAG, "onItemClick: deviceName = " + deviceName + " // deviceAddress = " + deviceAddress);
 
@@ -388,6 +399,13 @@ public class SetSleepSessionActivity extends AppCompatActivity  implements Adapt
             Log.d(TAG, "Trying to pair with " + deviceName);
 
             mBTDevices.get(i).createBond();
+
+
+
+            // Establish connection to the proxy.
+            mBluetoothAdapter.getProfileProxy(SetSleepSessionActivity.this, mProfileListener, BluetoothProfile.A2DP);
+
+
 
             IntentFilter discoverDevicesIntent = new IntentFilter(BluetoothDevice.ACTION_FOUND);
             registerReceiver(mBroadcastReceiver4, discoverDevicesIntent);
@@ -403,12 +421,87 @@ public class SetSleepSessionActivity extends AppCompatActivity  implements Adapt
 
     }
 
+    boolean mIsA2dpReady = false;
+    void setIsA2dpReady(boolean ready) {
+        mIsA2dpReady = ready;
+        Toast.makeText(this, "A2DP ready ? " + (ready ? "true" : "false"), Toast.LENGTH_SHORT).show();
+    }
+
     private BluetoothProfile.ServiceListener mProfileListener = new BluetoothProfile.ServiceListener() {
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
             if (profile == BluetoothProfile.A2DP) {
-                Log.d(TAG, "profile == BluetoothProfile.A2DP - Connecting");
+                //Log.d(TAG, "profile == BluetoothProfile.A2DP - Connecting");
 
                 mBluetoothEarbuds = (BluetoothA2dp) proxy;
+
+                String deviceName = clickedDevice;
+
+                //BluetoothDevice result = null;
+                BluetoothDevice result = null;
+
+                Set<BluetoothDevice> devices = mBluetoothAdapter.getBondedDevices();
+
+                if (devices != null) {
+                    for (BluetoothDevice device : devices) {
+                        if (deviceName.equals(device.getName())) {
+                            result = device;
+                            break;
+                        }
+                    }
+                }
+
+
+
+
+                try {
+                    Method connect = BluetoothA2dp.class.getDeclaredMethod("connect", BluetoothDevice.class);
+
+                    connect.invoke(proxy, result);
+                } catch (InvocationTargetException e) {
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                } catch (NoSuchMethodException e) {
+                    e.printStackTrace();
+                }
+
+
+
+                List<BluetoothDevice> connectedDevices = proxy.getConnectedDevices();
+
+                if (connectedDevices != null) {
+                    for (BluetoothDevice device : devices) {
+                        if (deviceName.equals(device.getName())) {
+                            result = device;
+                            break;
+                        }
+                    }
+                }
+
+                IntentFilter connectToDeviceIntent = new IntentFilter(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED);
+                connectToDeviceIntent.addAction(BluetoothA2dp.ACTION_PLAYING_STATE_CHANGED);
+                registerReceiver(mReceiver, connectToDeviceIntent);
+
+                IntentFilter connectToDeviceIntent2 = new IntentFilter(mBluetoothEarbuds.ACTION_CONNECTION_STATE_CHANGED);
+                connectToDeviceIntent2.addAction(mBluetoothEarbuds.ACTION_PLAYING_STATE_CHANGED);
+                registerReceiver(mReceiver, connectToDeviceIntent2);
+
+                IntentFilter connectToDeviceIntent3 = new IntentFilter(result.ACTION_ACL_CONNECTED);
+                connectToDeviceIntent3.addAction(result.ACTION_BOND_STATE_CHANGED);
+                registerReceiver(mReceiver, connectToDeviceIntent3);
+
+
+
+
+                if (mAudioManager.isBluetoothA2dpOn()) {
+
+                } else {
+                    Log.d(TAG, "bluetooth a2dp is not on while service connected");
+                    mAudioManager.setBluetoothA2dpOn(true);
+                    mAudioManager.setBluetoothScoOn(true);
+                }
+
+
             }else{
                 Log.d(TAG, "The device chosen is not bluetooth earbuds or headphones");
                 Toast toast = Toast.makeText(SetSleepSessionActivity.this, "Please connect to bluetooth earbuds or headphones", Toast.LENGTH_LONG);
@@ -457,6 +550,57 @@ public class SetSleepSessionActivity extends AppCompatActivity  implements Adapt
         }
         return false;
     }
+
+    private void addCompatibleDevice(BluetoothDevice device) {
+
+        String deviceName = setName(device);
+        String deviceAddress = setAddress(device);
+
+        device.fetchUuidsWithSdp();
+        ParcelUuid[] uuids = device.getUuids();
+
+        if(uuids != null && uuids.length != 0 && inArray(uuids)){
+            // Check if the device has already been found and added to the list
+            if(!isInList(mBTDevices, device)){
+                mBTDevices.add(device);
+                mDeviceListAdapter = new DeviceListAdapter(SetSleepSessionActivity.this, R.layout.device_adapter_view, mBTDevices);
+                lvNewDevices.setAdapter(mDeviceListAdapter);
+                Log.d(TAG, "Added a new device to mBTDevices: " + deviceName + " - " + deviceAddress);
+            }else{
+                Log.d(TAG, "Device" + deviceName + " " + deviceAddress + " has already been found and added to the mBTDevices list.");
+            }
+        }else{
+            Log.d(TAG, "This device does not support A2DP (is not a pair of earbuds, headphones or a headset). Device:" + deviceName);
+        }
+    }
+
+    private String setName(BluetoothDevice device) {
+        // Set anonymous name or address if the device name or address is null
+        String deviceName;
+
+        if(device.getName() == null) {
+            deviceName = "anonymous device";
+        }else{
+            deviceName = device.getName();
+        }
+
+        return deviceName;
+    }
+
+    private String setAddress(BluetoothDevice device) {
+        // Set anonymous name or address if the device name or address is null
+        String deviceAddress;
+
+        if(device.getAddress() == null) {
+            deviceAddress = "anonymous address";
+        }else{
+            deviceAddress = device.getAddress();
+        }
+
+        return deviceAddress;
+    }
+
+
 
 
 
