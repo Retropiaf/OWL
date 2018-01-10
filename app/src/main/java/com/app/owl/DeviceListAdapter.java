@@ -2,6 +2,7 @@ package com.app.owl;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,12 +36,14 @@ public class DeviceListAdapter extends ArrayAdapter<BluetoothDevice>  {
             TextView deviceName = (TextView) convertView.findViewById(R.id.tvDeviceName);
             TextView deviceAddress = (TextView) convertView.findViewById(R.id.tvDeviceAddress);
 
-            if (deviceName != null) {
+            if (deviceName.getText() != null) {
+                Log.d("In DeviceListAdapter", String.valueOf(deviceName.getText()));
                 deviceName.setText(device.getName());
             }else{
+                Log.d("In DeviceListAdapter", "deviceName == null");
                 deviceName.setText("Anonymous device");
             }
-            if (deviceAddress != null) {
+            if (deviceAddress.getText() != null) {
                 deviceAddress.setText(device.getAddress());
             }else{
                 deviceName.setText("Anonymous address");

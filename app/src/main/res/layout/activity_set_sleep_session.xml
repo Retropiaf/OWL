@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.widget.LinearLayout
+    android:orientation="vertical"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/testWireless"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.app.owl.SetSleepSessionActivity">
+
+
+    <TextView
+        android:id="@+id/chooseDevice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/choose_device" />
+
+    <Button
+        android:id="@+id/discover"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="discover"
+        tools:layout_editor_absoluteX="29dp"
+        tools:layout_editor_absoluteY="231dp" />
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/lvNewDevices"/>
+</android.widget.LinearLayout>

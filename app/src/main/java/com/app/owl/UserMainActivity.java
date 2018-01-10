@@ -34,7 +34,7 @@ public class UserMainActivity extends AppCompatActivity {
         testWireless.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(UserMainActivity.this, WirelessTestActivity.class);
+                Intent intent = new Intent(UserMainActivity.this, SetSleepSessionActivity.class);
                 startActivity(intent);
             }
         });
