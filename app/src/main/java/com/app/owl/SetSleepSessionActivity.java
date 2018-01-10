@@ -187,7 +187,7 @@ public class SetSleepSessionActivity extends AppCompatActivity  implements Adapt
         Set<BluetoothDevice> bondedDevices = mBluetoothAdapter.getBondedDevices();
 
         for (BluetoothDevice mBluetoothDevice : bondedDevices){
-            Log.d(TAG, "found a bounder device");
+            Log.d(TAG, "found a bounded device");
             addCompatibleDevice(mBluetoothDevice);
 
         }
