@@ -6,16 +6,10 @@
     android:layout_height="match_parent"
     tools:context="com.app.owl.p2p.VideoStreamActivity">
 
-    <VideoView
-        android:id="@+id/video_screen"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="0dp" />
 
     <SurfaceView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="1" />
+        android:id="@+id/surfaceView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" />
 
 </android.widget.LinearLayout>
