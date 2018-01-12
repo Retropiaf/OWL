@@ -21,6 +21,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.app.owl.p2p.VideoStreamActivity;
+
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -128,6 +130,16 @@ public class SetSleepSessionActivity extends AppCompatActivity  implements Adapt
 
         discoverBtn = (TextView) findViewById(R.id.discover); // Button
 
+        TextView goToVideo = (TextView) findViewById(R.id.go_to_video); // Go to video button
+
+        goToVideo.setOnClickListener(new View.OnClickListener() {
+
+            public void onClick(View v) {   Intent goTovideo = new Intent(SetSleepSessionActivity.this, VideoStreamActivity.class);
+                startActivity(goTovideo);
+            }
+
+        });
+
         discoverBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -146,7 +158,7 @@ public class SetSleepSessionActivity extends AppCompatActivity  implements Adapt
             Log.d(TAG, "No bluetooth functionality");
             Toast toast = Toast.makeText(SetSleepSessionActivity.this, "This device doesn't support bluetooth connections", Toast.LENGTH_LONG);
             toast.show();
-            finish();
+            //finish();
         }
 
     } // End of OnCreate

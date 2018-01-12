@@ -24,6 +24,14 @@
         tools:layout_editor_absoluteX="29dp"
         tools:layout_editor_absoluteY="231dp" />
 
+    <Button
+        android:id="@+id/go_to_video"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="go to video"
+        tools:layout_editor_absoluteX="29dp"
+        tools:layout_editor_absoluteY="231dp" />
+
     <ListView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
