@@ -24,9 +24,9 @@ public class VideoStreamActivity extends AppCompatActivity implements MediaPlaye
     final static String USERNAME = "admin";
     final static String PASSWORD = "password1";
     //final static String RTSP_URL = "rtsp://192.168.0.15:88/videoMain";
-    final static String RTSP_URL = "rtsp://admin:password1@192.168.0.15:88/videoSub";
+    //final static String RTSP_URL = "rtsp://admin:password1@192.168.0.15:88/videoSub";
     //final static String RTSP_URL = "http://192.168.0.15:88";
-    //final static String RTSP_URL = "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov";
+    final static String RTSP_URL = "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov";
 
     private MediaPlayer _mediaPlayer;
     private SurfaceHolder _surfaceHolder;
