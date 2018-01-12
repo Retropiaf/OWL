@@ -23,7 +23,8 @@ public class VideoStreamActivity extends AppCompatActivity {
     MediaController mediaController;
     //String url = "http://192.168.0.15:88";
     //String url = "rtsp://192.168.0.15:88";
-    String url = "rtsp://192.168.0.15:88";
+    String url = "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov";
+
 
 
     @Override
