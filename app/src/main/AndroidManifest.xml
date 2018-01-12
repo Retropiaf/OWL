@@ -45,7 +45,8 @@
         <activity android:name=".UsersActivity" />
         <activity android:name=".UserDetailsActivity" />
         <activity android:name=".WirelessTestActivity" />
-        <activity android:name=".SetSleepSessionActivity"></activity>
+        <activity android:name=".SetSleepSessionActivity" />
+        <activity android:name=".p2p.VideoStreamActivity"></activity>
     </application>
 
 </manifest>
