@@ -1,8 +1,6 @@
 package com.app.owl.p2p;
 
-import android.content.Context;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Base64;
@@ -65,9 +63,9 @@ public class VideoStreamActivity extends AppCompatActivity implements MediaPlaye
         _mediaPlayer = new MediaPlayer();
         _mediaPlayer.setDisplay(_surfaceHolder);
 
-        Context context = getApplicationContext();
-        Map<String, String> headers = getRtspHeaders();
-        Uri source = Uri.parse(RTSP_URL);
+        //Context context = getApplicationContext();
+        //Map<String, String> headers = getRtspHeaders();
+        //Uri source = Uri.parse(RTSP_URL);
 
         try {
             // Specify the IP camera's URL and auth headers.
@@ -96,6 +94,7 @@ public class VideoStreamActivity extends AppCompatActivity implements MediaPlaye
                             Log.e(TAG, "MEDIA_ERROR_TIMED_OUT");
                         }
                     } else if (MediaPlayer.MEDIA_ERROR_SERVER_DIED == what) {
+
                         Log.e(TAG, "MEDIA_ERROR_SERVER_DIED");
                     }
                     return true;
