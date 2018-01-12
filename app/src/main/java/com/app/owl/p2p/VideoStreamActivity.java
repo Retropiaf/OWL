@@ -1,7 +1,9 @@
 package com.app.owl.p2p;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+
+import com.app.owl.R;
 
 public class VideoStreamActivity extends AppCompatActivity {
 
