@@ -1,9 +1,10 @@
 package com.app.owl.p2p;
 
+import android.app.Activity;
+import android.content.Context;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Base64;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -12,15 +13,12 @@ import android.view.WindowManager;
 
 import com.app.owl.R;
 
-import java.util.HashMap;
-import java.util.Map;
 
-
-public class VideoStreamActivity extends AppCompatActivity implements MediaPlayer.OnPreparedListener,
+public class VideoStreamActivity extends Activity implements MediaPlayer.OnPreparedListener,
         SurfaceHolder.Callback {
 
-    final static String USERNAME = "admin";
-    final static String PASSWORD = "password1";
+    //final static String USERNAME = "admin";
+    //final static String PASSWORD = "password1";
     //final static String RTSP_URL = "rtsp://192.168.0.15:88/videoMain";
     //final static String RTSP_URL = "rtsp://admin:password1@192.168.0.15:88/videoSub";
     //final static String RTSP_URL = "http://192.168.0.15:88";
@@ -54,6 +52,7 @@ public class VideoStreamActivity extends AppCompatActivity implements MediaPlaye
         _surfaceHolder.setFixedSize(320, 240);
     }
 
+    /* SurfaceHolder.Callback */
     @Override
     public void surfaceChanged(
             SurfaceHolder sh, int f, int w, int h) {}
@@ -63,16 +62,22 @@ public class VideoStreamActivity extends AppCompatActivity implements MediaPlaye
         _mediaPlayer = new MediaPlayer();
         _mediaPlayer.setDisplay(_surfaceHolder);
 
-        //Context context = getApplicationContext();
+        Context context = getApplicationContext();
         //Map<String, String> headers = getRtspHeaders();
-        //Uri source = Uri.parse(RTSP_URL);
+        Uri source = Uri.parse(RTSP_URL);
 
         try {
             // Specify the IP camera's URL and auth headers.
-            _mediaPlayer.setDataSource(RTSP_URL);
+            _mediaPlayer.setDataSource(context, source);
 
             // Begin the process of setting up a video stream.
             _mediaPlayer.setOnPreparedListener(this);
+            _mediaPlayer.prepareAsync();
+        } catch (Exception e) {}
+            //Log.d("MediaPlayer", String.valueOf("I was called!!!!!!!!!"));
+            //_mediaPlayer.start();
+            //Log.d("MediaPlayer", String.valueOf( _mediaPlayer.isPlaying()));
+            /*
             _mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
                 //@Override
                 String TAG = "Error";
@@ -100,14 +105,11 @@ public class VideoStreamActivity extends AppCompatActivity implements MediaPlaye
                     return true;
                 }
             });
+            */
 
 
-            _mediaPlayer.prepareAsync();
-            //Log.d("MediaPlayer", String.valueOf("I was called!!!!!!!!!"));
-            //_mediaPlayer.start();
-            //Log.d("MediaPlayer", String.valueOf( _mediaPlayer.isPlaying()));
-        }
-        catch (Exception e) {}
+
+
     }
 
     @Override
@@ -115,6 +117,7 @@ public class VideoStreamActivity extends AppCompatActivity implements MediaPlaye
         _mediaPlayer.release();
     }
 
+    /*
     private Map<String, String> getRtspHeaders() {
         Map<String, String> headers = new HashMap<String, String>();
         String basicAuthValue = getBasicAuthValue(USERNAME, PASSWORD);
@@ -128,18 +131,15 @@ public class VideoStreamActivity extends AppCompatActivity implements MediaPlaye
         byte[] bytes = credentials.getBytes();
         return "Basic " + Base64.encodeToString(bytes, flags);
     }
+    */
 
-    /*
-MediaPlayer.OnPreparedListener
-*/
+    /* MediaPlayer.OnPreparedListener */
     @Override
     public void onPrepared(MediaPlayer _mediaPlayer) {
         Log.d("MediaPlayer", String.valueOf("I was called!!!!!!!!!"));
         _mediaPlayer.start();
         Log.d("MediaPlayer", String.valueOf( _mediaPlayer.isPlaying()));
     }
-
-
 
 
 }
