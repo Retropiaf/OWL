@@ -39,6 +39,9 @@ public class VideoStreamActivity extends Activity implements MediaPlayer.OnPrepa
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        askPermissions();
+
+        /*
         if (ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.MODIFY_AUDIO_SETTINGS) == PackageManager.PERMISSION_DENIED)
             Log.d("App", "No MODIFY_AUDIO_SETTINGS" );
         else
@@ -56,11 +59,13 @@ public class VideoStreamActivity extends Activity implements MediaPlayer.OnPrepa
                         android.Manifest.permission.RECORD_AUDIO
                 },1 );
         Log.d("App","Requested perms");
+        */
 
 
 
         //createVisualizer();
 
+        /*
         // Set up a full-screen black window.
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         Window window = getWindow();
@@ -80,6 +85,49 @@ public class VideoStreamActivity extends Activity implements MediaPlayer.OnPrepa
         _surfaceHolder = surfaceView.getHolder();
         _surfaceHolder.addCallback(this);
         _surfaceHolder.setFixedSize(320, 240);
+        */
+    }
+    public void askPermissions(){
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.MODIFY_AUDIO_SETTINGS) == PackageManager.PERMISSION_DENIED)
+            Log.d("App", "No MODIFY_AUDIO_SETTINGS" );
+        else
+            Log.d("App", "Yes MODIFY_AUDIO_SETTINGS" );
+
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_DENIED)
+            Log.d("App", "No RECORD_AUDIO" );
+        else
+            Log.d("App", "Yes RECORD_AUDIO" );
+
+        Log.d("App","Requesting permissions" );
+        ActivityCompat.requestPermissions( this, new String[]
+                {
+                        android.Manifest.permission.MODIFY_AUDIO_SETTINGS,
+                        android.Manifest.permission.RECORD_AUDIO
+                },1 );
+        Log.d("App","Requested perms");
+
+    }
+    public void startStream(){
+        // Set up a full-screen black window.
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        Window window = getWindow();
+        window.setFlags(
+                WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        window.setBackgroundDrawableResource(android.R.color.black);
+
+        setContentView(R.layout.activity_video_stream);
+
+        // Configure the view that renders live video.
+        SurfaceView surfaceView =
+                (SurfaceView) findViewById(R.id.surfaceView);
+
+        Log.d("SurfaceView", String.valueOf(surfaceView));
+
+        _surfaceHolder = surfaceView.getHolder();
+        _surfaceHolder.addCallback(this);
+        _surfaceHolder.setFixedSize(320, 240);
+
     }
 
     /* SurfaceHolder.Callback */
@@ -167,8 +215,10 @@ public class VideoStreamActivity extends Activity implements MediaPlayer.OnPrepa
     @Override
     public void onPrepared(MediaPlayer _mediaPlayer) {
         Log.d("MediaPlayer", String.valueOf("I was called!!!!!!!!!"));
+        createVisualizer();
         _mediaPlayer.start();
         Log.d("MediaPlayer", String.valueOf( _mediaPlayer.isPlaying()));
+
     }
 
     private void createVisualizer() {
@@ -207,7 +257,8 @@ public class VideoStreamActivity extends Activity implements MediaPlayer.OnPrepa
         }
         if( success ) {
             Log.d("App","Setting up visualizer");
-            createVisualizer();
+            //createVisualizer();
+            startStream();
         }
 
 
