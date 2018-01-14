@@ -2,14 +2,19 @@ package com.app.owl.p2p;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
+import android.media.audiofx.Visualizer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import com.app.owl.R;
 
@@ -27,9 +32,34 @@ public class VideoStreamActivity extends Activity implements MediaPlayer.OnPrepa
     private MediaPlayer _mediaPlayer;
     private SurfaceHolder _surfaceHolder;
 
+    private Visualizer audioOutput = null;
+    public float intensity = 0; //intensity is a value between 0 and 1. The intensity in this case is the system output volume
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.MODIFY_AUDIO_SETTINGS) == PackageManager.PERMISSION_DENIED)
+            Log.d("App", "No MODIFY_AUDIO_SETTINGS" );
+        else
+            Log.d("App", "Yes MODIFY_AUDIO_SETTINGS" );
+
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_DENIED)
+            Log.d("App", "No RECORD_AUDIO" );
+        else
+            Log.d("App", "Yes RECORD_AUDIO" );
+
+        Log.d("App","Requesting permissions" );
+        ActivityCompat.requestPermissions( this, new String[]
+                {
+                        android.Manifest.permission.MODIFY_AUDIO_SETTINGS,
+                        android.Manifest.permission.RECORD_AUDIO
+                },1 );
+        Log.d("App","Requested perms");
+
+
+
+        //createVisualizer();
 
         // Set up a full-screen black window.
         requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -141,5 +171,70 @@ public class VideoStreamActivity extends Activity implements MediaPlayer.OnPrepa
         Log.d("MediaPlayer", String.valueOf( _mediaPlayer.isPlaying()));
     }
 
+    private void createVisualizer() {
+        int rate = Visualizer.getMaxCaptureRate();
+        audioOutput = new Visualizer(0); // get output audio stream
+        audioOutput.setDataCaptureListener(new Visualizer.OnDataCaptureListener() {
+            @Override
+            public void onWaveFormDataCapture(Visualizer visualizer, byte[] waveform, int samplingRate) {
+                intensity = ((float) waveform[0] + 128f) / 256;
+                Log.d("vis", String.valueOf(intensity));
+            }
+
+            @Override
+            public void onFftDataCapture(Visualizer visualizer, byte[] fft, int samplingRate) {
+
+            }
+        }, rate, true, false); // waveform not freq data
+        Log.d("rate", String.valueOf(Visualizer.getMaxCaptureRate()));
+        audioOutput.setEnabled(true);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        boolean success = true;
+        Log.d("App","in onRequestPermissionsResult");
+
+        for( int i = 0; i < permissions.length; ++i ) {
+            if (grantResults[i] == PackageManager.PERMISSION_GRANTED ) {
+                Log.d("App",permissions[i]+" granted");
+            } else {
+                Log.d("App",permissions[i]+" denied");
+                Toast.makeText(getApplicationContext(), "Needed " + permissions[i], Toast.LENGTH_SHORT).show();
+                success = false;
+            }
+        }
+        if( success ) {
+            Log.d("App","Setting up visualizer");
+            createVisualizer();
+        }
+
+
+
+    }
+
+    /*
+    public void onRequestPermissionsResult (int requestCode,
+                                            String[] permissions,
+                                            int[] grantResults)
+    {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        boolean success = true;
+        for( int i = 0; i < permissions.length; ++i ) {
+            if (grantResults[i] == PackageManager.PERMISSION_GRANTED ) {
+                Log.d("App",permissions[i]+" granted");
+            } else {
+                Log.d("App",permissions[i]+" denied");
+                Toast.makeText(getApplicationContext(), "Needed " + permissions[i], Toast.LENGTH_SHORT).show();
+                success = false;
+            }
+        }
+        if( success ) {
+            Log.d("App","Setting up visualizer");
+        }
+    }
+    */
 
 }
