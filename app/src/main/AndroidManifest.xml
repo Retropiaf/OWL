@@ -24,6 +24,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
     <application
         android:allowBackup="true"
@@ -50,6 +51,9 @@
         <activity android:name=".SetSleepSessionActivity" />
         <activity android:name=".p2p.VideoStreamActivity" />
         <activity android:name=".SoundDetector.SoundDetectorActivity" />
+        <activity android:name=".Sleepcircle.SleepCircleActivity" />
+        <activity android:name=".Sleepcircle.AddSleepCircleActivity" />
+        <activity android:name=".monitor.AddMonitorActivity"></activity>
     </application>
 
 </manifest>

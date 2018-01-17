@@ -17,6 +17,9 @@ public class SoundDetectorActivity extends AppCompatActivity {
     Timer timer;
     int seconds;
     BuildSoundArray soundArray;
+    isSignificant is_Significant;
+    AlertHandler alertHandler;
+    Alert alert;
 
 
     @Override
@@ -26,7 +29,7 @@ public class SoundDetectorActivity extends AppCompatActivity {
         timer = new Timer();
         soundArray = new BuildSoundArray();
         seconds = 0;
-
+        alertHandler = new AlertHandler();
 
         soundCapture = new SoundCapture();
 
@@ -107,8 +110,20 @@ public class SoundDetectorActivity extends AppCompatActivity {
             //int i = 0;
             @Override
             public void run() {
-                Log.d("Timer", "Seconds = " + seconds);
-                soundArray.addSound(soundCapture.getAmplitude());
+                final double sound = soundCapture.getAmplitude();
+                double[] arrayAtTime = soundArray.addSound(sound);
+
+                Log.d("arrayAtTime", String.valueOf(arrayAtTime[0]) + " - " + String.valueOf(arrayAtTime[1]) + " - " + String.valueOf(arrayAtTime[2]) + " - " + String.valueOf(arrayAtTime[3]) + " - " + String.valueOf(arrayAtTime[4]));
+
+                is_Significant = new isSignificant(arrayAtTime); // Create new isSignificant class
+                Boolean significant = new isSignificant(arrayAtTime).significant(); // Call the significant() method on isSignificant
+
+                // Handle the alert
+                if (significant) {
+                    Log.d("Alert", "alert parents");
+                    alert = new Alert();
+                    alertHandler.registerAlert(alert);
+                }
 
                 seconds += 1;
 

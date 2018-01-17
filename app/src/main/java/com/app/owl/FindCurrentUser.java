@@ -17,6 +17,7 @@ import com.google.firebase.database.ValueEventListener;
 
 public class FindCurrentUser {
 
+
     static String id;
     static String uid;
     static FirebaseUser user;

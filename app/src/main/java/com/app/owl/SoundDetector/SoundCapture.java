@@ -37,8 +37,9 @@ public class SoundCapture {
 
     public double getAmplitude() {
         if (mRecorder != null) {
-            Log.d("In SoundCapture", String.valueOf(mRecorder.getMaxAmplitude()));
-            return mRecorder.getMaxAmplitude();
+            double sound = mRecorder.getMaxAmplitude();
+            Log.d("In SoundCapture", String.valueOf(sound));
+            return sound;
 
         } else {
             return 0;
