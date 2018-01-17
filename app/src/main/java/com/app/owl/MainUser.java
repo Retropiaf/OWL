@@ -12,9 +12,11 @@ public class MainUser {
     String userName;
     String userEmail;
 
+    /*
     public MainUser(){
 
     }
+    */
 
     public MainUser(String userId, String userUid, String userName, String userEmail) {
         this.userId = userId;

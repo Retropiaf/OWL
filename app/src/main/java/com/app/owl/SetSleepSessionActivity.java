@@ -21,7 +21,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.app.owl.p2p.VideoStreamActivity;
+import com.app.owl.SoundDetector.SoundDetectorActivity;
 
 import java.util.ArrayList;
 import java.util.Set;
@@ -134,11 +134,36 @@ public class SetSleepSessionActivity extends AppCompatActivity  implements Adapt
 
         goToVideo.setOnClickListener(new View.OnClickListener() {
 
+            public void onClick(View v) {   Intent goTovideo = new Intent(SetSleepSessionActivity.this, SoundDetectorActivity.class);
+                startActivity(goTovideo);
+            }
+
+        });
+
+
+
+
+
+        /*
+
+
+
+        goToVideo.setOnClickListener(new View.OnClickListener() {
+
             public void onClick(View v) {   Intent goTovideo = new Intent(SetSleepSessionActivity.this, VideoStreamActivity.class);
                 startActivity(goTovideo);
             }
 
         });
+
+        goToVideo.setOnClickListener(new View.OnClickListener() {
+
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.ipcamlive.com/5a5e6fc95491b"));
+                startActivity(intent);
+            }
+        });
+        */
 
         discoverBtn.setOnClickListener(new View.OnClickListener() {
             @Override

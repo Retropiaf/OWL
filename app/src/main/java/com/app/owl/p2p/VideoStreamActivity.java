@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.media.audiofx.Visualizer;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -23,11 +22,17 @@ public class VideoStreamActivity extends Activity implements MediaPlayer.OnPrepa
         SurfaceHolder.Callback {
 
     //final static String USERNAME = "admin";
-    //final static String PASSWORD = "password1";
-    //final static String RTSP_URL = "rtsp://192.168.0.15:88/videoMain";
-    //final static String RTSP_URL = "rtsp://admin:password1@192.168.0.15:88/videoSub";
+    //final static String PASSWORD = "";
+    //final static String RTSP_URL = "rtsp://73.42.136.188:88/videoMain";
+    //final static String RTSP_URL = "rtsp://retropiaf:Cs252552@73.42.136.188:88/videoSub";
+    //final static String RTSP_URL = "rtsp://admin:password@192.168.0.15:88/videoSub";
     //final static String RTSP_URL = "http://192.168.0.15:88";
-    final static String RTSP_URL = "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov";
+    //final static String RTSP_URL = "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov";
+    //final static String RTSP_URL = "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov";
+    //final static String RTSP_URL = "rtsp://admin:owly363663@192.168.0.108/cam/realmonitor?channel=1&subtype=1";
+    //final static String RTSP_URL = "http://192.168.0.108/cgi-bin/audio.cgi?action=getAudio&httptype=singlepart&channel=1";
+    //final static String RTSP_URL = "rtsp://admin:Cs252552@73.42.136.188:554/cam/realmonitor?channel=1&subtype=1";
+    //final static String RTSP_URL = "rtsp://@73.42.136.188:554/cam/realmonitor?channel=1&subtype=1";
 
     private MediaPlayer _mediaPlayer;
     private SurfaceHolder _surfaceHolder;
@@ -40,6 +45,7 @@ public class VideoStreamActivity extends Activity implements MediaPlayer.OnPrepa
         super.onCreate(savedInstanceState);
 
         askPermissions();
+        startStream();
 
         /*
         if (ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.MODIFY_AUDIO_SETTINGS) == PackageManager.PERMISSION_DENIED)
@@ -138,15 +144,17 @@ public class VideoStreamActivity extends Activity implements MediaPlayer.OnPrepa
     @Override
     public void surfaceCreated(SurfaceHolder sh) {
         _mediaPlayer = new MediaPlayer();
+        //_mediaPlayer.stop();
+        //_mediaPlayer.release();
         _mediaPlayer.setDisplay(_surfaceHolder);
 
         Context context = getApplicationContext();
         //Map<String, String> headers = getRtspHeaders();
-        Uri source = Uri.parse(RTSP_URL);
+        //Uri source = Uri.parse(RTSP_URL);
 
         try {
             // Specify the IP camera's URL and auth headers.
-            _mediaPlayer.setDataSource(context, source);
+            _mediaPlayer.setDataSource("rtsp://admin:Cs252552@73.42.136.188:554/cam/realmonitor?channel=1&subtype=1");
 
             // Begin the process of setting up a video stream.
             _mediaPlayer.setOnPreparedListener(this);
@@ -195,7 +203,8 @@ public class VideoStreamActivity extends Activity implements MediaPlayer.OnPrepa
         _mediaPlayer.release();
     }
 
-    /*
+
+/*
     private Map<String, String> getRtspHeaders() {
         Map<String, String> headers = new HashMap<String, String>();
         String basicAuthValue = getBasicAuthValue(USERNAME, PASSWORD);
@@ -209,8 +218,8 @@ public class VideoStreamActivity extends Activity implements MediaPlayer.OnPrepa
         byte[] bytes = credentials.getBytes();
         return "Basic " + Base64.encodeToString(bytes, flags);
     }
-    */
 
+*/
     /* MediaPlayer.OnPreparedListener */
     @Override
     public void onPrepared(MediaPlayer _mediaPlayer) {
@@ -258,7 +267,7 @@ public class VideoStreamActivity extends Activity implements MediaPlayer.OnPrepa
         if( success ) {
             Log.d("App","Setting up visualizer");
             //createVisualizer();
-            startStream();
+            //startStream();
         }
 
 
