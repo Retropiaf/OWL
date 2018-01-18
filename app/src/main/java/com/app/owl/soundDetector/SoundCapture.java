@@ -1,4 +1,4 @@
-package com.app.owl.SoundDetector;
+package com.app.owl.soundDetector;
 
 import android.media.MediaRecorder;
 import android.util.Log;

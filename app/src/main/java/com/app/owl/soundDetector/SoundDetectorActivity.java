@@ -1,4 +1,4 @@
-package com.app.owl.SoundDetector;
+package com.app.owl.soundDetector;
 
 import android.content.pm.PackageManager;
 import android.os.Bundle;

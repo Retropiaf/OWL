@@ -1,8 +1,5 @@
 package com.app.owl.monitor;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
 /**
  * Created by Christiane on 1/17/18.
  */
@@ -11,8 +8,9 @@ public class PhoneMonitor {
     String deviceIP;
 
     public PhoneMonitor() {
-        this.deviceIP = getIpAddress();
+        //this.deviceIP = getIpAddress();
     }
+    /*
 
     public String getIpAddress(){
         try {
@@ -22,6 +20,6 @@ public class PhoneMonitor {
             System.out.println("I'm sorry. I don't know my own address. Connect to wifi maybe.");
         }
     }
-
+*/
 
 }

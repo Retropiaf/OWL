@@ -1,4 +1,4 @@
-package com.app.owl.SoundDetector;
+package com.app.owl.soundDetector;
 
 import android.util.Log;
 
@@ -31,7 +31,7 @@ public class AlertHandler {
     public String chooseResponder(){
         String currentResponder = "";
         Query lastAlert = databaseAlerts.limitToFirst(1);
-        String lastResponder = lastAlert.ResponderId;
+        //String lastResponder = lastAlert.ResponderId;
 
         //Get the current sleep session
             // Get the parent id that is not the same as lastResponder, save as current responder

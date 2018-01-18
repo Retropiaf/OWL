@@ -52,6 +52,9 @@
     <string name="add_monitor">Add a baby monitor</string>
     <string name="add_monitor_warning">You can only add this device as a monitor if you are not using it to pair your earbuds</string>
     <string name="turn_into_monitor">Turn this device into a monitor</string>
+    <string name="name_circle">Name your Circle</string>
+    <string name="second_user">Second user:</string>
+
 
 
 </resources>

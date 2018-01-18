@@ -1,4 +1,4 @@
-package com.app.owl.SoundDetector;
+package com.app.owl.soundDetector;
 
 /**
  * Created by Christiane on 1/17/18.

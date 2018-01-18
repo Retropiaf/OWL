@@ -3,6 +3,7 @@ package com.app.owl.p2p;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.audiofx.Visualizer;
 import android.os.Bundle;
@@ -114,6 +115,7 @@ public class VideoStreamActivity extends Activity implements MediaPlayer.OnPrepa
 
     }
     public void startStream(){
+        Log.d("App", "entered startStream");
         // Set up a full-screen black window.
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         Window window = getWindow();
@@ -143,6 +145,7 @@ public class VideoStreamActivity extends Activity implements MediaPlayer.OnPrepa
 
     @Override
     public void surfaceCreated(SurfaceHolder sh) {
+        Log.d("App", "surfaceCreated");
         _mediaPlayer = new MediaPlayer();
         //_mediaPlayer.stop();
         //_mediaPlayer.release();
@@ -154,12 +157,16 @@ public class VideoStreamActivity extends Activity implements MediaPlayer.OnPrepa
 
         try {
             // Specify the IP camera's URL and auth headers.
-            _mediaPlayer.setDataSource("rtsp://admin:Cs252552@73.42.136.188:554/cam/realmonitor?channel=1&subtype=1");
+            _mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            _mediaPlayer.setDataSource("rtsp://admin:Cs252552@192.168.0.15:554/cam/realmonitor?channel=1&subtype=1");
+            Log.d("App", "set source");
 
             // Begin the process of setting up a video stream.
             _mediaPlayer.setOnPreparedListener(this);
             _mediaPlayer.prepareAsync();
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            Log.d("App", "Exception: " + String.valueOf(e));
+        }
             //Log.d("MediaPlayer", String.valueOf("I was called!!!!!!!!!"));
             //_mediaPlayer.start();
             //Log.d("MediaPlayer", String.valueOf( _mediaPlayer.isPlaying()));

@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import com.app.owl.sleepCircle.SleepCirclesActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -35,6 +36,15 @@ public class UserMainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(UserMainActivity.this, SetSleepSessionActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        Button sleepCircle = (Button) findViewById(R.id.sleep_circle_btn);
+        sleepCircle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(UserMainActivity.this, SleepCirclesActivity.class);
                 startActivity(intent);
             }
         });

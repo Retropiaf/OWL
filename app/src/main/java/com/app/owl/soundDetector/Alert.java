@@ -1,4 +1,4 @@
-package com.app.owl.SoundDetector;
+package com.app.owl.soundDetector;
 
 import java.util.Calendar;
 import java.util.Date;

@@ -21,7 +21,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.app.owl.SoundDetector.SoundDetectorActivity;
+import com.app.owl.p2p.VideoStreamActivity;
 
 import java.util.ArrayList;
 import java.util.Set;
@@ -134,7 +134,7 @@ public class SetSleepSessionActivity extends AppCompatActivity  implements Adapt
 
         goToVideo.setOnClickListener(new View.OnClickListener() {
 
-            public void onClick(View v) {   Intent goTovideo = new Intent(SetSleepSessionActivity.this, SoundDetectorActivity.class);
+            public void onClick(View v) {   Intent goTovideo = new Intent(SetSleepSessionActivity.this, VideoStreamActivity.class);
                 startActivity(goTovideo);
             }
 
