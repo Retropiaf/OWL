@@ -10,8 +10,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.app.owl.CurrentUser;
 import com.app.owl.MainUser;
 import com.app.owl.R;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -20,87 +22,147 @@ import com.google.firebase.database.ValueEventListener;
 
 public class AddSleepCircleActivity extends AppCompatActivity {
 
-    SleepCircle sleepCircle;
-    DatabaseReference database;
-    String seconUserEmail;
-    String secondUserId;
     String TAG = "AddSleepCircleActivity";
+
+    DatabaseReference database;
+    String secondUserEmail;
+    String secondUserId;
     SleepCircle circle;
     String circleName;
+    EditText editSecondUser;
+    EditText editCircleName;
+    MainUser user2;
+    FirebaseUser currentUser;
+    String sleepCircleId;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_sleep_circle);
 
-        EditText editCircleName = (EditText) findViewById(R.id.editCircleName);
-        circleName = editCircleName.getText().toString().trim();
+        Log.d(TAG, "In onCreate");
 
-        EditText editSecondUser = (EditText) findViewById(R.id.second_user_email);
-        seconUserEmail = editSecondUser.getText().toString().trim();
+        editCircleName = (EditText) findViewById(R.id.editCircleName);
+
+        editSecondUser = (EditText) findViewById(R.id.second_user_email);
+
 
         Button buttonAdd = (Button) findViewById(R.id.confirm_create_circle);
 
         buttonAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Log.d(TAG, "Inside onClick");
 
-                if(TextUtils.isEmpty(circleName)){
-                    Toast.makeText(AddSleepCircleActivity.this,"You need to enter a name", Toast.LENGTH_SHORT).show();
-                }else if(TextUtils.isEmpty(seconUserEmail)){
-                    Toast.makeText(AddSleepCircleActivity.this,"You need to enter an email", Toast.LENGTH_SHORT).show();
-                }else{
-                    findSecondUser();
-                }
+                createCircle();
 
             }
         });
 
     }
 
-    private void findSecondUser(){
+    private void createCircle(){
 
         database = FirebaseDatabase.getInstance().getReference();
+        circleName = editCircleName.getText().toString().trim();
+        secondUserEmail = editSecondUser.getText().toString().trim().toLowerCase();
 
-        database.child("MainUsers")
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                            MainUser user = snapshot.getValue(MainUser.class);
-                            if(user.getUserEmail() == seconUserEmail){
-                                secondUserId = user.getUserId();
+        if(TextUtils.isEmpty(circleName)){
+            //Toast.makeText(AddSleepCircleActivity.this,"You need to enter a circle name", Toast.LENGTH_SHORT).show();
+        }else if(TextUtils.isEmpty(secondUserEmail)){
+            //Toast.makeText(AddSleepCircleActivity.this,"You need to enter an email", Toast.LENGTH_SHORT).show();
+        }else{
+            database.child("MainUsers").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        user2 = snapshot.getValue(MainUser.class);
+                        Log.d(TAG, "user2 = " + user2);
+                        if(user2.getUserEmail() != null) {
+                            String user_email = user2.getUserEmail().toLowerCase();
+
+                            Log.d(TAG, "database user2 email is: " + user_email );
+                            Log.d(TAG, "input user2 email is: " + secondUserEmail );
+                            Log.d(TAG, "Both emails are the same: " + secondUserEmail.equals(user_email) );
+
+                            Log.d(TAG, "user is: " + String.valueOf(user2));
+
+                            if(secondUserEmail.equals(user_email)){
+                                Log.d(TAG, "Found second user");
+                                secondUserId = user2.getUserId();
+
+                                Log.d(TAG, "Create new Circle");
                                 circle = new SleepCircle(circleName, secondUserId);
-                                addCircleToDatabase(circle.getCircleId(), circle);
+                                addCircleToDatabase(circle);
+                                addCircleToUsers();
+                                returnToSleepCirclesPage();
+
 
                             }
                         }
-                        Log.d(TAG, "no user found with email '" + seconUserEmail + "'");
-                    }
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
+
+
                     }
 
-                });
+                }
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    //TODO: Handle database error
+                }
+
+            });
+        }
 
     }
 
-    private void addCircleToDatabase(String id, SleepCircle circle) {
+    private void addCircleToDatabase(SleepCircle circle) {
+        Log.d(TAG, "In addCircleToDatabase");
 
-       database = FirebaseDatabase.getInstance().getReference("SleepCircles").child(id);
+       database = FirebaseDatabase.getInstance().getReference("SleepCircles");
 
-       String SleepCircleId =  database.push().getKey();
+       sleepCircleId =  database.push().getKey();
 
-       circle.setCircleId(SleepCircleId);
+       circle.setCircleId(sleepCircleId);
 
-       database.child(secondUserId).setValue(circle);
+       database.child(sleepCircleId).setValue(circle);
 
        Toast.makeText(AddSleepCircleActivity.this, "Adding sleep circle to database", Toast.LENGTH_SHORT).show();
 
-       Intent intent = new Intent(AddSleepCircleActivity.this, SleepCirclesActivity.class);
-       startActivity(intent);
+    }
+
+    private void addCircleToUsers(){
+
+        Log.d(TAG, "In addCircleToUsers");
+
+        CurrentUser.findId();
+        String currentUserId = CurrentUser.id;
+
+        updateUserCircleList(currentUserId, sleepCircleId);
+        updateUserCircleList(user2.getUserId(), sleepCircleId);
+
+        //TODO: Check if user is logged in (add a method to current user) and handle logged out user
 
 
+    }
 
+    private void updateUserCircleList(String userKey, String circleId){
+        Log.d(TAG, "In updateUserCircleList");
+
+        database = FirebaseDatabase.getInstance().getReference().child("MainUsers");
+
+        Log.d(TAG, String.valueOf(database));
+
+        database.child(userKey).child("circles").child(circleId).setValue(circleId);
+
+    }
+
+    private void returnToSleepCirclesPage(){
+        Log.d(TAG, "In returnToSleepCirclesPage");
+
+        Toast.makeText(AddSleepCircleActivity.this, "Adding sleep circle to database", Toast.LENGTH_SHORT).show();
+
+        Intent intent = new Intent(AddSleepCircleActivity.this, SleepCirclesActivity.class);
+        startActivity(intent);
     }
 }

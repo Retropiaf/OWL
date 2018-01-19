@@ -2,6 +2,7 @@ package com.app.owl.monitor;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import com.app.owl.R;
 import com.google.firebase.database.DatabaseReference;
@@ -20,19 +21,17 @@ public class AddMonitorActivity extends AppCompatActivity {
         phoneMonitor = new PhoneMonitor();
 
 
-/*
-        if(phoneMonitor.getIpAddress() != null){
-            String id = databaseMonitor.push().getKey();
 
+        if(phoneMonitor.deviceIP != null){
+            String phoneMonitorId = databaseMonitor.push().getKey();
 
-            // Add the sleep circle as a node
-            databaseMonitor.child(id).setValue(phoneMonitor);
+            databaseMonitor.child(phoneMonitorId).setValue(phoneMonitor);
 
             Log.d(TAG, "registerAlert: phoneMonitor added! ");
 
         }else{
             Log.d(TAG, "registerAlert: failed to add phoneMonitor to the database ");
         }
-        */
+
     }
 }

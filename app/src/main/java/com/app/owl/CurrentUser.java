@@ -15,16 +15,17 @@ import com.google.firebase.database.ValueEventListener;
  * Created by Christiane on 1/6/18.
  */
 
-public class FindCurrentUser {
+public class CurrentUser {
 
-
-    static String id;
+    static String TAG = "CurrentUser class";
     static String uid;
     static FirebaseUser user;
+    public static String id;
 
 
-    static void findCurrentUser() {
+    public static void findId() {
 
+        Log.d(TAG, "inside finddId");
 
         user = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -36,16 +37,14 @@ public class FindCurrentUser {
 
         Query query = databaseMainUser.child("MainUsers").orderByChild("userUid").equalTo(uid);
 
-        Log.d("After the Query!!!!!!!", uid);
+        //Log.d("After the Query!!!!!!!", uid);
 
         query.addListenerForSingleValueEvent(new ValueEventListener() {
 
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
-                Log.d("In onDataChange!!!!!!!", "In onDataChange!!!!!!!");
                 if (dataSnapshot.exists()) {
-                    Log.d("In onDataChange!!!!!!!", "DataSnapshot exists!!!!!!!");
                     // dataSnapshot is the "MainUser" node with all children with uid = uid
                     for (DataSnapshot mainUser : dataSnapshot.getChildren()) {
                         MainUser user = mainUser.getValue(MainUser.class);
@@ -69,17 +68,10 @@ public class FindCurrentUser {
     }
 
     static String returnValue() {
-
-
-
-        if(id != null){
-            return id;
-        }else{
-            return null;
-        }
-
+        return id;
     }
 
+    public static void isLoggedIn(){}
 
 
 }

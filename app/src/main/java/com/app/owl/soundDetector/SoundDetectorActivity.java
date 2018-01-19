@@ -8,6 +8,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.app.owl.sleepCircle.AddSleepCircleActivity;
+
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -123,6 +125,7 @@ public class SoundDetectorActivity extends AppCompatActivity {
                     Log.d("Alert", "alert parents");
                     alert = new Alert();
                     alertHandler.registerAlert(alert);
+                    Toast.makeText(SoundDetectorActivity.this, "Sound alert received", Toast.LENGTH_SHORT).show();
                 }
 
                 seconds += 1;

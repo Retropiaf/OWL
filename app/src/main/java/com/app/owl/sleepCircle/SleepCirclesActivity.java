@@ -92,7 +92,7 @@ public class SleepCirclesActivity extends AppCompatActivity {
                                     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                                         SleepCircle circle = sleepCircleList.get(i);
                                         Intent intent = new Intent(getApplicationContext(), SleepCircleDetailsActivity.class);
-                                        intent.putExtra(CIRCLENAME, circle.getCircleName());
+                                        intent.putExtra(CIRCLENAME, circle.getSleepCircleName());
                                         intent.putExtra(CIRCLEID, circle.getCircleId());
 
                                         startActivity(intent);
