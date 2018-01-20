@@ -11,11 +11,11 @@ import android.widget.TextView;
 
 import com.app.owl.CurrentUser;
 import com.app.owl.R;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
@@ -27,7 +27,7 @@ public class SleepCirclesActivity extends AppCompatActivity {
 
     DatabaseReference database;
 
-    ArrayList<SleepCircle> list = new ArrayList<>();
+    ArrayList<SleepCircle> list;
 
     String TAG = "SleepCirclesActivity";
 
@@ -38,6 +38,22 @@ public class SleepCirclesActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sleep_circles);
+
+        TextView addCircle = (TextView) findViewById(R.id.create_circle);
+
+        listViewSleepCircle = (ListView)findViewById(R.id.listViewSleepCircles);
+
+        list = new ArrayList<>();
+
+        addCircle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent addCircleIntent = new Intent(SleepCirclesActivity.this, AddSleepCircleActivity.class);
+                startActivity(addCircleIntent);
+            }
+        });
+
+        /*
 
 
         String currentUserUid = CurrentUser.uid;
@@ -83,12 +99,14 @@ public class SleepCirclesActivity extends AppCompatActivity {
             }
         });
 
+        */
+
         listViewSleepCircle.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 SleepCircle circle = sleepCircleList.getItem(i);
                 Intent intent = new Intent(getApplicationContext(), SleepCircleDetailsActivity.class);
-                intent.putExtra(CIRCLE_NAME, circle.getSleepCircleName());
+                intent.putExtra(CIRCLE_NAME, circle.getCircleName());
                 intent.putExtra(CIRCLE_ID, circle.getCircleId());
 
                 startActivity(intent);
@@ -96,14 +114,23 @@ public class SleepCirclesActivity extends AppCompatActivity {
         });
 
 
+
+
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-/*
-        CurrentUser.findId();
-        String currentUserId = CurrentUser.id;
+
+        Log.d(TAG, "onStart is triggered");
+        //list.clear();
+
+        /*
+
+        setContentView(R.layout.activity_sleep_circles);
+
+         String currentUserUid = CurrentUser.uid;
+        Log.d(TAG, "Current user uid is: " + currentUserUid);
 
         TextView addCircle = (TextView) findViewById(R.id.create_circle);
         addCircle.setOnClickListener(new View.OnClickListener() {
@@ -115,31 +142,58 @@ public class SleepCirclesActivity extends AppCompatActivity {
         });
 
         listViewSleepCircle = (ListView)findViewById(R.id.listViewSleepCircles);
-        final ArrayAdapter<String> adapter=new ArrayAdapter<String>(SleepCirclesActivity.this, android.R.layout.simple_dropdown_item_1line, list);
-        listViewSleepCircle.setAdapter(adapter);
-        database = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(currentUserId).child("circles");
-        database.addChildEventListener(new ChildEventListener() {
+
+        sleepCircleList = new SleepCircleList(this, list);
+
+        listViewSleepCircle.setAdapter(sleepCircleList);
+
+*/
+        String currentUserUid = CurrentUser.uid;
+
+        database = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(currentUserUid).child("circles");
+        database.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                list.add(dataSnapshot.getValue(String.class));
-                adapter.notifyDataSetChanged();
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                list.clear();
+
+                for (DataSnapshot circleSnapshot : dataSnapshot.getChildren()) {
+                    //getting artist
+                    SleepCircle circle = circleSnapshot.getValue(SleepCircle.class);
+                    //adding artist to the list
+                    Log.d(TAG, String.valueOf(circle));
+                    list.add(circle);
+                }
+
+                //creating adapter
+                sleepCircleList = new SleepCircleList(SleepCirclesActivity.this, list);
+
+                //attaching adapter to the listview
+                listViewSleepCircle.setAdapter(sleepCircleList);
             }
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-            }
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-                list.remove(dataSnapshot.getValue(String.class));
-                adapter.notifyDataSetChanged();
-            }
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-            }
+
             @Override
             public void onCancelled(DatabaseError databaseError) {
+
+            }
+
+
+        });
+
+        listViewSleepCircle.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                SleepCircle circle = sleepCircleList.getItem(i);
+                Intent intent = new Intent(getApplicationContext(), SleepCircleDetailsActivity.class);
+                intent.putExtra(CIRCLE_NAME, circle.getCircleName());
+                intent.putExtra(CIRCLE_ID, circle.getCircleId());
+
+                startActivity(intent);
             }
         });
-*/
+
+
+
     }
 
 

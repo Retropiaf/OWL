@@ -8,7 +8,7 @@ import com.app.owl.CurrentUser;
 public class SleepCircle {
     String user1;
     String user2;
-    String circleName;
+    private String circleName;
     String circleId;
     String monitorIp;
 
@@ -27,8 +27,10 @@ public class SleepCircle {
         this.monitorIp = monitorIp;
     }
 
-
+    /*
     public String getSleepCircleName(){ return circleName; }
+*/
+    public String getCircleName(){ return circleName;}
 
 
     public String getCircleId() {

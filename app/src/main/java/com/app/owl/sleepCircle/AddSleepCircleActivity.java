@@ -28,6 +28,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+
 public class AddSleepCircleActivity extends AppCompatActivity {
 
     String TAG = "AddSleepCircleActivity";
@@ -46,6 +48,7 @@ public class AddSleepCircleActivity extends AppCompatActivity {
     ConnectivityManager connManager;
     NetworkInfo myWifi;
     WifiManager wifiManager;
+    ArrayList<SleepCircle> list;
 
 
     @Override
@@ -65,6 +68,8 @@ public class AddSleepCircleActivity extends AppCompatActivity {
         myWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 
         wifiManager = (WifiManager) this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+
+        list = new ArrayList<>();
 
 
         Button buttonAdd = (Button) findViewById(R.id.confirm_create_circle);
