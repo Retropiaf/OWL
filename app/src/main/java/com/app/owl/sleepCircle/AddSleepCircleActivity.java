@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -64,6 +65,27 @@ public class AddSleepCircleActivity extends AppCompatActivity {
 
         checkBox = findViewById(R.id.make_monitor);
 
+        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if(checkBox.isChecked()){
+                    new AlertDialog.Builder(AddSleepCircleActivity.this)
+                            .setTitle("Confirm")
+                            .setMessage("You can not use this device as a monitor and pair it to your earbuds. Are you sure you want to use this device as a monitor?")
+                            .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    // Do nothing
+                                }})
+                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    checkBox.setChecked(false);
+                                }}).show();
+
+
+                }
+            }
+        });
+
         connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         myWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 
@@ -78,36 +100,7 @@ public class AddSleepCircleActivity extends AppCompatActivity {
         buttonAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(checkBox.isChecked()){
-                    new AlertDialog.Builder(AddSleepCircleActivity.this)
-                            .setTitle("Confirm")
-                            .setMessage("You can not use a device both as a monitor and pair it to your earbuds. Are you sure you want to use this device as a monitor?")
-                            .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    if(!myWifi.isConnected()){
-                                        new AlertDialog.Builder(AddSleepCircleActivity.this)
-                                                .setTitle("Confirm")
-                                                .setMessage("Your device need to be connected to wifi.")
-                                                .setPositiveButton("Turn wifi on", new DialogInterface.OnClickListener() {
-                                                    public void onClick(DialogInterface dialog, int which) {
-                                                        wifiManager.setWifiEnabled(true);
-                                                        createCircle();
-                                                        wifiManager.setWifiEnabled(false);
-                                                    }})
-                                                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                                    public void onClick(DialogInterface dialog, int which) {
-                                                        // Do nothing
-                                                    }}).show();
-                                    }
-                                    createCircle();
-                                }})
-                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    // Do nothing
-                                }}).show();
-
-
-                }
+                createCircle();
             }
 
         });
@@ -116,6 +109,26 @@ public class AddSleepCircleActivity extends AppCompatActivity {
 
 
     private void makeMonitor(){
+
+        Boolean wifiOn = true;
+
+        if(!myWifi.isConnected()){
+            wifiOn = false;
+            new AlertDialog.Builder(AddSleepCircleActivity.this)
+                    .setTitle("Confirm")
+                    .setMessage("Your device need to be connected to wifi.")
+                    .setPositiveButton("Turn wifi on", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            wifiManager.setWifiEnabled(true);
+                        }})
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            checkBox.setChecked(false);
+                            Toast.makeText(AddSleepCircleActivity.this,"You unselected \"Use this device as a monitor\"", Toast.LENGTH_SHORT).show();
+                        }}).show();
+        }
+
+
         int SDK_INT = android.os.Build.VERSION.SDK_INT;
         if (SDK_INT > 8)
         {
@@ -124,6 +137,7 @@ public class AddSleepCircleActivity extends AppCompatActivity {
             StrictMode.setThreadPolicy(policy);
             PhoneMonitor phoneMonitor = new PhoneMonitor();
             monitorIp = String.valueOf(phoneMonitor.deviceIP);
+            if(!wifiOn){ wifiManager.setWifiEnabled(false); }
 
         }
     }
