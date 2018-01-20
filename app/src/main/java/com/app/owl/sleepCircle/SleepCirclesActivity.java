@@ -39,9 +39,9 @@ public class SleepCirclesActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sleep_circles);
 
-        CurrentUser.findId();
-        String currentUserId = CurrentUser.id;
-        Log.d(TAG, "Current user id is: " + currentUserId);
+
+        String currentUserUid = CurrentUser.uid;
+        Log.d(TAG, "Current user uid is: " + currentUserUid);
 
         TextView addCircle = (TextView) findViewById(R.id.create_circle);
         addCircle.setOnClickListener(new View.OnClickListener() {
@@ -58,7 +58,7 @@ public class SleepCirclesActivity extends AppCompatActivity {
 
         listViewSleepCircle.setAdapter(sleepCircleList);
 
-        database = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(currentUserId).child("circles");
+        database = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(currentUserUid).child("circles");
         database.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {

@@ -23,19 +23,21 @@ public class MainUser {
     }
 
 
-    public MainUser(String userId, String userUid, String userName, String userEmail) {
-        this.userId = userId;
+    public MainUser(String userUid, String userName, String userEmail) {
+        //this.userId = userId;
         this.userUid = userUid;
         this.userName = userName;
         this.userEmail = userEmail;
         circles = new HashMap<>();
     }
 
+    /*
     public String getUserId() {
         return userId;
     }
+    */
 
-    public String getUserUid() {
+    public String getUid() {
         return userUid;
     }
 
@@ -51,10 +53,6 @@ public class MainUser {
         return circles;
     }
 
-    public void addCircle(String circleId){
-        //circles.put("/posts/" + key, postValues);
-        //circles.add(circleId);
-    }
 
 
 }

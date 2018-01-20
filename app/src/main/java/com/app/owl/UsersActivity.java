@@ -1,24 +1,13 @@
 package com.app.owl;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ListView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class UsersActivity extends AppCompatActivity {
@@ -40,6 +29,8 @@ public class UsersActivity extends AppCompatActivity {
 
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        /*
 
         if(user != null) {
             String uid = user.getUid();
@@ -79,7 +70,7 @@ public class UsersActivity extends AppCompatActivity {
                                         SecondaryUser user = secondaryUserList.get(i);
                                         Intent intent = new Intent(getApplicationContext(), UserDetailsActivity.class);
                                         intent.putExtra(USERNAME, user.getSecondaryUserName());
-                                        intent.putExtra(USER_ID, user.getUserId());
+                                        intent.putExtra(USER_ID, user.getUid());
 
                                         startActivity(intent);
                                     }
@@ -97,6 +88,7 @@ public class UsersActivity extends AppCompatActivity {
                 }
             });
         }
+        */
 
 
 
@@ -107,6 +99,8 @@ public class UsersActivity extends AppCompatActivity {
         super.onStart();
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        /*
 
         if(user != null) {
             String uid = user.getUid();
@@ -166,8 +160,9 @@ public class UsersActivity extends AppCompatActivity {
             });
         }
 
-
+*/
 
 
     }
+
 }
