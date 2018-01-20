@@ -41,11 +41,13 @@ public class SleepCircleList extends ArrayAdapter<SleepCircle> {
 
         View listViewItem = inflater.inflate(R.layout.sleep_circles_list, null, true);
 
-        TextView textViewCircleName = (TextView) listViewItem.findViewById(R.id.circle_name);
-
+        TextView textViewCircleName = (TextView) listViewItem.findViewById(R.id.text_view_circle_name);
 
         SleepCircle circle = sleepCircleList.get(position);
-        textViewCircleName.setText(circle.getSleepCircleName());
+        Log.d(TAG, String.valueOf(circle));
+        String name = circle.getSleepCircleName();
+        Log.d(TAG, name);
+        textViewCircleName.setText(name);
 
         Log.d(TAG, "I'm in the list");
         return listViewItem;

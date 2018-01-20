@@ -1,5 +1,7 @@
 package com.app.owl;
 
+import com.app.owl.sleepCircle.SleepCircle;
+
 import java.util.HashMap;
 
 /**
@@ -13,7 +15,7 @@ public class MainUser {
     String userUid;
     String userName;
     String userEmail;
-    HashMap<String, String> circles;
+    HashMap<String, SleepCircle> circles;
 
 
     public MainUser(){
@@ -43,6 +45,10 @@ public class MainUser {
 
     public String getUserEmail() {
         return userEmail;
+    }
+
+    public HashMap<String, SleepCircle> getCircleList() {
+        return circles;
     }
 
     public void addCircle(String circleId){

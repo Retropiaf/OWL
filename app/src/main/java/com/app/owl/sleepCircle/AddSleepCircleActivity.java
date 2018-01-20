@@ -13,7 +13,6 @@ import android.widget.Toast;
 import com.app.owl.CurrentUser;
 import com.app.owl.MainUser;
 import com.app.owl.R;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -32,7 +31,6 @@ public class AddSleepCircleActivity extends AppCompatActivity {
     EditText editSecondUser;
     EditText editCircleName;
     MainUser user2;
-    FirebaseUser currentUser;
     String sleepCircleId;
 
 
@@ -82,9 +80,6 @@ public class AddSleepCircleActivity extends AppCompatActivity {
                         if(user2.getUserEmail() != null) {
                             String user_email = user2.getUserEmail().toLowerCase();
 
-                            Log.d(TAG, "database user2 email is: " + user_email );
-                            Log.d(TAG, "input user2 email is: " + secondUserEmail );
-                            Log.d(TAG, "Both emails are the same: " + secondUserEmail.equals(user_email) );
 
                             Log.d(TAG, "user is: " + String.valueOf(user2));
 
@@ -138,22 +133,22 @@ public class AddSleepCircleActivity extends AppCompatActivity {
         CurrentUser.findId();
         String currentUserId = CurrentUser.id;
 
-        updateUserCircleList(currentUserId, sleepCircleId);
-        updateUserCircleList(user2.getUserId(), sleepCircleId);
+        updateUserCircleList(currentUserId);
+        updateUserCircleList(user2.getUserId());
 
         //TODO: Check if user is logged in (add a method to current user) and handle logged out user
 
 
     }
 
-    private void updateUserCircleList(String userKey, String circleId){
+    private void updateUserCircleList(String userKey){
         Log.d(TAG, "In updateUserCircleList");
 
         database = FirebaseDatabase.getInstance().getReference().child("MainUsers");
 
         Log.d(TAG, String.valueOf(database));
 
-        database.child(userKey).child("circles").child(circleId).setValue(circleId);
+        database.child(userKey).child("circles").child(sleepCircleId).setValue(circle);
 
     }
 

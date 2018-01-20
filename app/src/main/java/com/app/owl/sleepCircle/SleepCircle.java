@@ -38,6 +38,7 @@ public class SleepCircle {
     public String getCircleId() {
         return circleId;
     }
+
     public void setCircleId (String id) {
         this.circleId = id;
     }

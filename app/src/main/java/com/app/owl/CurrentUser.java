@@ -71,7 +71,14 @@ public class CurrentUser {
         return id;
     }
 
-    public static void isLoggedIn(){}
+    public static Boolean isLoggedIn(){
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user == null){
+            return false;
+        }else{
+            return true;
+        }
+    }
 
 
 }
