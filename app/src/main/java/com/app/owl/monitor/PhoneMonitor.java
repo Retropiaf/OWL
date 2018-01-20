@@ -8,7 +8,7 @@ import java.net.UnknownHostException;
  */
 
 public class PhoneMonitor {
-    InetAddress deviceIP;
+    public static InetAddress deviceIP;
 
     public PhoneMonitor() {
         try {

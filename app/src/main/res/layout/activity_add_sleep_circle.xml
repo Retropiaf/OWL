@@ -32,10 +32,12 @@
         tools:layout_editor_absoluteX="16dp"
         tools:layout_editor_absoluteY="25dp" />
 
-    <Button
+    <CheckBox
+        android:id="@+id/make_monitor"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Button" />
+        android:text="@string/make_monitor" />
+
 
     <Button
         android:id="@+id/confirm_create_circle"

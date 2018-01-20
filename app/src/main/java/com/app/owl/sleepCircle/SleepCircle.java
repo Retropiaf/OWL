@@ -12,15 +12,15 @@ public class SleepCircle {
     ///static FirebaseUser user;
     String user1;
     String user2;
-    String monitor;
     String circleName;
     String circleId;
+    String monitorIp;
 
 
 
     public SleepCircle() {}
 
-    public SleepCircle(String circleName, String user2) {
+    public SleepCircle(String circleName, String user2, String monitorIp) {
         Log.d("SleepCircle", "Before CurrentUser.findId()");
         CurrentUser.findId();
         Log.d("SleepCircle", "after CurrentUser.findId()");
@@ -29,6 +29,8 @@ public class SleepCircle {
         this.user2 = user2;
 
         this.circleName = circleName;
+
+        this.monitorIp = monitorIp;
     }
 
 
@@ -51,8 +53,8 @@ public class SleepCircle {
         return user2;
     }
 
-    public String getMonitor() {
-        return monitor;
+    public String getMonitorIp() {
+        return monitorIp;
     }
 
     /*

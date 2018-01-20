@@ -1,18 +1,27 @@
 package com.app.owl.sleepCircle;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.app.owl.CurrentUser;
 import com.app.owl.MainUser;
 import com.app.owl.R;
+import com.app.owl.monitor.PhoneMonitor;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -32,6 +41,11 @@ public class AddSleepCircleActivity extends AppCompatActivity {
     EditText editCircleName;
     MainUser user2;
     String sleepCircleId;
+    CheckBox checkBox;
+    String monitorIp;
+    ConnectivityManager connManager;
+    NetworkInfo myWifi;
+    WifiManager wifiManager;
 
 
     @Override
@@ -45,18 +59,87 @@ public class AddSleepCircleActivity extends AppCompatActivity {
 
         editSecondUser = (EditText) findViewById(R.id.second_user_email);
 
+        checkBox = findViewById(R.id.make_monitor);
+
+        connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        myWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+
+        wifiManager = (WifiManager) this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+
 
         Button buttonAdd = (Button) findViewById(R.id.confirm_create_circle);
+
 
         buttonAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d(TAG, "Inside onClick");
+                if(checkBox.isChecked()){
+                    new AlertDialog.Builder(AddSleepCircleActivity.this)
+                            .setTitle("Confirm")
+                            .setMessage("You can not use a device both as a monitor and pair it to your earbuds. Are you sure you want to use this device as a monitor?")
+                            .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    if(!myWifi.isConnected()){
+                                        new AlertDialog.Builder(AddSleepCircleActivity.this)
+                                                .setTitle("Confirm")
+                                                .setMessage("Your device need to be connected to wifi.")
+                                                .setPositiveButton("Turn wifi on", new DialogInterface.OnClickListener() {
+                                                    public void onClick(DialogInterface dialog, int which) {
+                                                        wifiManager.setWifiEnabled(true);
+                                                        createCircle();
+                                                        wifiManager.setWifiEnabled(false);
+                                                    }})
+                                                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                                    public void onClick(DialogInterface dialog, int which) {
 
-                createCircle();
+                                                    }}).show();
 
+
+                                    }
+                                    createCircle();
+                                }})
+                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    // Do nothing
+                                }}).show();
+
+
+                }
             }
+
         });
+
+    }
+
+    public void onViewCreated(View view, Bundle savedInstanceState)
+    {
+        int SDK_INT = android.os.Build.VERSION.SDK_INT;
+        if (SDK_INT > 8)
+        {
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+                    .permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+            //your codes here
+
+        }
+    }
+
+    private void makeMonitor(){
+        int SDK_INT = android.os.Build.VERSION.SDK_INT;
+        if (SDK_INT > 8)
+        {
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+                    .permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+            PhoneMonitor phoneMonitor = new PhoneMonitor();
+            monitorIp = String.valueOf(phoneMonitor.deviceIP);
+
+        }
+
+
+    }
+    private void removeMonitor(){
+        monitorIp = null;
 
     }
 
@@ -88,7 +171,13 @@ public class AddSleepCircleActivity extends AppCompatActivity {
                                 secondUserId = user2.getUserId();
 
                                 Log.d(TAG, "Create new Circle");
-                                circle = new SleepCircle(circleName, secondUserId);
+
+                                if (checkBox.isChecked()) {
+                                    makeMonitor();
+                                }else{
+                                    removeMonitor();
+                                }
+                                circle = new SleepCircle(circleName, secondUserId, monitorIp);
                                 addCircleToDatabase(circle);
                                 addCircleToUsers();
                                 returnToSleepCirclesPage();
