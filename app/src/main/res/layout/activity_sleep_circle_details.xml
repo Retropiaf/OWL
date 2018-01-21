@@ -1,17 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.widget.LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.app.owl.sleepCircle.SleepCircleDetailsActivity">
 
-
     <TextView
         android:id="@+id/circle_details_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="TextView"
+        tools:layout_editor_absoluteX="128dp"
+        tools:layout_editor_absoluteY="112dp" />
+    <TextView
+        android:id="@+id/circle_details_user1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="TextView"
         tools:layout_editor_absoluteX="128dp"
         tools:layout_editor_absoluteY="112dp" />
-</android.support.constraint.ConstraintLayout>
+    <TextView
+        android:id="@+id/circle_details_user2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        tools:layout_editor_absoluteX="128dp"
+        tools:layout_editor_absoluteY="112dp" />
+    <TextView
+        android:id="@+id/circle_details_monitor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        tools:layout_editor_absoluteX="128dp"
+        tools:layout_editor_absoluteY="112dp"/>
+
+    <Button
+        android:id="@+id/circle_details_make_monitor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/turn_into_monitor" />
+
+</android.widget.LinearLayout>

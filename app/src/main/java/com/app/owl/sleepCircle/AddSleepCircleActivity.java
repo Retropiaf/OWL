@@ -50,6 +50,8 @@ public class AddSleepCircleActivity extends AppCompatActivity {
     NetworkInfo myWifi;
     WifiManager wifiManager;
     ArrayList<SleepCircle> list;
+    Boolean wifiOn;
+    String circleName;
 
 
     @Override
@@ -79,6 +81,7 @@ public class AddSleepCircleActivity extends AppCompatActivity {
                             .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
                                     checkBox.setChecked(false);
+                                    Toast.makeText(AddSleepCircleActivity.this,"You unselected \"Use this device as a monitor\"", Toast.LENGTH_SHORT).show();
                                 }}).show();
 
 
@@ -109,8 +112,8 @@ public class AddSleepCircleActivity extends AppCompatActivity {
 
 
     private void makeMonitor(){
-
-        Boolean wifiOn = true;
+        Log.d(TAG, "In cmakeMonitor");
+        wifiOn = true;
 
         if(!myWifi.isConnected()){
             wifiOn = false;
@@ -120,6 +123,17 @@ public class AddSleepCircleActivity extends AppCompatActivity {
                     .setPositiveButton("Turn wifi on", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             wifiManager.setWifiEnabled(true);
+                            int SDK_INT = android.os.Build.VERSION.SDK_INT;
+                            if (SDK_INT > 8)
+                            {
+                                StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+                                        .permitAll().build();
+                                StrictMode.setThreadPolicy(policy);
+                                PhoneMonitor phoneMonitor = new PhoneMonitor();
+                                monitorIp = String.valueOf(phoneMonitor.deviceIP);
+                                if(!wifiOn){ wifiManager.setWifiEnabled(false); }
+
+                            }
                         }})
                     .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
@@ -129,17 +143,7 @@ public class AddSleepCircleActivity extends AppCompatActivity {
         }
 
 
-        int SDK_INT = android.os.Build.VERSION.SDK_INT;
-        if (SDK_INT > 8)
-        {
-            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
-                    .permitAll().build();
-            StrictMode.setThreadPolicy(policy);
-            PhoneMonitor phoneMonitor = new PhoneMonitor();
-            monitorIp = String.valueOf(phoneMonitor.deviceIP);
-            if(!wifiOn){ wifiManager.setWifiEnabled(false); }
 
-        }
     }
 
     private void removeMonitor(){
@@ -148,10 +152,10 @@ public class AddSleepCircleActivity extends AppCompatActivity {
     }
 
     private void createCircle(){
+        Log.d(TAG, "In createCircle");
         database = FirebaseDatabase.getInstance().getReference();
-        final String circleName = editCircleName.getText().toString().trim();
+        circleName = editCircleName.getText().toString().trim();
 
-        Log.d(TAG, circleName);
         secondUserEmail = editSecondUser.getText().toString().trim().toLowerCase();
 
         if(TextUtils.isEmpty(circleName) && TextUtils.isEmpty(secondUserEmail)){
@@ -161,32 +165,42 @@ public class AddSleepCircleActivity extends AppCompatActivity {
         }else if(TextUtils.isEmpty(secondUserEmail)){
             Toast.makeText(AddSleepCircleActivity.this,"You need to enter an email", Toast.LENGTH_SHORT).show();
         }else{
-
+            Log.d(TAG, "got here 0");
             database.child("MainUsers").addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
 
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        Log.d(TAG, "got here 0a");
 
                         user2 = snapshot.getValue(MainUser.class);
 
                         if(user2.getUserEmail() != null) {
                             String user_email = user2.getUserEmail().toLowerCase();
+                            Log.d(TAG, "got here 0b");
+
+                            Log.d(TAG, secondUserEmail);
+                            Log.d(TAG, user_email);
 
                             if(secondUserEmail.equals(user_email)){
-                                secondUserUid = user2.getUid();
+                                Log.d(TAG, "got here 1");
+                                secondUserUid = user2.getUserUid();
+                                Log.d(TAG, "got here 2");
 
-                                if (checkBox.isChecked()) {
-                                    makeMonitor();
-                                }else{
-                                    removeMonitor();
-                                }
+                                Log.d(TAG, "secondUserUid: " + secondUserUid);
 
                                 circle = new SleepCircle(circleName, secondUserUid, monitorIp);
+
+                                if(checkBox.isChecked()){ makeMonitor(); }
+
                                 addCircleToDatabase(circle);
                                 addCircleToUsers();
                                 returnToSleepCirclesPage();
 
+                            }else{
+                                Toast.makeText(AddSleepCircleActivity.this,"No user with the email \"" + secondUserEmail + "\"", Toast.LENGTH_SHORT).show();
+                                editSecondUser.setText("");
+                                // add username verification
 
                             }
                         } // TODO HANDLE ELSE CASE: NO EMAIL FOR USER 2
@@ -206,21 +220,25 @@ public class AddSleepCircleActivity extends AppCompatActivity {
     }
 
     private void addCircleToDatabase(SleepCircle circle) {
-       database = FirebaseDatabase.getInstance().getReference("SleepCircles");
+        Log.d(TAG, "addCircleToDatabase");
 
-       sleepCircleId =  database.push().getKey();
+        database = FirebaseDatabase.getInstance().getReference("SleepCircles");
 
-       circle.setCircleId(sleepCircleId);
+        sleepCircleId =  database.push().getKey();
 
-       database.child(sleepCircleId).setValue(circle);
+        circle.setCircleId(sleepCircleId);
 
-       Toast.makeText(AddSleepCircleActivity.this, "Adding sleep circle to database", Toast.LENGTH_SHORT).show();
+        database.child(sleepCircleId).setValue(circle);
+
+        Toast.makeText(AddSleepCircleActivity.this, "Adding sleep circle to database", Toast.LENGTH_SHORT).show();
 
     }
 
     private void addCircleToUsers(){
+        Log.d(TAG, "addCircleToUsers");
+
         updateUserCircleList(CurrentUser.uid);
-        updateUserCircleList(user2.getUid());
+        updateUserCircleList(user2.getUserUid());
 
         //TODO: Check if user is logged in (add a method to current user) and handle logged out user
 
@@ -240,7 +258,7 @@ public class AddSleepCircleActivity extends AppCompatActivity {
     private void returnToSleepCirclesPage(){
         Log.d(TAG, "In returnToSleepCirclesPage");
 
-        Toast.makeText(AddSleepCircleActivity.this, "Adding sleep circle to database", Toast.LENGTH_SHORT).show();
+        Toast.makeText(AddSleepCircleActivity.this, circleName + " was added to your Sleep Circles", Toast.LENGTH_SHORT).show();
 
         Intent intent = new Intent(AddSleepCircleActivity.this, SleepCirclesActivity.class);
         startActivity(intent);

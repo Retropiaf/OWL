@@ -51,7 +51,7 @@
     <string name="create_sleep_cicrle">Create Sleep Circle</string>
     <string name="add_monitor">Add a baby monitor</string>
     <string name="add_monitor_warning">You can only add this device as a monitor if you are not using it to pair your earbuds</string>
-    <string name="turn_into_monitor">Turn this device into a monitor</string>
+    <string name="turn_into_monitor">Use as a Monitor</string>
     <string name="name_circle">Name your Circle</string>
     <string name="second_user">Second user:</string>
     <string name="make_monitor">Make this device the monitor</string>

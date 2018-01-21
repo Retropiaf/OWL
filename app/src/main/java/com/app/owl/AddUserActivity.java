@@ -87,7 +87,7 @@ public class AddUserActivity extends AppCompatActivity {
                     // dataSnapshot is the "MainUser" node with all children with uid = uid
                     for (DataSnapshot mainUser : dataSnapshot.getChildren()) {
                         MainUser user = mainUser.getValue(MainUser.class);
-                        if(user != null){id = user.userId;}
+                        if(user != null){id = user.getUserUid();}
                         if(id != null) {
                             Log.d("id!!!!!!!!!!!!!!!!!!!", id);
                             saveSecondaryUser(id);

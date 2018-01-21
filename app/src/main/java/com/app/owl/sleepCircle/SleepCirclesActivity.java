@@ -33,6 +33,9 @@ public class SleepCirclesActivity extends AppCompatActivity {
 
     public static final String CIRCLE_NAME = "circle name";
     public static final String CIRCLE_ID = "circle id";
+    public static final String USER_1 = "user 1";
+    public static final String USER_2 = "user 2";
+    public static final String MONITOR = "monitor";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,6 +111,9 @@ public class SleepCirclesActivity extends AppCompatActivity {
                 Intent intent = new Intent(getApplicationContext(), SleepCircleDetailsActivity.class);
                 intent.putExtra(CIRCLE_NAME, circle.getCircleName());
                 intent.putExtra(CIRCLE_ID, circle.getCircleId());
+                intent.putExtra(USER_1, circle.getUser1());
+                intent.putExtra(USER_2, circle.getUser2());
+                intent.putExtra(MONITOR, circle.getMonitorIp());
 
                 startActivity(intent);
             }
@@ -187,6 +193,9 @@ public class SleepCirclesActivity extends AppCompatActivity {
                 Intent intent = new Intent(getApplicationContext(), SleepCircleDetailsActivity.class);
                 intent.putExtra(CIRCLE_NAME, circle.getCircleName());
                 intent.putExtra(CIRCLE_ID, circle.getCircleId());
+                intent.putExtra(USER_1, circle.getUser1());
+                intent.putExtra(USER_2, circle.getUser2());
+                intent.putExtra(MONITOR, circle.getMonitorIp());
 
                 startActivity(intent);
             }

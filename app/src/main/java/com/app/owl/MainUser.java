@@ -11,10 +11,11 @@ import java.util.HashMap;
 public class MainUser {
 
 
-    String userId;
-    String userUid;
-    String userName;
-    String userEmail;
+    //private String userId;
+    public String uid;
+    public String userUid;
+    public String userName;
+    public String userEmail;
     HashMap<String, SleepCircle> circles;
 
 
@@ -24,8 +25,7 @@ public class MainUser {
 
 
     public MainUser(String userUid, String userName, String userEmail) {
-        //this.userId = userId;
-        this.userUid = userUid;
+        this.uid = userUid;
         this.userName = userName;
         this.userEmail = userEmail;
         circles = new HashMap<>();
@@ -37,9 +37,19 @@ public class MainUser {
     }
     */
 
-    public String getUid() {
+    public String getUserUid() {
         return userUid;
     }
+
+    public String getUid() {
+        return uid;
+    }
+
+    /*
+    public String getId() {
+        return userId;
+    }
+    */
 
     public String getUserName() {
         return userName;
