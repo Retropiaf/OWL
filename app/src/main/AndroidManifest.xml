@@ -27,7 +27,7 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
     <!-- Turn wifi on -->
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"></uses-permission>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
 
     <application
         android:allowBackup="true"
@@ -57,7 +57,10 @@
         <activity android:name=".sleepCircle.SleepCirclesActivity" />
         <activity android:name=".sleepCircle.AddSleepCircleActivity" />
         <activity android:name=".monitor.AddMonitorActivity" />
-        <activity android:name=".sleepCircle.SleepCircleDetailsActivity"></activity>
+        <activity android:name=".sleepCircle.SleepCircleDetailsActivity" />
+        <activity android:name=".sleepSession.SleepSessionActivity" />
+        <activity android:name=".sleepSession.SleepSessionDetailsActivity" />
+        <activity android:name=".sleepSession.OnGoingSleepSessionActivity"></activity>
     </application>
 
 </manifest>
