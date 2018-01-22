@@ -28,7 +28,7 @@ public class RegisterActivity extends AppCompatActivity {
     // Firebase Database
     DatabaseReference databaseMainUsers;
 
-    private EditText mEmail, mPassword, mConfirmPassword;
+    private EditText mEmail, mPassword, mConfirmPassword, mUsername;
     private Button mRegister;
     private ProgressBar mProgressBar;
 
@@ -36,11 +36,13 @@ public class RegisterActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+        mUsername = (EditText) findViewById(R.id.input_username);
         mEmail = (EditText) findViewById(R.id.input_email);
         mPassword = (EditText) findViewById(R.id.input_password);
         mConfirmPassword = (EditText) findViewById(R.id.input_confirm_password);
         mRegister = (Button) findViewById(R.id.btn_register);
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
+
 
         databaseMainUsers = FirebaseDatabase.getInstance().getReference("MainUsers");
 
@@ -50,7 +52,7 @@ public class RegisterActivity extends AppCompatActivity {
                 Log.d(TAG, "onClick: attempting to register.");
 
                 //check for null value EditText fields
-                if(!isEmpty(mEmail.getText().toString())
+                if(!isEmpty(mEmail.getText().toString()) && !isEmpty(mUsername.getText().toString())
                         && !isEmpty(mPassword.getText().toString())
                         && !isEmpty(mConfirmPassword.getText().toString())){
 
@@ -183,10 +185,11 @@ public class RegisterActivity extends AppCompatActivity {
             String uid = user.getUid();
             String name = user.getDisplayName();
             String email = user.getEmail();
+            String userName = mUsername.getText().toString();
 
             //String id = databaseMainUsers.push().getKey();
 
-            MainUser mainUser = new MainUser(uid, name, email);
+            MainUser mainUser = new MainUser(uid, email, userName, name);
 
             databaseMainUsers.child(uid).setValue(mainUser);
 

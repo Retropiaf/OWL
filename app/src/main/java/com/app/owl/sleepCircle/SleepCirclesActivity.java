@@ -27,6 +27,8 @@ public class SleepCirclesActivity extends AppCompatActivity {
 
     DatabaseReference database;
 
+    String userName1;
+
     ArrayList<SleepCircle> list;
 
     String TAG = "SleepCirclesActivity";
@@ -34,8 +36,11 @@ public class SleepCirclesActivity extends AppCompatActivity {
     public static final String CIRCLE_NAME = "circle name";
     public static final String CIRCLE_ID = "circle id";
     public static final String USER_1 = "user 1";
+    public static final String USERNAME_1 = "username 1";
     public static final String USER_2 = "user 2";
+    public static final String USERNAME_2 = "username 2";
     public static final String MONITOR = "monitor";
+    public static final String MONITOR_NAME = "monitor name";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,6 +109,32 @@ public class SleepCirclesActivity extends AppCompatActivity {
 
         */
 
+        /*
+
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference().child("MainUsers");
+        database.addListenerForSingleValueEvent(new ValueEventListener() {
+
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+
+                    MainUser mainUser = snapshot.getValue(MainUser.class);
+                    if(mainUser.getUid() == CurrentUser.uid){
+                        userName1 = mainUser.getUserName();
+                        Log.d(TAG, "userName1 = " + userName1);
+                    }
+
+                } // TODO HANDLE ELSE CASE: NO EMAIL FOR USER 2
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // TODO: Handle database error
+            }
+        });
+        */
+
+
         listViewSleepCircle.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -113,7 +144,9 @@ public class SleepCirclesActivity extends AppCompatActivity {
                 intent.putExtra(CIRCLE_ID, circle.getCircleId());
                 intent.putExtra(USER_1, circle.getUser1());
                 intent.putExtra(USER_2, circle.getUser2());
+                intent.putExtra(USERNAME_2, circle.secondUserName);
                 intent.putExtra(MONITOR, circle.getMonitorIp());
+                intent.putExtra(MONITOR_NAME, circle.getMonitorName());
 
                 startActivity(intent);
             }
@@ -129,6 +162,31 @@ public class SleepCirclesActivity extends AppCompatActivity {
         super.onStart();
 
         Log.d(TAG, "onStart is triggered");
+
+        /*
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference().child("MainUsers");
+        database.addListenerForSingleValueEvent(new ValueEventListener() {
+
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+
+                    MainUser mainUser = snapshot.getValue(MainUser.class);
+                    if(mainUser.getUid() == CurrentUser.uid){
+                        userName1 = mainUser.getUserName();
+                        Log.d(TAG, "userName1 = " + userName1);
+                    }
+
+                } // TODO HANDLE ELSE CASE: NO EMAIL FOR USER 2
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // TODO: Handle database error
+            }
+        });
+        */
+
         //list.clear();
 
         /*
@@ -154,6 +212,7 @@ public class SleepCirclesActivity extends AppCompatActivity {
         listViewSleepCircle.setAdapter(sleepCircleList);
 
 */
+
         String currentUserUid = CurrentUser.uid;
 
         database = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(currentUserUid).child("circles");
@@ -195,7 +254,9 @@ public class SleepCirclesActivity extends AppCompatActivity {
                 intent.putExtra(CIRCLE_ID, circle.getCircleId());
                 intent.putExtra(USER_1, circle.getUser1());
                 intent.putExtra(USER_2, circle.getUser2());
+                intent.putExtra(USERNAME_2, circle.secondUserName);
                 intent.putExtra(MONITOR, circle.getMonitorIp());
+                intent.putExtra(MONITOR_NAME, circle.getMonitorName());
 
                 startActivity(intent);
             }

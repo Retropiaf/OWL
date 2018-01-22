@@ -1,6 +1,7 @@
 package com.app.owl.sleepCircle;
 
-import com.app.owl.CurrentUser;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
 
 /**
  * Created by Christiane on 1/17/18.
@@ -8,28 +9,28 @@ import com.app.owl.CurrentUser;
 public class SleepCircle {
     String user1;
     String user2;
+    String secondUserName;
     private String circleName;
     String circleId;
     String monitorIp;
+    String monitorName;
+    DatabaseReference database;
 
 
 
     public SleepCircle() {}
 
-    public SleepCircle(String circleName, String user2, String monitorIp) {
+    public SleepCircle(String circleName, String user2, String secondUserName, String monitorIp, String monitorName) {
 
-        this.user1 = CurrentUser.uid;
-
+        this.user1 = FirebaseAuth.getInstance().getCurrentUser().getUid();
         this.user2 = user2;
-
+        this.secondUserName = secondUserName;
         this.circleName = circleName;
-
         this.monitorIp = monitorIp;
+        this.monitorName = monitorName;
     }
 
-    /*
-    public String getSleepCircleName(){ return circleName; }
-*/
+
     public String getCircleName(){ return circleName;}
 
 
@@ -52,5 +53,9 @@ public class SleepCircle {
     public String getMonitorIp() {
         return monitorIp;
     }
+    public String getMonitorName() {
+        return monitorName;
+    }
+
 
 }

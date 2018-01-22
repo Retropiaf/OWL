@@ -1,5 +1,7 @@
 package com.app.owl;
 
+import android.util.Log;
+
 import com.app.owl.sleepCircle.SleepCircle;
 
 import java.util.HashMap;
@@ -15,7 +17,9 @@ public class MainUser {
     public String uid;
     public String userUid;
     public String userName;
+    public String name;
     public String userEmail;
+    public Boolean isRegistered;
     HashMap<String, SleepCircle> circles;
 
 
@@ -24,10 +28,12 @@ public class MainUser {
     }
 
 
-    public MainUser(String userUid, String userName, String userEmail) {
+    public MainUser(String userUid, String userEmail, String userName, String name) {
         this.uid = userUid;
+        this.name = name;
         this.userName = userName;
         this.userEmail = userEmail;
+        this.isRegistered = false;
         circles = new HashMap<>();
     }
 
@@ -61,6 +67,15 @@ public class MainUser {
 
     public HashMap<String, SleepCircle> getCircleList() {
         return circles;
+    }
+
+    public Boolean getIsRegistered(){ return isRegistered; }
+
+    public void setIsRegistered(){
+        Log.d("Inside setIsRegistered", String.valueOf(this.isRegistered));
+        this.isRegistered = true;
+        Log.d("Inside setIsRegistered", String.valueOf(this.isRegistered));
+
     }
 
 

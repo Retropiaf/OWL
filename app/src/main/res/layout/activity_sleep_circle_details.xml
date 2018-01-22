@@ -15,13 +15,7 @@
         android:text="TextView"
         tools:layout_editor_absoluteX="128dp"
         tools:layout_editor_absoluteY="112dp" />
-    <TextView
-        android:id="@+id/circle_details_user1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="TextView"
-        tools:layout_editor_absoluteX="128dp"
-        tools:layout_editor_absoluteY="112dp" />
+
     <TextView
         android:id="@+id/circle_details_user2"
         android:layout_width="wrap_content"
@@ -37,10 +31,33 @@
         tools:layout_editor_absoluteX="128dp"
         tools:layout_editor_absoluteY="112dp"/>
 
+    <EditText
+        android:id="@+id/edit_monitor_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="@string/prompt_monitor_name"
+        android:inputType="textPersonName"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="25dp" />
+
     <Button
-        android:id="@+id/circle_details_make_monitor"
+        android:id="@+id/circle_details_make_monitor1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/turn_into_monitor" />
+
+    <Button
+        android:id="@+id/circle_details_make_monitor2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/turn_into_monitor" />
+
+    <Button
+        android:id="@+id/start_sleep_session"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/start_sleep" />
+
 
 </android.widget.LinearLayout>

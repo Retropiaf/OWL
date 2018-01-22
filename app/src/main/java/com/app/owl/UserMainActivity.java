@@ -22,15 +22,6 @@ public class UserMainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_main);
 
-        Button users = (Button) findViewById(R.id.users_btn);
-        users.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(UserMainActivity.this, UsersActivity.class);
-                startActivity(intent);
-            }
-        });
-
         Button testWireless = (Button) findViewById(R.id.new_sleep_btn);
         testWireless.setOnClickListener(new View.OnClickListener() {
             @Override

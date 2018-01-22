@@ -19,6 +19,14 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -26,6 +34,7 @@ public class LoginActivity extends AppCompatActivity {
 
     //Firebase auth
     private FirebaseAuth.AuthStateListener mAuthListener;
+    DatabaseReference database;
 
 
 
@@ -139,8 +148,43 @@ public class LoginActivity extends AppCompatActivity {
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if(user != null){
+                    final String uid = user.getUid();
 
                     if(user.isEmailVerified()){
+                        Log.d(TAG, "inside setupFirebaseAuth");
+
+                        database = FirebaseDatabase.getInstance().getReference().child("MainUsers");
+                        database.addListenerForSingleValueEvent(new ValueEventListener() {
+
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+
+                                    MainUser mainUser = snapshot.getValue(MainUser.class);
+
+                                    if(mainUser.getUid().equals(CurrentUser.uid) && (mainUser.isRegistered == null || !mainUser.isRegistered)){
+
+                                        Map<String, Object> childUpdates = new HashMap<>();
+                                        childUpdates.put(CurrentUser.uid + "/isRegistered/", true);
+                                        database.updateChildren(childUpdates);
+
+                                    }
+
+
+
+                                    } // TODO HANDLE ELSE CASE: NO EMAIL FOR USER 2
+                                }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+                                // TODO: Handle database error
+                            }
+                        });
+
+
+
+
+
                         Log.d(TAG, "onAuthStateChanged: signed_in: " + user.getUid());
                         Toast.makeText(LoginActivity.this, "Authenticated with: " + user.getEmail(), Toast.LENGTH_SHORT).show();
 
@@ -151,6 +195,7 @@ public class LoginActivity extends AppCompatActivity {
                         finish();
                     }else{
                         Toast.makeText(LoginActivity.this, "Check Your Email Inbox for a Verification Link", Toast.LENGTH_SHORT).show();
+
                         FirebaseAuth.getInstance().signOut();
                     }
 

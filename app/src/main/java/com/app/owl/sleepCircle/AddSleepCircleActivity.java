@@ -36,11 +36,11 @@ public class AddSleepCircleActivity extends AppCompatActivity {
     String TAG = "AddSleepCircleActivity";
 
     DatabaseReference database;
-    String secondUserEmail;
+    String secondUserEmail, secondUserName, monitorName;
     String secondUserUid;
     SleepCircle circle;
     //String circleName;
-    EditText editSecondUser;
+    EditText editSecondUser, editSecondUserName, editMonitorName;
     EditText editCircleName;
     MainUser user2;
     String sleepCircleId;
@@ -52,6 +52,7 @@ public class AddSleepCircleActivity extends AppCompatActivity {
     ArrayList<SleepCircle> list;
     Boolean wifiOn;
     String circleName;
+    Boolean userFound, userRegistered;
 
 
     @Override
@@ -65,6 +66,11 @@ public class AddSleepCircleActivity extends AppCompatActivity {
 
         editSecondUser = (EditText) findViewById(R.id.second_user_email);
 
+        editSecondUserName = (EditText) findViewById(R.id.second_user_username);
+
+        editMonitorName = (EditText) findViewById(R.id.edit_monitor_name);
+        editMonitorName.setVisibility(View.INVISIBLE);
+
         checkBox = findViewById(R.id.make_monitor);
 
         checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -76,7 +82,7 @@ public class AddSleepCircleActivity extends AppCompatActivity {
                             .setMessage("You can not use this device as a monitor and pair it to your earbuds. Are you sure you want to use this device as a monitor?")
                             .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
-                                    // Do nothing
+                                    editMonitorName.setVisibility(View.VISIBLE);
                                 }})
                             .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
@@ -84,6 +90,9 @@ public class AddSleepCircleActivity extends AppCompatActivity {
                                     Toast.makeText(AddSleepCircleActivity.this,"You unselected \"Use this device as a monitor\"", Toast.LENGTH_SHORT).show();
                                 }}).show();
 
+
+                }else{
+                    editMonitorName.setVisibility(View.INVISIBLE);
 
                 }
             }
@@ -112,7 +121,7 @@ public class AddSleepCircleActivity extends AppCompatActivity {
 
 
     private void makeMonitor(){
-        Log.d(TAG, "In cmakeMonitor");
+        Log.d(TAG, "In makeMonitor");
         wifiOn = true;
 
         if(!myWifi.isConnected()){
@@ -142,8 +151,6 @@ public class AddSleepCircleActivity extends AppCompatActivity {
                         }}).show();
         }
 
-
-
     }
 
     private void removeMonitor(){
@@ -154,18 +161,29 @@ public class AddSleepCircleActivity extends AppCompatActivity {
     private void createCircle(){
         Log.d(TAG, "In createCircle");
         database = FirebaseDatabase.getInstance().getReference();
+
         circleName = editCircleName.getText().toString().trim();
-
         secondUserEmail = editSecondUser.getText().toString().trim().toLowerCase();
+        secondUserName = editSecondUserName.getText().toString().trim().toLowerCase();
+        monitorName = editMonitorName.getText().toString().trim().toLowerCase();
 
-        if(TextUtils.isEmpty(circleName) && TextUtils.isEmpty(secondUserEmail)){
-            Toast.makeText(AddSleepCircleActivity.this,"You need to enter a circle name and a second user", Toast.LENGTH_SHORT).show();
+
+        if(TextUtils.isEmpty(circleName) && TextUtils.isEmpty(secondUserEmail) && TextUtils.isEmpty(secondUserName)){
+            Toast.makeText(AddSleepCircleActivity.this,"You need to fill all the fields", Toast.LENGTH_SHORT).show();
         }else if(TextUtils.isEmpty(circleName)){
             Toast.makeText(AddSleepCircleActivity.this,"You need to enter a circle name", Toast.LENGTH_SHORT).show();
         }else if(TextUtils.isEmpty(secondUserEmail)){
             Toast.makeText(AddSleepCircleActivity.this,"You need to enter an email", Toast.LENGTH_SHORT).show();
+        }else if(TextUtils.isEmpty(secondUserName)){
+            Toast.makeText(AddSleepCircleActivity.this,"You need to enter a username", Toast.LENGTH_SHORT).show();
+        }else if(editMonitorName.getVisibility() == View.VISIBLE && TextUtils.isEmpty(monitorName) && checkBox.isChecked()){
+            Toast.makeText(AddSleepCircleActivity.this,"You need to enter a monitor name", Toast.LENGTH_SHORT).show();
         }else{
             Log.d(TAG, "got here 0");
+
+            userFound = false;
+
+
             database.child("MainUsers").addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
 
@@ -175,39 +193,46 @@ public class AddSleepCircleActivity extends AppCompatActivity {
 
                         user2 = snapshot.getValue(MainUser.class);
 
-                        if(user2.getUserEmail() != null) {
+                        if(user2.getUserEmail() != null && user2.getUserName() != null) {
+                            userFound = true;
+
                             String user_email = user2.getUserEmail().toLowerCase();
+                            String user_name = user2.getUserName().toLowerCase();
                             Log.d(TAG, "got here 0b");
 
                             Log.d(TAG, secondUserEmail);
                             Log.d(TAG, user_email);
+                            Log.d(TAG, user_name);
 
-                            if(secondUserEmail.equals(user_email)){
-                                Log.d(TAG, "got here 1");
+                            if(secondUserEmail.toLowerCase().equals(user_email) && secondUserName.toLowerCase().equals(user_name)){
+                                Log.d(TAG, "found a user");
+
                                 secondUserUid = user2.getUserUid();
-                                Log.d(TAG, "got here 2");
 
                                 Log.d(TAG, "secondUserUid: " + secondUserUid);
+                                if (user2.getIsRegistered()) {
 
-                                circle = new SleepCircle(circleName, secondUserUid, monitorIp);
+                                    circle = new SleepCircle(circleName, secondUserUid, secondUserName, monitorIp, monitorName);
 
-                                if(checkBox.isChecked()){ makeMonitor(); }
+                                    if(checkBox.isChecked()){
+                                        makeMonitor();
+                                    }
 
-                                addCircleToDatabase(circle);
-                                addCircleToUsers();
-                                returnToSleepCirclesPage();
-
-                            }else{
-                                Toast.makeText(AddSleepCircleActivity.this,"No user with the email \"" + secondUserEmail + "\"", Toast.LENGTH_SHORT).show();
-                                editSecondUser.setText("");
-                                // add username verification
-
+                                    addCircleToDatabase(circle);
+                                    addCircleToUsers();
+                                    returnToSleepCirclesPage();
+                                }else{
+                                    Toast.makeText(AddSleepCircleActivity.this,"User \"" + secondUserName + "\" has not comfirmed their email yet. \"", Toast.LENGTH_SHORT).show();
+                                }
                             }
                         } // TODO HANDLE ELSE CASE: NO EMAIL FOR USER 2
-
-
                     }
 
+                    if(!userFound) {
+                        Log.d(TAG, "NO USER FOUND");
+                        //TODO: Fix no user found essage that appears even when user is found
+                        Toast.makeText(AddSleepCircleActivity.this, "No user with the email \"" + secondUserEmail + "\" and the username \"" + secondUserName + "\"", Toast.LENGTH_SHORT).show();
+                    }
                 }
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
@@ -215,6 +240,9 @@ public class AddSleepCircleActivity extends AppCompatActivity {
                 }
 
             });
+
+
+
         }
 
     }

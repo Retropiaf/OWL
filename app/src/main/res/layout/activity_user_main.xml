@@ -8,13 +8,6 @@
     android:layout_height="match_parent"
     tools:context="com.app.owl.UserMainActivity">
 
-    <Button
-        android:id="@+id/menu_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Menu"
-        tools:layout_editor_absoluteX="280dp"
-        tools:layout_editor_absoluteY="16dp" />
 
     <Button
         android:id="@+id/sleep_circle_btn"
@@ -23,15 +16,6 @@
         android:text="@string/sleep_circles_btn"
         tools:layout_editor_absoluteX="39dp"
         tools:layout_editor_absoluteY="285dp" />
-
-
-    <Button
-        android:id="@+id/users_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/users_btn"
-        tools:layout_editor_absoluteX="39dp"
-        tools:layout_editor_absoluteY="135dp" />
 
 
     <Button

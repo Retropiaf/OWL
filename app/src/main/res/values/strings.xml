@@ -27,6 +27,7 @@
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
+    <string name="prompt_username">Username</string>
     <string name="action_sign_in_short">Sign in</string>
     <string name="resend_verification_email">Resend Verification Email</string>
     <string name="forgot_password">Forgot Password</string>
@@ -55,6 +56,13 @@
     <string name="name_circle">Name your Circle</string>
     <string name="second_user">Second user:</string>
     <string name="make_monitor">Make this device the monitor</string>
+
+
+    <!-- Sleep Session -->
+    <string name="start_sleep">Start Sleep Session</string>
+
+    <!-- Monitor -->
+    <string name="prompt_monitor_name">Enter a name for this device</string>
 
 
 
