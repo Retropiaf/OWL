@@ -22,6 +22,7 @@ import com.app.owl.CurrentUser;
 import com.app.owl.MainUser;
 import com.app.owl.R;
 import com.app.owl.monitor.PhoneMonitor;
+import com.app.owl.sleepSession.NewSleepSessionActivity;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -106,6 +107,14 @@ public class SleepCircleDetailsActivity extends AppCompatActivity {
         userName2 = intent.getStringExtra(SleepCirclesActivity.USERNAME_2);
         monitorIp = intent.getStringExtra(SleepCirclesActivity.MONITOR);
         monitorName = intent.getStringExtra(SleepCirclesActivity.MONITOR_NAME);
+
+        start_sleep_session.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(SleepCircleDetailsActivity.this, NewSleepSessionActivity.class);
+                startActivity(intent);
+            }
+        });
 
 
 
