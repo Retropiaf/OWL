@@ -15,7 +15,7 @@ public class PhoneMonitor {
             this.deviceIP = InetAddress.getLocalHost();
 
         } catch (UnknownHostException e) {
-            System.out.println("I'm sorry. I don't know my own address. Connect to wifi maybe.");
+            System.out.println("I'm sorry. I don't know my own address. Connect to wifi, maybe?");
         }
     }
 

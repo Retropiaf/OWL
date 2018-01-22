@@ -1,7 +1,8 @@
 package com.app.owl.sleepCircle;
 
+import android.util.Log;
+
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DatabaseReference;
 
 /**
  * Created by Christiane on 1/17/18.
@@ -14,7 +15,7 @@ public class SleepCircle {
     String circleId;
     String monitorIp;
     String monitorName;
-    DatabaseReference database;
+    //DatabaseReference database;
 
 
 
@@ -28,6 +29,9 @@ public class SleepCircle {
         this.circleName = circleName;
         this.monitorIp = monitorIp;
         this.monitorName = monitorName;
+        String ip = this.monitorIp;
+        if(ip == null){ip = "nul";}
+        Log.d("Inside SleepCircle", ip);
     }
 
 

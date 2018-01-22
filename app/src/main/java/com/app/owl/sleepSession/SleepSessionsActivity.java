@@ -17,6 +17,8 @@ public class SleepSessionsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sleep_session);
 
+        //TODO: check if current user has circles to show. If yes, show sleep session list if available and add sleep session button. If no, show "you need to create a sleep circle"
+
         // new sleep session button: open new sleep session activity
         newSleepSessionBtn = findViewById(R.id.new_sleep_btn);
         newSleepSessionBtn.setOnClickListener(new View.OnClickListener() {

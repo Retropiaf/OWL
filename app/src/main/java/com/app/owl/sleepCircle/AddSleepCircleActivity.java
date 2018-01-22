@@ -4,6 +4,8 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
@@ -22,13 +24,14 @@ import android.widget.Toast;
 import com.app.owl.CurrentUser;
 import com.app.owl.MainUser;
 import com.app.owl.R;
-import com.app.owl.monitor.PhoneMonitor;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 public class AddSleepCircleActivity extends AppCompatActivity {
@@ -36,14 +39,10 @@ public class AddSleepCircleActivity extends AppCompatActivity {
     String TAG = "AddSleepCircleActivity";
 
     DatabaseReference database;
-    String secondUserEmail, secondUserName, monitorName;
-    String secondUserUid;
+    String secondUserEmail, secondUserName, monitorName, secondUserUid, sleepCircleId;
     SleepCircle circle;
-    //String circleName;
-    EditText editSecondUser, editSecondUserName, editMonitorName;
-    EditText editCircleName;
+    EditText editSecondUser, editSecondUserName, editMonitorName, editCircleName;
     MainUser user2;
-    String sleepCircleId;
     CheckBox checkBox;
     String monitorIp;
     ConnectivityManager connManager;
@@ -53,6 +52,7 @@ public class AddSleepCircleActivity extends AppCompatActivity {
     Boolean wifiOn;
     String circleName;
     Boolean userFound, userRegistered;
+    Button buttonAdd;
 
 
     @Override
@@ -83,6 +83,7 @@ public class AddSleepCircleActivity extends AppCompatActivity {
                             .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
                                     editMonitorName.setVisibility(View.VISIBLE);
+
                                 }})
                             .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
@@ -106,12 +107,14 @@ public class AddSleepCircleActivity extends AppCompatActivity {
         list = new ArrayList<>();
 
 
-        Button buttonAdd = (Button) findViewById(R.id.confirm_create_circle);
+        buttonAdd = (Button) findViewById(R.id.confirm_create_circle);
 
 
         buttonAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                buttonAdd.setClickable(false);
+                buttonAdd.getBackground().setColorFilter(Color.GRAY, PorterDuff.Mode.MULTIPLY);
                 createCircle();
             }
 
@@ -122,15 +125,18 @@ public class AddSleepCircleActivity extends AppCompatActivity {
 
     private void makeMonitor(){
         Log.d(TAG, "In makeMonitor");
-        wifiOn = true;
+        //wifiOn = true;
 
         if(!myWifi.isConnected()){
-            wifiOn = false;
+            Log.d(TAG, "In makeMonitor: wifi is not connected");
+            //wifiOn = false;
             new AlertDialog.Builder(AddSleepCircleActivity.this)
                     .setTitle("Confirm")
                     .setMessage("Your device need to be connected to wifi.")
                     .setPositiveButton("Turn wifi on", new DialogInterface.OnClickListener() {
+
                         public void onClick(DialogInterface dialog, int which) {
+
                             wifiManager.setWifiEnabled(true);
                             int SDK_INT = android.os.Build.VERSION.SDK_INT;
                             if (SDK_INT > 8)
@@ -138,18 +144,74 @@ public class AddSleepCircleActivity extends AppCompatActivity {
                                 StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
                                         .permitAll().build();
                                 StrictMode.setThreadPolicy(policy);
-                                PhoneMonitor phoneMonitor = new PhoneMonitor();
-                                monitorIp = String.valueOf(phoneMonitor.deviceIP);
-                                if(!wifiOn){ wifiManager.setWifiEnabled(false); }
 
+                                //PhoneMonitor phoneMonitor = new PhoneMonitor();
+
+                                try {
+                                    InetAddress inetAddress = InetAddress.getLocalHost();
+                                    monitorIp = String.valueOf(inetAddress);
+                                    circle = new SleepCircle(circleName, secondUserUid, secondUserName, monitorIp, monitorName);
+                                    addCircleToDatabase(circle);
+                                    addCircleToUsers();
+                                    returnToSleepCirclesPage();
+
+
+                                } catch (UnknownHostException e) {
+                                    System.out.println("I'm sorry. I don't know my own address. Connect to wifi, maybe?");
+                                }
+                                Log.d(TAG, "monitorIp inside makeMonitor (wifi is not connected)= " + monitorIp);
+                                wifiManager.setWifiEnabled(false);
+
+
+                            }else{
+                                checkBox.setChecked(false);
+                                editMonitorName.setVisibility(View.INVISIBLE);
+                                buttonAdd.setClickable(true);
+                                buttonAdd.getBackground().clearColorFilter();
+                                Toast.makeText(AddSleepCircleActivity.this,"This device is too old to be used as a monitor", Toast.LENGTH_SHORT).show();
                             }
+
                         }})
                     .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             checkBox.setChecked(false);
+                            editMonitorName.setVisibility(View.INVISIBLE);
                             Toast.makeText(AddSleepCircleActivity.this,"You unselected \"Use this device as a monitor\"", Toast.LENGTH_SHORT).show();
                         }}).show();
+        }else{
+            Log.d(TAG, "In makeMonitor: wifi is connected");
+            int SDK_INT = android.os.Build.VERSION.SDK_INT;
+            if (SDK_INT > 8)
+            {
+                StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+                        .permitAll().build();
+                StrictMode.setThreadPolicy(policy);
+                try {
+                    InetAddress inetAddress = InetAddress.getLocalHost();
+                    monitorIp = String.valueOf(inetAddress);
+                    circle = new SleepCircle(circleName, secondUserUid, secondUserName, monitorIp, monitorName);
+                    addCircleToDatabase(circle);
+                    addCircleToUsers();
+                    returnToSleepCirclesPage();
+
+
+                } catch (UnknownHostException e) {
+                    System.out.println("I'm sorry. I don't know my own address. Connect to wifi, maybe?");
+                }
+
+            }else{
+                checkBox.setChecked(false);
+                editMonitorName.setVisibility(View.INVISIBLE);
+                Toast.makeText(AddSleepCircleActivity.this,"This device is too old to be used as a monitor", Toast.LENGTH_SHORT).show();
+                buttonAdd.setClickable(true);
+                buttonAdd.getBackground().clearColorFilter();
+            }
+
         }
+
+
+
+        Log.d(TAG, "Exiting makeMonitor");
 
     }
 
@@ -212,17 +274,33 @@ public class AddSleepCircleActivity extends AppCompatActivity {
                                 Log.d(TAG, "secondUserUid: " + secondUserUid);
                                 if (user2.getIsRegistered()) {
 
+                                    Log.d(TAG, "monitorIp inside createCircle = " + monitorIp);
+
                                     circle = new SleepCircle(circleName, secondUserUid, secondUserName, monitorIp, monitorName);
 
+                                    // Todo: greyout button and show loading wheel
+
+
                                     if(checkBox.isChecked()){
+                                        Log.d(TAG, "Inside createCircle: CheckBox is checked");
+                                        Log.d(TAG, "monitorIp inside createCircle = " + monitorIp);
+
                                         makeMonitor();
+
+                                    }else{
+                                        Log.d(TAG, "Inside createCircle: CheckBox is not checked");
+                                        circle = new SleepCircle(circleName, secondUserUid, secondUserName, monitorIp, monitorName);
+                                        addCircleToDatabase(circle);
+                                        addCircleToUsers();
+                                        returnToSleepCirclesPage();
                                     }
 
-                                    addCircleToDatabase(circle);
-                                    addCircleToUsers();
-                                    returnToSleepCirclesPage();
+
                                 }else{
                                     Toast.makeText(AddSleepCircleActivity.this,"User \"" + secondUserName + "\" has not comfirmed their email yet. \"", Toast.LENGTH_SHORT).show();
+                                    buttonAdd.setClickable(true);
+                                    buttonAdd.getBackground().clearColorFilter();
+
                                 }
                             }
                         } // TODO HANDLE ELSE CASE: NO EMAIL FOR USER 2
@@ -232,6 +310,8 @@ public class AddSleepCircleActivity extends AppCompatActivity {
                         Log.d(TAG, "NO USER FOUND");
                         //TODO: Fix no user found essage that appears even when user is found
                         Toast.makeText(AddSleepCircleActivity.this, "No user with the email \"" + secondUserEmail + "\" and the username \"" + secondUserName + "\"", Toast.LENGTH_SHORT).show();
+                        buttonAdd.setClickable(true);
+                        buttonAdd.getBackground().clearColorFilter();
                     }
                 }
                 @Override
@@ -259,6 +339,8 @@ public class AddSleepCircleActivity extends AppCompatActivity {
         database.child(sleepCircleId).setValue(circle);
 
         Toast.makeText(AddSleepCircleActivity.this, "Adding sleep circle to database", Toast.LENGTH_SHORT).show();
+        addCircleToUsers();
+
 
     }
 
@@ -267,6 +349,7 @@ public class AddSleepCircleActivity extends AppCompatActivity {
 
         updateUserCircleList(CurrentUser.uid);
         updateUserCircleList(user2.getUserUid());
+        returnToSleepCirclesPage();
 
         //TODO: Check if user is logged in (add a method to current user) and handle logged out user
 

@@ -47,6 +47,8 @@ public class SleepCirclesActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sleep_circles);
 
+        //TODO: check if current user has circles to show. If yes, show list and add circle button. If no, only show button
+
         TextView addCircle = (TextView) findViewById(R.id.create_circle);
 
         listViewSleepCircle = (ListView)findViewById(R.id.listViewSleepCircles);
@@ -56,6 +58,7 @@ public class SleepCirclesActivity extends AppCompatActivity {
         addCircle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 Intent addCircleIntent = new Intent(SleepCirclesActivity.this, AddSleepCircleActivity.class);
                 startActivity(addCircleIntent);
             }
