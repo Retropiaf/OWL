@@ -196,8 +196,9 @@ public class SetSleepSessionActivity extends AppCompatActivity  implements Adapt
         // Close proxy connection after use.
         mBluetoothAdapter.closeProfileProxy(BluetoothProfile.A2DP, mBluetoothEarbuds);
         mBluetoothAdapter.disable();
-        if (mBroadcastReceiver4 != null) {unregisterReceiver(mBroadcastReceiver3);}
-        //if (mBroadcastReceiver4 != null) {unregisterReceiver(mBroadcastReceiver4);}
+        if (mBroadcastReceiver4 != null) {unregisterReceiver(mBroadcastReceiver4);}
+        if (mBroadcastReceiver3 != null) {unregisterReceiver(mBroadcastReceiver3);}
+        if (mBroadcastReceiver1 != null) {unregisterReceiver(mBroadcastReceiver1);}
         mBluetoothAdapter.cancelDiscovery();
     } // End of onDestroy
 

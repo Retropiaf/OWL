@@ -20,6 +20,7 @@ public class MainUser {
     public String name;
     public String userEmail;
     public Boolean isRegistered;
+    public Boolean isSignedIn;
     HashMap<String, SleepCircle> circles;
 
 
@@ -34,6 +35,7 @@ public class MainUser {
         this.userName = userName;
         this.userEmail = userEmail;
         this.isRegistered = false;
+        this.isSignedIn = false;
         circles = new HashMap<>();
     }
 
@@ -70,6 +72,8 @@ public class MainUser {
     }
 
     public Boolean getIsRegistered(){ return isRegistered; }
+
+    public Boolean getIsSignedIn(){ return isSignedIn; }
 
     public void setIsRegistered(){
         Log.d("Inside setIsRegistered", String.valueOf(this.isRegistered));
