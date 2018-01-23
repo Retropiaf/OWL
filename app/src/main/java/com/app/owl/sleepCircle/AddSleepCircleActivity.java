@@ -23,6 +23,8 @@ import android.widget.Toast;
 
 import com.app.owl.CurrentUser;
 import com.app.owl.MainUser;
+import com.app.owl.OnGetDataListener;
+import com.app.owl.OnGetIpListener;
 import com.app.owl.R;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -44,7 +46,7 @@ public class AddSleepCircleActivity extends AppCompatActivity {
     EditText editSecondUser, editSecondUserName, editMonitorName, editCircleName;
     MainUser user2;
     CheckBox checkBox;
-    String monitorIp;
+    String monitorIp, ip;
     ConnectivityManager connManager;
     NetworkInfo myWifi;
     WifiManager wifiManager;
@@ -62,6 +64,33 @@ public class AddSleepCircleActivity extends AppCompatActivity {
 
         Log.d(TAG, "In onCreate");
 
+///////////////////////////////////////// !!!!!!
+        /*
+        database = FirebaseDatabase.getInstance().getReference();
+        database = database.child("MainUsers").child("KMrFhYzQU3WwqJC0LwVCZxKZzQ13").child("circles").child("-L3V5Z8tKP2QtHbE4Laj");
+        Log.d(TAG, "Testing callback: database = " + database);
+
+        readData(database, new OnGetDataListener() {
+            @Override
+            public void onSuccess(DataSnapshot dataSnapshot) {
+
+                SleepCircle circle = dataSnapshot.getValue(SleepCircle.class);
+                Log.d(TAG, "Testing callback: " + circle.getCircleName());
+                circleName = circle.getCircleName();
+
+
+            }
+            @Override
+            public void onStart() {
+            }
+
+            @Override
+            public void onFailure() {
+                Log.d("onFailure", "Failed");
+            }
+        });
+
+*/
         editCircleName = (EditText) findViewById(R.id.editCircleName);
 
         editSecondUser = (EditText) findViewById(R.id.second_user_email);
@@ -94,7 +123,7 @@ public class AddSleepCircleActivity extends AppCompatActivity {
 
                 }else{
                     editMonitorName.setVisibility(View.INVISIBLE);
-
+                    removeMonitor();
                 }
             }
         });
@@ -119,99 +148,6 @@ public class AddSleepCircleActivity extends AppCompatActivity {
             }
 
         });
-
-    }
-
-
-    private void makeMonitor(){
-        Log.d(TAG, "In makeMonitor");
-        //wifiOn = true;
-
-        if(!myWifi.isConnected()){
-            Log.d(TAG, "In makeMonitor: wifi is not connected");
-            //wifiOn = false;
-            new AlertDialog.Builder(AddSleepCircleActivity.this)
-                    .setTitle("Confirm")
-                    .setMessage("Your device need to be connected to wifi.")
-                    .setPositiveButton("Turn wifi on", new DialogInterface.OnClickListener() {
-
-                        public void onClick(DialogInterface dialog, int which) {
-
-                            wifiManager.setWifiEnabled(true);
-                            int SDK_INT = android.os.Build.VERSION.SDK_INT;
-                            if (SDK_INT > 8)
-                            {
-                                StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
-                                        .permitAll().build();
-                                StrictMode.setThreadPolicy(policy);
-
-                                //PhoneMonitor phoneMonitor = new PhoneMonitor();
-
-                                try {
-                                    InetAddress inetAddress = InetAddress.getLocalHost();
-                                    monitorIp = String.valueOf(inetAddress);
-                                    circle = new SleepCircle(circleName, secondUserUid, secondUserName, monitorIp, monitorName);
-                                    addCircleToDatabase(circle);
-                                    addCircleToUsers();
-                                    returnToSleepCirclesPage();
-
-
-                                } catch (UnknownHostException e) {
-                                    System.out.println("I'm sorry. I don't know my own address. Connect to wifi, maybe?");
-                                }
-                                Log.d(TAG, "monitorIp inside makeMonitor (wifi is not connected)= " + monitorIp);
-                                wifiManager.setWifiEnabled(false);
-
-
-                            }else{
-                                checkBox.setChecked(false);
-                                editMonitorName.setVisibility(View.INVISIBLE);
-                                buttonAdd.setClickable(true);
-                                buttonAdd.getBackground().clearColorFilter();
-                                Toast.makeText(AddSleepCircleActivity.this,"This device is too old to be used as a monitor", Toast.LENGTH_SHORT).show();
-                            }
-
-                        }})
-                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            checkBox.setChecked(false);
-                            editMonitorName.setVisibility(View.INVISIBLE);
-                            Toast.makeText(AddSleepCircleActivity.this,"You unselected \"Use this device as a monitor\"", Toast.LENGTH_SHORT).show();
-                        }}).show();
-        }else{
-            Log.d(TAG, "In makeMonitor: wifi is connected");
-            int SDK_INT = android.os.Build.VERSION.SDK_INT;
-            if (SDK_INT > 8)
-            {
-                StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
-                        .permitAll().build();
-                StrictMode.setThreadPolicy(policy);
-                try {
-                    InetAddress inetAddress = InetAddress.getLocalHost();
-                    monitorIp = String.valueOf(inetAddress);
-                    circle = new SleepCircle(circleName, secondUserUid, secondUserName, monitorIp, monitorName);
-                    addCircleToDatabase(circle);
-                    addCircleToUsers();
-                    returnToSleepCirclesPage();
-
-
-                } catch (UnknownHostException e) {
-                    System.out.println("I'm sorry. I don't know my own address. Connect to wifi, maybe?");
-                }
-
-            }else{
-                checkBox.setChecked(false);
-                editMonitorName.setVisibility(View.INVISIBLE);
-                Toast.makeText(AddSleepCircleActivity.this,"This device is too old to be used as a monitor", Toast.LENGTH_SHORT).show();
-                buttonAdd.setClickable(true);
-                buttonAdd.getBackground().clearColorFilter();
-            }
-
-        }
-
-
-
-        Log.d(TAG, "Exiting makeMonitor");
 
     }
 
@@ -285,10 +221,31 @@ public class AddSleepCircleActivity extends AppCompatActivity {
                                         Log.d(TAG, "Inside createCircle: CheckBox is checked");
                                         Log.d(TAG, "monitorIp inside createCircle = " + monitorIp);
 
-                                        makeMonitor();
+                                        Log.d(TAG, "Inside createCircle: CheckBox is not checked");
+                                        makeMonitor(new OnGetIpListener() {
+                                            @Override
+                                            public void onSuccess() {
+                                                circle = new SleepCircle(circleName, secondUserUid, secondUserName, monitorIp, monitorName);
+                                                addCircleToDatabase(circle);
+                                                addCircleToUsers();
+                                                returnToSleepCirclesPage();
+                                            }
+
+                                            @Override
+                                            public void onStart() {
+
+                                            }
+
+                                            @Override
+                                            public void onFailure() {
+                                                checkBox.setChecked(false);
+                                                editMonitorName.setVisibility(View.INVISIBLE);
+                                                buttonAdd.setClickable(true);
+                                                buttonAdd.getBackground().clearColorFilter();
+                                            }
+                                        });
 
                                     }else{
-                                        Log.d(TAG, "Inside createCircle: CheckBox is not checked");
                                         circle = new SleepCircle(circleName, secondUserUid, secondUserName, monitorIp, monitorName);
                                         addCircleToDatabase(circle);
                                         addCircleToUsers();
@@ -373,5 +330,103 @@ public class AddSleepCircleActivity extends AppCompatActivity {
 
         Intent intent = new Intent(AddSleepCircleActivity.this, SleepCirclesActivity.class);
         startActivity(intent);
+    }
+
+
+
+    public void readData(DatabaseReference ref, final OnGetDataListener listener) {
+        listener.onStart();
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                listener.onSuccess(dataSnapshot);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                listener.onFailure();
+            }
+        });
+
+    }
+    public void makeMonitor(final OnGetIpListener listener) {
+        listener.onStart();
+
+        if(!myWifi.isConnected()){
+            Log.d(TAG, "In makeMonitor: wifi is not connected");
+            //wifiOn = false;
+            new AlertDialog.Builder(AddSleepCircleActivity.this)
+                    .setTitle("Confirm")
+                    .setMessage("Your device need to be connected to wifi.")
+                    .setPositiveButton("Turn wifi on", new DialogInterface.OnClickListener() {
+
+                        public void onClick(DialogInterface dialog, int which) {
+
+                            wifiManager.setWifiEnabled(true);
+
+                            int SDK_INT = android.os.Build.VERSION.SDK_INT;
+                            if (SDK_INT > 8)
+                            {
+                                StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+                                        .permitAll().build();
+                                StrictMode.setThreadPolicy(policy);
+
+                                try {
+                                    InetAddress inetAddress = InetAddress.getLocalHost();
+                                    monitorIp = String.valueOf(inetAddress);
+                                    listener.onSuccess();
+
+                                } catch (UnknownHostException e) {
+                                    Toast.makeText(AddSleepCircleActivity.this,"I'm sorry. I don't know my own ip address.", Toast.LENGTH_SHORT).show();
+                                    listener.onFailure();
+                                }
+
+                                wifiManager.setWifiEnabled(false);
+
+
+                            }else{
+                                Toast.makeText(AddSleepCircleActivity.this,"This device is too old to be used as a monitor.", Toast.LENGTH_SHORT).show();
+                                listener.onFailure();
+                            }
+
+
+                        }})
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            checkBox.setChecked(false);
+                            editMonitorName.setVisibility(View.INVISIBLE);
+                            Toast.makeText(AddSleepCircleActivity.this,"You unselected \"Use this device as a monitor\"", Toast.LENGTH_SHORT).show();
+                        }}).show();
+        }else{
+
+            int SDK_INT = android.os.Build.VERSION.SDK_INT;
+            if (SDK_INT > 8)
+            {
+                StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+                        .permitAll().build();
+                StrictMode.setThreadPolicy(policy);
+                try {
+                    InetAddress inetAddress = InetAddress.getLocalHost();
+                    monitorIp = String.valueOf(inetAddress);
+                    listener.onSuccess();
+
+                } catch (UnknownHostException e) {
+                    Toast.makeText(AddSleepCircleActivity.this,"I'm sorry. I don't know my own ip address.", Toast.LENGTH_SHORT).show();
+                    listener.onFailure();
+                }
+
+            }else{
+                Toast.makeText(AddSleepCircleActivity.this,"This device is too old to be used as a monitor.", Toast.LENGTH_SHORT).show();
+                listener.onFailure();
+            }
+
+
+
+        }
+
+
+
+
+
     }
 }

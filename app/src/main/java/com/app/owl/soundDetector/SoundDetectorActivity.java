@@ -203,6 +203,7 @@ public class SoundDetectorActivity extends AppCompatActivity {
                             Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
                             // ...
                         }
+
                     });
 
                     alert.setFirstResponderId(lastSecondResponder);
