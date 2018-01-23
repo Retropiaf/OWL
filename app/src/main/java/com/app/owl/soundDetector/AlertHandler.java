@@ -3,6 +3,7 @@ package com.app.owl.soundDetector;
 import android.util.Log;
 
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 
 /**
@@ -15,8 +16,9 @@ public class AlertHandler {
 
     public AlertHandler(){}
 
-    public void registerAlert(Alert alert){
+    public void registerAlert(Alert alert, String uid, String circleName){
         if(alert != null){
+            databaseAlerts = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(uid).child("circles").child(circleName).child("sessions");
             String id = databaseAlerts.push().getKey();
 
             databaseAlerts.child(id).setValue(alert);

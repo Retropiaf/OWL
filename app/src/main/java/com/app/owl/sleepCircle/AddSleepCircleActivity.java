@@ -336,7 +336,7 @@ public class AddSleepCircleActivity extends AppCompatActivity {
 
         circle.setCircleId(sleepCircleId);
 
-        database.child(sleepCircleId).setValue(circle);
+        database.child(circleName).setValue(circle);
 
         Toast.makeText(AddSleepCircleActivity.this, "Adding sleep circle to database", Toast.LENGTH_SHORT).show();
         addCircleToUsers();

@@ -8,12 +8,26 @@ import java.util.Date;
  */
 
 public class Alert {
-    Date time;
-    String ResponderId;
+    private Date startTime;
+    private Date endTime;
+    private String firstResponderId;
+    private String secondResponderId;
+
+    //public Alert(){}
 
     public Alert(){
-        this.time = Calendar.getInstance().getTime();
+
+        this.startTime = Calendar.getInstance().getTime();
+
     }
 
+    public String getFirstResponderId(){return firstResponderId;}
+    public String getSecondResponderId(){return secondResponderId;}
+    public Date getStartTime(){return startTime; }
+    public Date getEndTime(){return endTime; }
+
+    public void setFirstResponderId(String responder){this.firstResponderId = responder;}
+    public void setSecondResponderId(String responder){this.secondResponderId = responder;}
+    public void setEndTime(Date date){endTime = date; }
 
 }

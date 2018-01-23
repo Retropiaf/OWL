@@ -1,6 +1,7 @@
 package com.app.owl.sleepSession;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
@@ -17,6 +18,8 @@ import android.widget.Spinner;
 import com.app.owl.R;
 import com.app.owl.sleepCircle.SleepCircle;
 import com.app.owl.sleepCircle.SleepCircleList;
+import com.app.owl.sleepCircle.SleepCirclesActivity;
+import com.app.owl.soundDetector.SoundDetectorActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -32,9 +35,9 @@ import java.util.List;
 
 public class NewSleepSessionActivity extends AppCompatActivity {
 
-    String TAG = "NewSleepSessionActivity";
+    String TAG = "NewSleepSessionActivity", CIRCLE_NAME = "circle name";
     String selected = "";
-    String uid, ip, circleName, selection, circleMonitorIp;
+    String uid, ip, circleName, selection, circleMonitorIp, clickedCircleName;
     InetAddress inetAddress;
     Spinner chooseCirclespinner;
     Button startSleepBtn, startMonitoringBtn;
@@ -51,6 +54,9 @@ public class NewSleepSessionActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_sleep_session);
+
+        Intent intent = getIntent();
+        clickedCircleName = intent.getStringExtra(SleepCirclesActivity.CIRCLE_NAME);
 
         connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         myWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
@@ -82,6 +88,7 @@ public class NewSleepSessionActivity extends AppCompatActivity {
 
         chooseCirclespinner = findViewById(R.id.chooseCirclespinner);
 
+
         database = FirebaseDatabase.getInstance().getReference().child("SleepCircles");
 
         database.addValueEventListener(new ValueEventListener() {
@@ -99,6 +106,7 @@ public class NewSleepSessionActivity extends AppCompatActivity {
                 ArrayAdapter<String> sleepCircleAdapter = new ArrayAdapter<String>(NewSleepSessionActivity.this, android.R.layout.simple_spinner_item, sleepCircles);
                 sleepCircleAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 chooseCirclespinner.setAdapter(sleepCircleAdapter);
+                selectSpinnerValue(chooseCirclespinner, clickedCircleName);
             }
 
             @Override
@@ -113,15 +121,11 @@ public class NewSleepSessionActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 selected = String.valueOf(chooseCirclespinner.getSelectedItem());
-                if (!selected.equals("")) {
-                    Log.d(TAG, "Selection: " + selected);
-                } else {
-                    Log.d(TAG, "nothing is selected");
-                }
-                                        /*
-                                        Intent intent = new Intent(NewSleepSessionActivity.this, OnGoingMonitoringActivity.class);
-                                        startActivity(intent);
-                                        */
+
+                Intent intent = new Intent(NewSleepSessionActivity.this, SoundDetectorActivity.class);
+                intent.putExtra(CIRCLE_NAME, circle.getCircleId());
+                startActivity(intent);
+
             }
         });
         startSleepBtn = findViewById(R.id.start_sleep_btn);
@@ -130,15 +134,11 @@ public class NewSleepSessionActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                 selected = String.valueOf(chooseCirclespinner.getSelectedItem());
-                if (!selected.equals("")) {
-                    Log.d(TAG, "Selection: " + selected);
-                } else {
-                    Log.d(TAG, "nothing is selected");
-                }
-                                        /*
-                                        Intent intent = new Intent(NewSleepSessionActivity.this, OnGoingSleepSessionActivity.class);
-                                        startActivity(intent);
-                                        */
+
+                Intent intent = new Intent(NewSleepSessionActivity.this, OnGoingSleepSessionActivity.class);
+                intent.putExtra(CIRCLE_NAME, circle.getCircleId());
+                startActivity(intent);
+
             }
         });
 
@@ -299,6 +299,18 @@ public class NewSleepSessionActivity extends AppCompatActivity {
 
         });
         */
+    }
+
+    private void selectSpinnerValue(Spinner spinner, String myString)
+    {
+        Log.d(TAG, "Inside selectSpinnerValue");
+        for(int i = 0; i < spinner.getCount(); i++){
+            if(spinner.getItemAtPosition(i).toString().equals(myString)){
+                spinner.setSelection(i);
+                Log.d(TAG, "i:" + i);
+                break;
+            }
+        }
     }
 }
 

@@ -65,6 +65,8 @@
 
     <!-- Monitor -->
     <string name="prompt_monitor_name">Enter a name for this device</string>
+    <string name="end_session">End Sleep Session</string>
+    <string name="end_alert">End Alert</string>
 
 
 </resources>

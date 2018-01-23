@@ -111,7 +111,10 @@ public class SleepCircleDetailsActivity extends AppCompatActivity {
         start_sleep_session.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 Intent intent = new Intent(SleepCircleDetailsActivity.this, NewSleepSessionActivity.class);
+                intent.putExtra(CIRCLE_NAME, name);
+
                 startActivity(intent);
             }
         });
