@@ -57,6 +57,12 @@ public class AlertHandler {
         childUpdates.put(path, value);
         database.updateChildren(childUpdates);
     }
+    static void updateCurrentUser(DatabaseReference database, String path, String value){
+        //DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+        Map<String, Object> childUpdates = new HashMap<>();
+        childUpdates.put(path, value);
+        database.updateChildren(childUpdates);
+    }
     static void updateAlertBool(DatabaseReference database, String path, Boolean boolValue){
         //database = FirebaseDatabase.getInstance().getReference();
         Map<String, Object> childUpdates = new HashMap<>();

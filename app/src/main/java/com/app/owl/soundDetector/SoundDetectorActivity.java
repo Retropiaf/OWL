@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.app.owl.R;
+import com.app.owl.UserMainActivity;
 import com.app.owl.sleepCircle.SleepCircle;
 import com.app.owl.sleepSession.SleepSession;
 import com.google.firebase.auth.FirebaseAuth;
@@ -120,9 +121,19 @@ public class SoundDetectorActivity extends AppCompatActivity {
         endSession.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                timer.cancel();
+                timer.purge();
+                soundCapture.stop();
+                updateOnGoingAlertDb(false,  circle.getUser1());
+                updateOnGoingAlertDb(false,  circle.getUser2());
+                udpdateUserOngoingSession(false, circle.getUser1());
+                udpdateUserOngoingSession(false, circle.getUser2());
+                String timeNow = String.valueOf(Calendar.getInstance().getTime());
+                udpdateSessionEndTime(timeNow, circle.getUser1());
+                udpdateSessionEndTime(timeNow, circle.getUser2());
 
-                onDestroy();
-                // TODO: Go back intent
+                Intent intent = new Intent(SoundDetectorActivity.this, UserMainActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -200,6 +211,8 @@ public class SoundDetectorActivity extends AppCompatActivity {
                 if (significant) {
                     Log.d(TAG, "This is an alert!");
                     onGoingAlert = true;
+                    updateOnGoingAlertDb(true,  circle.getUser1());
+                    updateOnGoingAlertDb(true,  circle.getUser2());
                     declareAlert();
 
                 }
@@ -262,8 +275,8 @@ public class SoundDetectorActivity extends AppCompatActivity {
 
         Log.d(TAG, "Inside declareAlert, alert:" + alert);
         // Add alert to database for each user
-        alertHandler.registerAlertInUserDb(alert, sleepSession.getFirstResponder(), circleName, sleepSession.getStart_time());
-        alertHandler.registerAlertInUserDb(alert, sleepSession.getSecondResponder(), circleName, sleepSession.getStart_time());
+        alertHandler.registerAlertInUserDb(alert, sleepSession.getFirstResponder(), circleName, sleepSession.getStartTime());
+        alertHandler.registerAlertInUserDb(alert, sleepSession.getSecondResponder(), circleName, sleepSession.getStartTime());
 
         countDownForResponse();
 
@@ -281,7 +294,17 @@ public class SoundDetectorActivity extends AppCompatActivity {
                 // TODO: Check that update works
 
                 Log.d(TAG, "30second passed: closing the alert and starting sound detection again");
-                resolveAlert();
+
+                updateOnGoingAlertDb(false,  circle.getUser1());
+                updateOnGoingAlertDb(false,  circle.getUser2());
+
+
+                String timeNow = String.valueOf(Calendar.getInstance().getTime());
+
+                updateAlertEndDb(timeNow, circle.getUser1(), false);
+                updateAlertEndDb(timeNow, circle.getUser2(), false);
+
+/*
 
                 // no one answered the alert after 30s
                 database = FirebaseDatabase.getInstance().getReference();
@@ -290,11 +313,16 @@ public class SoundDetectorActivity extends AppCompatActivity {
 
                 String path = "/MainUsers/" + circle.getUser1() + "/SleepSessions/" + sleepSession.getStart_time() + "/Alerts/" + alert.getStartTime() + "/alertEnded/";
                 // set alert.getAlertEnded() = true;
+                AlertHandler.updateAlertBool(database, path, true);
+                */
 
+                /*
                 Map<String, Object> childUpdates = new HashMap<>();
                 childUpdates.put(path, true);
                 database.updateChildren(childUpdates);
-                //AlertHandler.updateAlertBool(database, path, true);
+                */
+/*
+
 
                 String now = String.valueOf(Calendar.getInstance().getTime());
                 path = "/MainUsers/" + circle.getUser1() + "/SleepSessions/" + sleepSession.getStart_time() + "/Alerts/" + alert.getStartTime() + "/endTime/";
@@ -317,8 +345,10 @@ public class SoundDetectorActivity extends AppCompatActivity {
                 path = "/MainUsers/" + circle.getUser2() + "/SleepSessions/" + sleepSession.getStart_time() + "/Alerts/" + alert.getStartTime() + "/alertAnswered/";
                 // set alertAnswered == false
                 AlertHandler.updateAlertBool(database, path, false);
+                */
 
                 Log.d(TAG, "call startDetectingSounds();");
+                new ShowEndSession().execute();
                 soundCapture.start();
                 startDetectingSounds();
             }
@@ -357,6 +387,7 @@ public class SoundDetectorActivity extends AppCompatActivity {
                             @Override
                             public void run() {
                                 Log.d(TAG, "Inside snoozeDecide - Should log the countdown every seconds:" + seconds);
+                                //TODO: make countdown show
                                 new SetTextSnoozeClock().execute(); // Update time left to click snooze button
                                 seconds -= 1;
                             }
@@ -384,8 +415,6 @@ public class SoundDetectorActivity extends AppCompatActivity {
     public void snooze(int snoozeDelay){
         Log.d(TAG, "Inside snooze - Snoozing for the chosen duration: " + snoozeDelay + " minutes");
 
-        // TODO: Check that snoozing work
-
         //when timer end, call startDetectingSounds()
         new ShowTimeLeft().execute(); // Show snooze time left countdown
         new SetTextTimeLeft().execute(String.valueOf(seconds)); // Test this
@@ -406,7 +435,8 @@ public class SoundDetectorActivity extends AppCompatActivity {
             @Override
             public void run() {
                 Log.d(TAG, "Inside snooze - This should log the snoozing time left every minute. Time left: " + minutes + " minutes");
-                new SetTextTimeLeft().execute(String.valueOf(seconds)); // Update snooze time left countdown TODO: not working, not showing count down
+                // TODO: make countdown show
+                new SetTextTimeLeft().execute(String.valueOf(seconds)); // Update snooze time left countdown
                 minutes -= 1;
             }
         };
@@ -423,9 +453,14 @@ public class SoundDetectorActivity extends AppCompatActivity {
 
     public void resolveAlert(){
         Log.d(TAG, "Inside resolveAlert, ShowEndSession() should get called");
+
         new ShowEndSession().execute();
         String timeNow = String.valueOf(Calendar.getInstance().getTime());
-        updateAlertEndDb(timeNow);
+        //updateAlertEndDb(timeNow);
+        updateAlertEndDb(timeNow, circle.getUser1(), true);
+        updateAlertEndDb(timeNow, circle.getUser2(), true);
+        updateOnGoingAlertDb(false,  circle.getUser1());
+        updateOnGoingAlertDb(false,  circle.getUser2());
         toggleCurrentResponder();
 
 
@@ -434,15 +469,59 @@ public class SoundDetectorActivity extends AppCompatActivity {
     }
 
     // TODO this could be a Java class accessible to the whole program
-    public void updateAlertEndDb(String time){
+    public void updateAlertEndDb(String endTime, String localUserUid, Boolean answered){
 
         // TODO: Check that update works
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+
+        database = FirebaseDatabase.getInstance().getReference();
+
+        String path = "/MainUsers/" + localUserUid + "/SleepSessions/" + sleepSession.getStartTime() + "/Alerts/" + alert.getStartTime() + "/alertEnded/";
+        // set alert.getAlertEnded() = true;
+        AlertHandler.updateAlertBool(database, path, true);
+
+        String now = String.valueOf(Calendar.getInstance().getTime());
+        path = "/MainUsers/" + localUserUid + "/SleepSessions/" + sleepSession.getStartTime() + "/Alerts/" + alert.getStartTime() + "/endTime/";
+        // set alert.endTime = time
+        AlertHandler.updateAlertTime(database, path, endTime);
+
+        path = "/MainUsers/" + localUserUid + "/SleepSessions/" + sleepSession.getStartTime() + "/Alerts/" + alert.getStartTime() + "/alertAnswered/";
+        // set alertAnswered == false
+        AlertHandler.updateAlertBool(database, path, answered);
+
+
+    }
+
+    public void updateOnGoingAlertDb(Boolean isOngoing,  String localUserUid){
+
+        database = FirebaseDatabase.getInstance().getReference();
+
+        String path = "/MainUsers/" + localUserUid + "/SleepSessions/" + sleepSession.getStartTime() + "/onGoingAlert/";
+
         Map<String, Object> childUpdates = new HashMap<>();
-        childUpdates.put("/MainUsers/" + userUid + "/SleepSessions/" + sleepSession.getStart_time() + "/Alerts/" + alert.getStartTime() + "/endTime/", time);
-        childUpdates.put("/MainUsers/" + userUid + "/SleepSessions/" + sleepSession.getStart_time() + "/Alerts/" + alert.getStartTime() + "/alertEnded/", true);
+        childUpdates.put(path, isOngoing);
         database.updateChildren(childUpdates);
 
+    }
+
+    private void udpdateSessionEndTime(String timeNow, String localUserUid){
+        database = FirebaseDatabase.getInstance().getReference();
+
+        String path = "/MainUsers/" + localUserUid + "/SleepSessions/" + sleepSession.getStartTime()  + "/endTime/";
+
+        Map<String, Object> childUpdates = new HashMap<>();
+        childUpdates.put(path, timeNow);
+        database.updateChildren(childUpdates);
+
+    }
+
+    private void udpdateUserOngoingSession(Boolean isOngoing, String localUserUid){
+        database = FirebaseDatabase.getInstance().getReference();
+
+        String path = "/MainUsers/" + localUserUid + "/OnGoingSessions/";
+
+        Map<String, Object> childUpdates = new HashMap<>();
+        childUpdates.put(path, isOngoing);
+        database.updateChildren(childUpdates);
     }
     public void toggleCurrentResponder(){
 
@@ -451,6 +530,12 @@ public class SoundDetectorActivity extends AppCompatActivity {
         }else{
             activityCurrentResponder = sleepSession.getFirstResponder();
         }
+
+        database = FirebaseDatabase.getInstance().getReference();
+
+        String path = "/MainUsers/" + circle.getUser1() + "/SleepSessions/" + sleepSession.getStartTime() + "/CurrentResponder/";
+
+        AlertHandler.updateCurrentUser(database, path, activityCurrentResponder);
 
     }
 

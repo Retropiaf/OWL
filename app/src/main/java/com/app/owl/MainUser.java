@@ -21,6 +21,8 @@ public class MainUser {
     public String userEmail;
     public Boolean isRegistered;
     public Boolean isSignedIn;
+    public Boolean onGoingSessions;
+    public Boolean inOnGoingSessions;
     HashMap<String, SleepCircle> circles;
 
 
@@ -36,6 +38,8 @@ public class MainUser {
         this.userEmail = userEmail;
         this.isRegistered = false;
         this.isSignedIn = false;
+        this.onGoingSessions = false;
+        this.inOnGoingSessions = false;
         circles = new HashMap<>();
     }
 
@@ -74,6 +78,14 @@ public class MainUser {
     public Boolean getIsRegistered(){ return isRegistered; }
 
     public Boolean getIsSignedIn(){ return isSignedIn; }
+
+    public Boolean getOnGoingSessions(){ return onGoingSessions; }
+
+    public Boolean getInOnGoingSessions(){ return inOnGoingSessions; }
+
+    public void setOnGoingSessions(Boolean bool){ onGoingSessions = bool; }
+
+    public void setInOnGoingSessions(Boolean bool){ inOnGoingSessions = bool; }
 
     public void setIsRegistered(){
         Log.d("Inside setIsRegistered", String.valueOf(this.isRegistered));

@@ -17,6 +17,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.app.owl.MainUser;
 import com.app.owl.OnGetDataListener;
 import com.app.owl.R;
 import com.app.owl.sleepCircle.SleepCircle;
@@ -33,7 +34,9 @@ import com.google.firebase.database.ValueEventListener;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class NewSleepSessionActivity extends AppCompatActivity {
 
@@ -155,7 +158,43 @@ public class NewSleepSessionActivity extends AppCompatActivity {
                 findCircle(selected, sleepCircleDatabase, new OnGetDataListener() {
                     @Override
                     public void onSuccess(DataSnapshot dataSnapshot) {
-                        SleepCircle circle = dataSnapshot.getValue(SleepCircle.class);
+                        final SleepCircle circle = dataSnapshot.getValue(SleepCircle.class);
+
+                        // TODO: Check if any of the user already in a session if so toast and nothing. Else do the rest
+
+                        database = FirebaseDatabase.getInstance().getReference().child("MainUser").child(circle.getUser1());
+                        database.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                final MainUser localUser1 = dataSnapshot.getValue(MainUser.class);
+                                if(!localUser1.getOnGoingSessions()){
+                                    database = FirebaseDatabase.getInstance().getReference().child("MainUser").child(circle.getUser2());
+                                    database.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                            final MainUser localUser2 = dataSnapshot.getValue(MainUser.class);
+                                            if(!localUser2.getOnGoingSessions()) {
+
+
+                                            }else{
+                                                // TODO: toast: user already has an ongoing session
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(DatabaseError databaseError) {
+
+                                        }
+                                    });
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+
 
                         Log.d(TAG, "firstResponder: " + firstResponder);
                         Log.d(TAG, "circle.getUser1(): " + circle.getUser1());
@@ -172,9 +211,15 @@ public class NewSleepSessionActivity extends AppCompatActivity {
                         Log.d(TAG, "secondResponder: " + secondResponder);
                         String sleepSessionId =  database.push().getKey();
 
-                        sleepSession = new SleepSession(selected, sleepSessionId, firstResponder, secondResponder);
+                        sleepSession = new SleepSession(selected, sleepSessionId, firstResponder, firstResponder, secondResponder);
 
-                        database.child(sleepSession.getStart_time()).setValue(sleepSession);
+                        addSessionDb(firstResponder, sleepSession.getStartTime(), sleepSession);
+                        addSessionDb(secondResponder, sleepSession.getStartTime(), sleepSession);
+
+                        udpdateUserOngoingSession(true, firstResponder);
+                        udpdateUserOngoingSession(true, secondResponder);
+
+                        //TODO update MainUser with ongoingSleepSession = true
 
                         Intent intent = new Intent(NewSleepSessionActivity.this, SoundDetectorActivity.class);
                         intent.putExtra(CIRCLE, circle);
@@ -363,6 +408,28 @@ public class NewSleepSessionActivity extends AppCompatActivity {
             }
         }
         spinner.setSelection(0);
+    }
+
+    private void addSessionDb(String localUserUid, String sessionStartTime, SleepSession localNewSleepSession){
+
+        database = FirebaseDatabase.getInstance().getReference();
+
+        String path = "/MainUsers/" + localUserUid + "/SleepSessions/" + sessionStartTime;
+
+
+        Map<String, Object> childUpdates = new HashMap<>();
+        childUpdates.put(path, localNewSleepSession);
+        database.updateChildren(childUpdates);
+    }
+
+    private void udpdateUserOngoingSession(Boolean isOngoing, String localUserUid){
+        database = FirebaseDatabase.getInstance().getReference();
+
+        String path = "/MainUsers/" + localUserUid + "/OnGoingSessions/";
+
+        Map<String, Object> childUpdates = new HashMap<>();
+        childUpdates.put(path, isOngoing);
+        database.updateChildren(childUpdates);
     }
 }
 
