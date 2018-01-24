@@ -19,6 +19,7 @@ public class SleepSession  implements Serializable {
     String firstResponder;
     String secondResponder;
     String circleName;
+    //Boolean onGoingAlert;
     HashMap<Integer, Alert> alerts;
 
     SleepSession(){}
@@ -30,6 +31,7 @@ public class SleepSession  implements Serializable {
         this.firstResponder = firstResponder;
         this.currentResponder = firstResponder;
         this.secondResponder = secondResponder;
+        //this.onGoingAlert = false;
         this.alerts = new HashMap();
 
     }
@@ -41,6 +43,7 @@ public class SleepSession  implements Serializable {
     public String getFirstResponder(){return firstResponder;}
     public String getSecondResponder(){return secondResponder;}
     public String getCircleName(){return circleName;}
+    //public Boolean getOnGoingAlert(){return onGoingAlert;}
     //public HashMap<Integer, Alert> alerts(){return alerts;}
 
     public void setEnd_time(String time ){this.end_time = time;}
@@ -51,4 +54,5 @@ public class SleepSession  implements Serializable {
             this.currentResponder = this.firstResponder;
         }
     }
+    //public void setOnGoingAlert(Boolean bool){this.onGoingAlert = bool;}
 }

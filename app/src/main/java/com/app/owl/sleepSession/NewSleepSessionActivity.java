@@ -167,6 +167,8 @@ public class NewSleepSessionActivity extends AppCompatActivity {
                             secondResponder = circle.getUser1();
                         }
 
+                        //TODO: Check why several SleepSessions nodes get added
+
                         Log.d(TAG, "secondResponder: " + secondResponder);
                         String sleepSessionId =  database.push().getKey();
 

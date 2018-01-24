@@ -16,17 +16,13 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.app.owl.OnGetDataListener;
 import com.app.owl.R;
 import com.app.owl.sleepCircle.SleepCircle;
 import com.app.owl.sleepSession.SleepSession;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -49,7 +45,7 @@ public class SoundDetectorActivity extends AppCompatActivity {
     Alert alert;
     public static Button endSession, endAlert, snoozeBtn;
     DatabaseReference database, sleepSessionDatabase;
-    String circleName, selection, userUid;
+    String circleName, selection, userUid, activityCurrentResponder;
     TextView snoozeClock, timeLeft;
     Spinner snoozeDuration;
     SleepCircle circle;
@@ -57,8 +53,8 @@ public class SoundDetectorActivity extends AppCompatActivity {
     int seconds, minutes;
     FirebaseUser user;
     Thread t1;
-
-
+    Boolean onGoingAlert;
+    ToggleListener listener;
 
 
     @Override
@@ -66,8 +62,6 @@ public class SoundDetectorActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sound_detector);
 
-        ShowEndSessionBtn showEndSessionBtn = new ShowEndSessionBtn(SoundDetectorActivity.this);
-        t1 = new Thread(showEndSessionBtn);
 
 
         user = FirebaseAuth.getInstance().getCurrentUser();
@@ -76,6 +70,7 @@ public class SoundDetectorActivity extends AppCompatActivity {
         Intent intent = getIntent();
         circle = (SleepCircle) intent.getSerializableExtra("Sleep Circle");
         sleepSession = (SleepSession) intent.getSerializableExtra("Sleep Session");
+        activityCurrentResponder =  sleepSession.getFirstResponder();
 
         snoozeDuration = findViewById(R.id.snooze_duration);
         addItemsOnSpinner(snoozeDuration);
@@ -102,29 +97,32 @@ public class SoundDetectorActivity extends AppCompatActivity {
         timeLeft = findViewById(R.id.time_left);
         timeLeft.setVisibility(View.INVISIBLE);
 
-
-        endSession = findViewById(R.id.end_session_btn);
-        endSession.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                snoozeDecide();
-                onDestroy();
-                // TODO: Go back intent
-            }
-        });
-
         endAlert = findViewById(R.id.end_alert_btn);
         endAlert.setVisibility(View.INVISIBLE);
         endAlert.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 endSession.setVisibility(View.VISIBLE);
                 endAlert.setVisibility(View.INVISIBLE);
+                snoozeDecide();
                 resolveAlert();
                 soundCapture.start();
                 startDetectingSounds();
             }
         });
+
+        endSession = findViewById(R.id.end_session_btn);
+        endSession.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                onDestroy();
+                // TODO: Go back intent
+            }
+        });
+
+
 
         soundArray = new BuildSoundArray();
         alertHandler = new AlertHandler();
@@ -197,7 +195,9 @@ public class SoundDetectorActivity extends AppCompatActivity {
 
                 if (significant) {
                     Log.d(TAG, "This is an alert!");
+                    onGoingAlert = true;
                     declareAlert();
+
                 }
             }
         };
@@ -221,6 +221,8 @@ public class SoundDetectorActivity extends AppCompatActivity {
 
 
     public void declareAlert(){
+        Log.d(TAG, "Inside declareAlert - HideEndSession() Should get called ");
+        new HideEndSession().execute();
 
         stopDetectingSounds();
         //t1.start();
@@ -240,43 +242,26 @@ public class SoundDetectorActivity extends AppCompatActivity {
 
 
 
-        alert = new Alert();
+        alert = new Alert(String.valueOf(Calendar.getInstance().getTime()));
 
-        sleepSessionDatabase = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("Sleep Sessions").child(sleepSession.getStart_time());
+        Log.d(TAG, "Inside declareAlert, activityCurrentResponder:" + activityCurrentResponder);
+        Log.d(TAG, "Inside declareAlert, sleepSession.getFirstResponder():" + sleepSession.getFirstResponder());
+        Log.d(TAG, "Inside declareAlert, sleepSession.getSecondResponder():" + sleepSession.getSecondResponder());
 
-        findSession(sleepSessionDatabase, new OnGetDataListener() {
-            @Override
-            public void onSuccess(DataSnapshot dataSnapshot) {
-                SleepSession sleepSession = dataSnapshot.getValue(SleepSession.class);
+        if(activityCurrentResponder.equals(sleepSession.getFirstResponder())){
+            alert.setFirstResponderId(sleepSession.getFirstResponder());
+            alert.setSecondResponderId(sleepSession.getSecondResponder());
+        }else{
+            alert.setFirstResponderId(sleepSession.getSecondResponder());
+            alert.setSecondResponderId(sleepSession.getFirstResponder());
+        }
 
-                if(sleepSession.getCurrentResponder().equals(sleepSession.getFirstResponder())){
-                    alert.setFirstResponderId(sleepSession.getFirstResponder());
-                    alert.setSecondResponderId(sleepSession.getSecondResponder());
-                }else{
-                    alert.setFirstResponderId(sleepSession.getSecondResponder());
-                    alert.setSecondResponderId(sleepSession.getFirstResponder());
-                }
+        Log.d(TAG, "Inside declareAlert, alert:" + alert);
+        // Add alert to database for each user
+        alertHandler.registerAlertInUserDb(alert, sleepSession.getFirstResponder(), circleName, sleepSession.getStart_time());
+        alertHandler.registerAlertInUserDb(alert, sleepSession.getSecondResponder(), circleName, sleepSession.getStart_time());
 
-                // Add alert to database for each user
-                alertHandler.registerAlertInUserDb(alert, sleepSession.getFirstResponder(), circleName, sleepSession.getStart_time());
-                alertHandler.registerAlertInUserDb(alert, sleepSession.getSecondResponder(), circleName, sleepSession.getStart_time());
-
-                countDownForResponse();
-            }
-            @Override
-            public void onStart() {
-                //when starting
-                Log.d("ONSTART", "Started");
-            }
-
-            @Override
-            public void onFailure() {
-                Log.d("onFailure", "Failed");
-            }
-        });
-
-
-
+        countDownForResponse();
 
     }
 
@@ -290,6 +275,7 @@ public class SoundDetectorActivity extends AppCompatActivity {
             public void run() {
 
                 Log.d(TAG, "30second passed: closing the alert and starting sound detection again");
+                resolveAlert();
 
                 // no one answered the alert after 30s
                 database = FirebaseDatabase.getInstance().getReference();
@@ -327,7 +313,6 @@ public class SoundDetectorActivity extends AppCompatActivity {
                 AlertHandler.updateAlertBool(database, path, false);
 
                 Log.d(TAG, "call startDetectingSounds();");
-
                 startDetectingSounds();
             }
         };
@@ -401,15 +386,17 @@ public class SoundDetectorActivity extends AppCompatActivity {
         snoozeClock.setVisibility(View.VISIBLE);
         snoozeTimeLeft.schedule(clockTask, 0, 60000);
     }
+
     public void stopDetectingSounds(){
         timer.cancel();
     }
 
     public void resolveAlert(){
+        Log.d(TAG, "Inside resolveAlert, ShowEndSession() should get called");
+        new ShowEndSession().execute();
         String timeNow = String.valueOf(Calendar.getInstance().getTime());
         updateAlertEndDb(timeNow);
         toggleCurrentResponder();
-
 
 
        // TODO: Make sure to call "alert.setAlertResponderId" from responder's device
@@ -426,24 +413,13 @@ public class SoundDetectorActivity extends AppCompatActivity {
 
     }
     public void toggleCurrentResponder(){
-        String currentResponder = FirebaseDatabase.getInstance().getReference("/MainUsers/" + userUid + "/SleepSessions/" + sleepSession.getStart_time() + "/currentResponder/").toString();
 
-        Log.d(TAG, "currentResponder retrieved from the database with full path: " + currentResponder);
-
-        String firstResponderId = FirebaseDatabase.getInstance().getReference("/MainUsers/" + userUid + "/SleepSessions/" + sleepSession.getStart_time() + "/firstResponderId/").toString();
-
-        String secondResponderId = FirebaseDatabase.getInstance().getReference("/MainUsers/" + userUid + "/SleepSessions/" + sleepSession.getStart_time() + "/secondResponderId/").toString();
-
-        if (currentResponder.equals(firstResponderId)){
-            currentResponder = secondResponderId;
+        if (activityCurrentResponder.equals(sleepSession.getFirstResponder())){
+            activityCurrentResponder = sleepSession.getSecondResponder();
         }else{
-            currentResponder = firstResponderId;
+            activityCurrentResponder = sleepSession.getFirstResponder();
         }
 
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference();
-        Map<String, Object> childUpdates = new HashMap<>();
-        childUpdates.put("/MainUsers/" + userUid + "/SleepSessions/" + sleepSession.getStart_time() + "/currentResponder/", currentResponder);
-        database.updateChildren(childUpdates);
     }
 
     // add items into spinner dynamically
@@ -462,28 +438,17 @@ public class SoundDetectorActivity extends AppCompatActivity {
         spinner.setAdapter(dataAdapter);
     }
 
-    public void findSession(DatabaseReference ref, final OnGetDataListener listener) {
-        listener.onStart();
-        Log.d(TAG, "inside findSession, ref = " + ref);
-        ref.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.d(TAG, "dataSnapshot = " + dataSnapshot);
-                SleepSession localSleepSession = dataSnapshot.getValue(SleepSession.class);
-                if (localSleepSession.getStart_time().equals(sleepSession.getStart_time())){
-                    listener.onSuccess(dataSnapshot);
-
-                }
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                listener.onFailure();
-            }
-        });
+    /*
+    public void toggleListener(final ToggleListener listener) {
+        if(onGoingAlert){
+            listener.onTrue();
+        }else{
+            listener.onFalse();
+        }
 
     }
+    */
+
 
 
 }

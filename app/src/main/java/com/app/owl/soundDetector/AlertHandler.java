@@ -26,7 +26,7 @@ public class AlertHandler {
         // TODO: ADD alert to database
         if(alert != null){
             //String path = "/MainUsers/" + userUid + "/SleepSessions/" + sleepSession.getStart_time() + "/Alerts/" + alert.getStartTime() + "/alertEnded/";
-            databaseAlerts = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("Sleep Sessions").child(sessionTime).child("Alerts");
+            databaseAlerts = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions").child(sessionTime).child("Alerts");
             Log.d(TAG, "databaseAlerts = " + databaseAlerts);
             //String id = databaseAlerts.push().getKey();
 

@@ -1,7 +1,5 @@
 package com.app.owl.soundDetector;
 
-import java.util.Calendar;
-
 /**
  * Created by Christiane on 1/17/18.
  */
@@ -17,11 +15,11 @@ public class Alert {
     private Boolean alertEnded;
     private Boolean speaker;
 
-    //public Alert(){}
+    public Alert(){}
 
-    public Alert(){
+    public Alert(String startTime){
 
-        this.startTime = String.valueOf(Calendar.getInstance().getTime());
+        this.startTime = startTime;
         this.alertRedirected = false;
         this.alertAnswered = false;
         this.alertEnded = false;

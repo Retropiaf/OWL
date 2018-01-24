@@ -14,7 +14,7 @@ public class isSignificant {
     public boolean significant(){
         boolean significant = true;
         for(double sound : array){
-            if (sound < 1000){
+            if (sound < 600){
                 significant = false;
                 break;
             }
