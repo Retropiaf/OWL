@@ -55,8 +55,10 @@ public class SleepCircleDetailsActivity extends AppCompatActivity {
     String name;
     String userName1;
     String userName2;
+    SleepCircle circle;
 
 
+    public static final String CIRCLE = "Sleep Circle";
     public static final String CIRCLE_NAME = "circle name";
     public static final String CIRCLE_ID = "circle id";
     public static final String USER_1 = "user 1";
@@ -98,59 +100,28 @@ public class SleepCircleDetailsActivity extends AppCompatActivity {
         });
 
         intent = getIntent();
-        name = intent.getStringExtra(SleepCirclesActivity.CIRCLE_NAME);
-        circle_id = intent.getStringExtra(SleepCirclesActivity.CIRCLE_ID);
-        user1 = intent.getStringExtra(SleepCirclesActivity.USER_1);
-        user2 = intent.getStringExtra(SleepCirclesActivity.USER_2);
-        //userName1 = intent.getStringExtra(SleepCirclesActivity.USERNAME_1);
-        Log.d(TAG, "USERNAME " + userName1);
-        userName2 = intent.getStringExtra(SleepCirclesActivity.USERNAME_2);
-        monitorIp = intent.getStringExtra(SleepCirclesActivity.MONITOR);
-        monitorName = intent.getStringExtra(SleepCirclesActivity.MONITOR_NAME);
+        circle = (SleepCircle) intent.getSerializableExtra("Sleep Circle");
+
+        name = circle.getCircleName();
+        circle_id = circle.getCircleId();
+        user1 = circle.getUser1();
+        user2 = circle.getUser2();
+        userName2 = circle.secondUserName;
+        monitorIp = circle.getMonitorIp();
+        monitorName = circle.getMonitorName();
 
         start_sleep_session.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
                 Intent intent = new Intent(SleepCircleDetailsActivity.this, NewSleepSessionActivity.class);
-                intent.putExtra(CIRCLE_NAME, name);
-
+                //intent.putExtra(, name);
+                intent.putExtra(CIRCLE, circle);
                 startActivity(intent);
             }
         });
 
 
-
-        /*
-
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        final String uid = user.getUid();
-
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference().child("MainUsers");
-        database.addListenerForSingleValueEvent(new ValueEventListener() {
-
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-
-                    MainUser mainUser = snapshot.getValue(MainUser.class);
-                    if(mainUser.getUid() == uid){
-                        userName1 = mainUser.getUserName();
-                    }else{
-                        //TODO: handle no user
-                    }
-
-                } // TODO HANDLE ELSE CASE: NO EMAIL FOR USER 2
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                // TODO: Handle database error
-            }
-        });
-
-
-*/
 
 
 
@@ -246,6 +217,9 @@ public class SleepCircleDetailsActivity extends AppCompatActivity {
 
                                     overridePendingTransition(0, 0);
                                     Intent intent = new Intent(getApplicationContext(), SleepCircleDetailsActivity.class);
+                                    intent.putExtra(CIRCLE, circle);
+                                    // TODO: check what happened when a monitor is add here and the page reloaded with the old circle object
+                                    /*
                                     intent.putExtra(CIRCLE_NAME, name);
                                     intent.putExtra(CIRCLE_ID, circle_id);
                                     intent.putExtra(USER_1, user1);
@@ -254,6 +228,7 @@ public class SleepCircleDetailsActivity extends AppCompatActivity {
                                     intent.putExtra(USERNAME_1, userName1);
                                     intent.putExtra(USERNAME_2, userName2);
                                     intent.putExtra(MONITOR_NAME, monitorName);
+                                    */
 
                                     startActivity(intent);
                                     overridePendingTransition(0, 0);

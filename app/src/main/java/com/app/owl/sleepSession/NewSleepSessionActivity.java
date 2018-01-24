@@ -14,13 +14,15 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import com.app.owl.OnGetDataListener;
 import com.app.owl.R;
 import com.app.owl.sleepCircle.SleepCircle;
-import com.app.owl.sleepCircle.SleepCircleList;
-import com.app.owl.sleepCircle.SleepCirclesActivity;
 import com.app.owl.soundDetector.SoundDetectorActivity;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -35,28 +37,37 @@ import java.util.List;
 
 public class NewSleepSessionActivity extends AppCompatActivity {
 
-    String TAG = "NewSleepSessionActivity", CIRCLE_NAME = "circle name";
+    String TAG = "NewSleepSessionActivity", CIRCLE = "Sleep Circle", SLEEP_SESSION = "Sleep Session";
     String selected = "";
-    String uid, ip, circleName, selection, circleMonitorIp, clickedCircleName;
+    String ip, circleName, selection, circleMonitorIp, clickedCircleName, userUid;
     InetAddress inetAddress;
     Spinner chooseCirclespinner;
-    Button startSleepBtn, startMonitoringBtn;
-    SleepCircleList sleepCircleList; // The adapter
-    ArrayList<SleepCircle> list;
+    Button startMonitoringBtn;
     DatabaseReference database;
     ConnectivityManager connManager;
     NetworkInfo myWifi;
     WifiManager wifiManager;
-    Boolean monitorDevice;
     SleepCircle circle;
+    SleepSession sleepSession;
+    FirebaseUser user;
+    String firstResponder, secondResponder;
+    TextView sleepSessionInfo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_sleep_session);
 
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        userUid = user.getUid();
+        Log.d(TAG, "userUid = " + userUid);
+
+
         Intent intent = getIntent();
-        clickedCircleName = intent.getStringExtra(SleepCirclesActivity.CIRCLE_NAME);
+        SleepCircle circleFromIntent = (SleepCircle) intent.getSerializableExtra("Sleep Circle");
+        clickedCircleName = circleFromIntent.getCircleName();
+
+        sleepSessionInfo = findViewById(R.id.new_sleep_session_info);
 
         connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         myWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
@@ -89,24 +100,34 @@ public class NewSleepSessionActivity extends AppCompatActivity {
         chooseCirclespinner = findViewById(R.id.chooseCirclespinner);
 
 
-        database = FirebaseDatabase.getInstance().getReference().child("SleepCircles");
+        database = FirebaseDatabase.getInstance().getReference("MainUsers/"+userUid+"/circles/");
+
+        final List<String> sleepCircles = new ArrayList<String>();
 
         database.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
-                final List<String> sleepCircles = new ArrayList<String>();
+                Log.d(TAG, "chooseCirclespinner, dataSnapshot = " + dataSnapshot );
 
-                for (DataSnapshot sleepCircleSnapshot : dataSnapshot.getChildren()) {
-                    String circleName = sleepCircleSnapshot.child("circleName").getValue(String.class);
+                for (DataSnapshot circleSnapshot : dataSnapshot.getChildren()) {
+                    Log.d(TAG, "chooseCirclespinner, circleSnapshot = " + circleSnapshot);
+                    SleepCircle circle = circleSnapshot.getValue(SleepCircle.class);
+
+
+                    String circleName = circle.getCircleName();
+                    Log.d(TAG, "circleName = " + circleName);
                     sleepCircles.add(circleName);
+
+                    ArrayAdapter<String> sleepCircleAdapter = new ArrayAdapter<String>(NewSleepSessionActivity.this, android.R.layout.simple_spinner_item, sleepCircles);
+                    sleepCircleAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    chooseCirclespinner.setAdapter(sleepCircleAdapter);
+                    if (clickedCircleName != null){
+                        selectSpinnerValue(chooseCirclespinner, clickedCircleName);
+                    }
+
                 }
 
-
-                ArrayAdapter<String> sleepCircleAdapter = new ArrayAdapter<String>(NewSleepSessionActivity.this, android.R.layout.simple_spinner_item, sleepCircles);
-                sleepCircleAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                chooseCirclespinner.setAdapter(sleepCircleAdapter);
-                selectSpinnerValue(chooseCirclespinner, clickedCircleName);
             }
 
             @Override
@@ -121,13 +142,69 @@ public class NewSleepSessionActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 selected = String.valueOf(chooseCirclespinner.getSelectedItem());
+                Log.d(TAG, "selected = " + selected );
 
-                Intent intent = new Intent(NewSleepSessionActivity.this, SoundDetectorActivity.class);
-                intent.putExtra(CIRCLE_NAME, circle.getCircleId());
-                startActivity(intent);
+                // TODO: find the sleepCircle using the circle name (clickedCircleName)
+                DatabaseReference sleepCircleDatabase = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("circles").child(selected);
+                database = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions");
+                firstResponder = userUid;
+                secondResponder = "";
+
+                Log.d(TAG, "sleepCircleDatabase: " + sleepCircleDatabase);
+
+                findCircle(selected, sleepCircleDatabase, new OnGetDataListener() {
+                    @Override
+                    public void onSuccess(DataSnapshot dataSnapshot) {
+                        SleepCircle circle = dataSnapshot.getValue(SleepCircle.class);
+
+                        Log.d(TAG, "firstResponder: " + firstResponder);
+                        Log.d(TAG, "circle.getUser1(): " + circle.getUser1());
+                        Log.d(TAG, "circle.getUser2(): " + circle.getUser2());
+
+                        if(firstResponder.equals(circle.getUser1())){
+                            secondResponder = circle.getUser2();
+                        }else{
+                            secondResponder = circle.getUser1();
+                        }
+
+                        Log.d(TAG, "secondResponder: " + secondResponder);
+                        String sleepSessionId =  database.push().getKey();
+
+                        sleepSession = new SleepSession(selected, sleepSessionId, firstResponder, secondResponder);
+
+                        database.child(sleepSession.getStart_time()).setValue(sleepSession);
+
+                        Intent intent = new Intent(NewSleepSessionActivity.this, SoundDetectorActivity.class);
+                        intent.putExtra(CIRCLE, circle);
+                        intent.putExtra(SLEEP_SESSION, sleepSession);
+
+                        startActivity(intent);
+
+                        Toast.makeText(NewSleepSessionActivity.this, "Starting sleep session", Toast.LENGTH_SHORT).show();
+
+                    }
+                    @Override
+                    public void onStart() {
+                        //when starting
+                        Log.d("ONSTART", "Started");
+                    }
+
+                    @Override
+                    public void onFailure() {
+                        Log.d("onFailure", "Failed");
+                    }
+                });
+
+
+
+
+
 
             }
         });
+
+        // TODO: Can ony start session from the monitoring device
+        /*
         startSleepBtn = findViewById(R.id.start_sleep_btn);
         startSleepBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -141,13 +218,10 @@ public class NewSleepSessionActivity extends AppCompatActivity {
 
             }
         });
+        startSleepBtn.setVisibility(View.INVISIBLE);
+        */
 
         startMonitoringBtn.setVisibility(View.INVISIBLE);
-        startSleepBtn.setVisibility(View.INVISIBLE);
-
-
-
-        uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         chooseCirclespinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -155,18 +229,22 @@ public class NewSleepSessionActivity extends AppCompatActivity {
 
                 Log.d(TAG, "new item selected");
                 selection = String.valueOf(chooseCirclespinner.getSelectedItem());
-                database = FirebaseDatabase.getInstance().getReference("MainUsers/"+uid+"/circles/");
+                database = FirebaseDatabase.getInstance().getReference("MainUsers/"+userUid+"/circles/");
                 Log.d(TAG, "database: " + database);
 
                 startMonitoringBtn.setVisibility(View.INVISIBLE);
+                sleepSessionInfo.setVisibility(View.VISIBLE);
                 // set startSleepBtn visible
-                startSleepBtn.setVisibility(View.VISIBLE);
+                // startSleepBtn.setVisibility(View.VISIBLE);
+
+
 
                 database.addChildEventListener(new ChildEventListener() {
                     @Override
                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                         circle = dataSnapshot.getValue(SleepCircle.class);
 
+                        // TODO make circleName private to this method?
                         circleName = circle.getCircleName();
                         circleMonitorIp = circle.getMonitorIp();
 
@@ -174,7 +252,8 @@ public class NewSleepSessionActivity extends AppCompatActivity {
                             Log.d(TAG, "Selected circle device and current device are the same");
                             startMonitoringBtn.setVisibility(View.VISIBLE);
                             // set startSleepBtn invisible
-                            startSleepBtn.setVisibility(View.INVISIBLE);
+                            //startSleepBtn.setVisibility(View.INVISIBLE);
+                            sleepSessionInfo.setVisibility(View.INVISIBLE);
 
                         }
                     }
@@ -210,7 +289,8 @@ public class NewSleepSessionActivity extends AppCompatActivity {
 
                 Log.d(TAG, "Nothing selected");
                 startMonitoringBtn.setVisibility(View.INVISIBLE);
-                startSleepBtn.setVisibility(View.INVISIBLE);
+                sleepSessionInfo.setVisibility(View.VISIBLE);
+                //startSleepBtn.setVisibility(View.INVISIBLE);
 
             }
 
@@ -229,88 +309,58 @@ public class NewSleepSessionActivity extends AppCompatActivity {
         // add Start button. Greyed-out is users not online / normal if everyone is online
 
 
-        // OnClick: call Make New Session
+        // TODO OnClick: call Make New Session
 
-        // Create new session with both users uid and usernames and with the monitor uid and name
+        // TODO Create new session with both users uid and usernames and with the monitor uid and name
         // add start date and time
 
-        // Make the monitor the alert giver
+        // TODO Make the monitor the alert giver
 
-        // new intent: open On Going sleep session activity // open On Going monitoring activity on the monitor
+        // TODO new intent: open On Going sleep session activity // open On Going monitoring activity on the monitor
+
+
 
 
     }
+
+    public void findCircle(final String localCircleName, DatabaseReference ref, final OnGetDataListener listener) {
+        listener.onStart();
+        Log.d(TAG, "inside findCircle, ref = " + ref);
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                SleepCircle circle1 = dataSnapshot.getValue(SleepCircle.class);
+                if (circle1.getCircleName().equals(localCircleName)){
+                    listener.onSuccess(dataSnapshot);
+
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                listener.onFailure();
+            }
+        });
+
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
-        /*
-        monitorDevice = false;
-        uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        database = FirebaseDatabase.getInstance().getReference().child("MainUser").child(uid).child("SleepCircles");
-        chooseCirclespinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                try {
-                    inetAddress = InetAddress.getLocalHost();
-                    ip = String.valueOf(inetAddress);
-
-                    database.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-
-                                SleepCircle circle = snapshot.getValue(SleepCircle .class);
-
-                                if(circle.getMonitorIp() == ip){
-                                    monitorDevice = true;
-                                }
-
-                            }
-                            if(monitorDevice){
-                                //set startMonitoringBtn visible
-                                startMonitoringBtn.setVisibility(View.VISIBLE);
-                                // set startSleepBtn invisible
-                                startSleepBtn.setVisibility(View.INVISIBLE);
-                            }else{
-                                // JOIN SLEEP SESSION and or start monitpring on monitor device
-                                //set startMonitoringBtn invisible
-                                startMonitoringBtn.setVisibility(View.INVISIBLE);
-                                // set startSleepBtn visible
-                                startSleepBtn.setVisibility(View.INVISIBLE);
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                        }
-                    });
-
-
-                } catch (UnknownHostException e) {
-                    System.out.println("I'm sorry. I don't know my own address. Connect to wifi, maybe?");
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parentView) {
-
-            }
-
-        });
-        */
     }
 
     private void selectSpinnerValue(Spinner spinner, String myString)
     {
         Log.d(TAG, "Inside selectSpinnerValue");
         for(int i = 0; i < spinner.getCount(); i++){
-            if(spinner.getItemAtPosition(i).toString().equals(myString)){
+            if(String.valueOf(spinner.getItemAtPosition(i)).equals(myString)){
                 spinner.setSelection(i);
                 Log.d(TAG, "i:" + i);
                 break;
             }
         }
+        spinner.setSelection(0);
     }
 }
 

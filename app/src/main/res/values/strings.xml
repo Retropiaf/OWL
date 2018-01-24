@@ -62,11 +62,13 @@
     <!-- Sleep Session -->
     <string name="start_sleep">Start Sleep Session</string>
     <string name="start_monitoring">Start Monitoring</string>
+    <string name="info_sleep_session">To start a sleep session, select a sleep circle for which the current device is registered as a monitor.</string>
 
     <!-- Monitor -->
     <string name="prompt_monitor_name">Enter a name for this device</string>
     <string name="end_session">End Sleep Session</string>
     <string name="end_alert">End Alert</string>
+    <string name="snooze">Snooze</string>
 
 
 </resources>

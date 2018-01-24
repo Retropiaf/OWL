@@ -31,7 +31,7 @@ public class SleepCirclesActivity extends AppCompatActivity {
 
     ArrayList<SleepCircle> list;
 
-    String TAG = "SleepCirclesActivity";
+    String TAG = "SleepCirclesActivity", CIRCLE = "Sleep Circle";
 
     public static final String CIRCLE_NAME = "circle name";
     public static final String CIRCLE_ID = "circle id";
@@ -143,6 +143,8 @@ public class SleepCirclesActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 SleepCircle circle = sleepCircleList.getItem(i);
                 Intent intent = new Intent(getApplicationContext(), SleepCircleDetailsActivity.class);
+                intent.putExtra(CIRCLE, circle);
+                /*
                 intent.putExtra(CIRCLE_NAME, circle.getCircleName());
                 intent.putExtra(CIRCLE_ID, circle.getCircleId());
                 intent.putExtra(USER_1, circle.getUser1());
@@ -150,6 +152,7 @@ public class SleepCirclesActivity extends AppCompatActivity {
                 intent.putExtra(USERNAME_2, circle.secondUserName);
                 intent.putExtra(MONITOR, circle.getMonitorIp());
                 intent.putExtra(MONITOR_NAME, circle.getMonitorName());
+                */
 
                 startActivity(intent);
             }
@@ -253,6 +256,8 @@ public class SleepCirclesActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 SleepCircle circle = sleepCircleList.getItem(i);
                 Intent intent = new Intent(getApplicationContext(), SleepCircleDetailsActivity.class);
+                intent.putExtra(CIRCLE, circle);
+                /*
                 intent.putExtra(CIRCLE_NAME, circle.getCircleName());
                 intent.putExtra(CIRCLE_ID, circle.getCircleId());
                 intent.putExtra(USER_1, circle.getUser1());
@@ -260,6 +265,7 @@ public class SleepCirclesActivity extends AppCompatActivity {
                 intent.putExtra(USERNAME_2, circle.secondUserName);
                 intent.putExtra(MONITOR, circle.getMonitorIp());
                 intent.putExtra(MONITOR_NAME, circle.getMonitorName());
+                */
 
                 startActivity(intent);
             }

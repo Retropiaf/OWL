@@ -64,33 +64,6 @@ public class AddSleepCircleActivity extends AppCompatActivity {
 
         Log.d(TAG, "In onCreate");
 
-///////////////////////////////////////// !!!!!!
-        /*
-        database = FirebaseDatabase.getInstance().getReference();
-        database = database.child("MainUsers").child("KMrFhYzQU3WwqJC0LwVCZxKZzQ13").child("circles").child("-L3V5Z8tKP2QtHbE4Laj");
-        Log.d(TAG, "Testing callback: database = " + database);
-
-        readData(database, new OnGetDataListener() {
-            @Override
-            public void onSuccess(DataSnapshot dataSnapshot) {
-
-                SleepCircle circle = dataSnapshot.getValue(SleepCircle.class);
-                Log.d(TAG, "Testing callback: " + circle.getCircleName());
-                circleName = circle.getCircleName();
-
-
-            }
-            @Override
-            public void onStart() {
-            }
-
-            @Override
-            public void onFailure() {
-                Log.d("onFailure", "Failed");
-            }
-        });
-
-*/
         editCircleName = (EditText) findViewById(R.id.editCircleName);
 
         editSecondUser = (EditText) findViewById(R.id.second_user_email);
@@ -285,6 +258,7 @@ public class AddSleepCircleActivity extends AppCompatActivity {
     }
 
     private void addCircleToDatabase(SleepCircle circle) {
+        /*
         Log.d(TAG, "addCircleToDatabase");
 
         database = FirebaseDatabase.getInstance().getReference("SleepCircles");
@@ -293,10 +267,12 @@ public class AddSleepCircleActivity extends AppCompatActivity {
 
         circle.setCircleId(sleepCircleId);
 
+
         database.child(circleName).setValue(circle);
 
         Toast.makeText(AddSleepCircleActivity.this, "Adding sleep circle to database", Toast.LENGTH_SHORT).show();
         addCircleToUsers();
+        */
 
 
     }
@@ -319,7 +295,7 @@ public class AddSleepCircleActivity extends AppCompatActivity {
 
         Log.d(TAG, String.valueOf(database));
 
-        database.child(userKey).child("circles").child(sleepCircleId).setValue(circle);
+        database.child(userKey).child("circles").child(circleName).setValue(circle);
 
     }
 

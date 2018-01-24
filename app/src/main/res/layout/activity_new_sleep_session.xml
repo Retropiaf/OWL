@@ -14,11 +14,11 @@
         tools:layout_editor_absoluteX="8dp"
         tools:layout_editor_absoluteY="6dp" />
 
-    <Button
-        android:id="@+id/start_sleep_btn"
+    <TextView
+        android:id="@+id/new_sleep_session_info"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/start_sleep" />
+        android:text="@string/info_sleep_session" />
 
     <Button
         android:id="@+id/start_monitoring_btn"

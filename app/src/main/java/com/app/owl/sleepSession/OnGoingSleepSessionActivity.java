@@ -19,6 +19,16 @@ public class OnGoingSleepSessionActivity extends AppCompatActivity {
         // Change status of alert to oven
         // change name ef the next alert handler
 
+        // TODO: on the responder's side, every second check if you are the current responder.
+        // if you are the current responder, check if there is an ongoing alert
+        // if there is an ongoing alert, play alarm.
+        // if alert redirected == true, do something special
+        // if no answer from responder after 30s and alertRedirected == false, change current responder, set alertRedirected = true and stop alarm.
+        // if no answer from responder after 30s and alertRedirected == true, set speaker == true
+        // if speaker == true, activate speaker alarm on both devices.
+        // if no answer after 30s, end alarm, set alertAnswered = false, alert.endTime to now and alertEnded = true;
+        // if responder click the "checking alert" button, set answer alertAnswered = true
+
 
 
 

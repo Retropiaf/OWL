@@ -18,4 +18,27 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/end_alert" />
+
+    <TextView
+        android:id="@+id/snooze_clock"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="" />
+
+    <TextView
+        android:id="@+id/time_left"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="" />
+
+    <Button
+        android:id="@+id/snooze_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/snooze" />
+
+    <Spinner
+        android:id="@+id/snooze_duration"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 </android.widget.LinearLayout>

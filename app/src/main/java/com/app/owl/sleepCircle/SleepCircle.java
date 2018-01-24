@@ -4,10 +4,12 @@ import android.util.Log;
 
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.io.Serializable;
+
 /**
  * Created by Christiane on 1/17/18.
  */
-public class SleepCircle {
+public class SleepCircle implements Serializable {
     String user1;
     String user2;
     String secondUserName;
@@ -37,13 +39,8 @@ public class SleepCircle {
 
     public String getCircleName(){ return circleName;}
 
-
     public String getCircleId() {
         return circleId;
-    }
-
-    public void setCircleId (String id) {
-        this.circleId = id;
     }
 
     public String getUser1() {
@@ -59,6 +56,29 @@ public class SleepCircle {
     }
     public String getMonitorName() {
         return monitorName;
+    }
+
+
+    public void setUser1(String user1) {
+        this.user1 = user1;
+    }
+    public void setUser2(String user2) {
+        this.user2 = user2;
+    }
+    public void setSecondUserName(String secondUserName) {
+        this.secondUserName = secondUserName;
+    }
+    public void setCircleName(String circleName) {
+        this.circleName = circleName;
+    }
+    public void setCircleId (String id) {
+        this.circleId = id;
+    }
+    public void setMonitorIp(String monitorIp) {
+        this.monitorIp = monitorIp;
+    }
+    public void setMonitorName(String monitorName) {
+        this.monitorName = monitorName;
     }
 
 
