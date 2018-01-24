@@ -46,15 +46,13 @@ public class SoundDetectorActivity extends AppCompatActivity {
     public static Button endSession, endAlert, snoozeBtn;
     DatabaseReference database, sleepSessionDatabase;
     String circleName, selection, userUid, activityCurrentResponder;
-    TextView snoozeClock, timeLeft;
-    Spinner snoozeDuration;
+    public static TextView snoozeClock, timeLeft;
+    public static Spinner snoozeDuration;
     SleepCircle circle;
     SleepSession sleepSession;
     int seconds, minutes;
     FirebaseUser user;
-    Thread t1;
     Boolean onGoingAlert;
-    ToggleListener listener;
 
 
     @Override
@@ -76,39 +74,45 @@ public class SoundDetectorActivity extends AppCompatActivity {
         addItemsOnSpinner(snoozeDuration);
         snoozeDuration.setVisibility(View.INVISIBLE);
 
-
-
-        snoozeBtn = findViewById(R.id.snooze_btn);
-        snoozeBtn.setVisibility(View.INVISIBLE);
-        snoozeBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                snoozeBtn.setVisibility(View.INVISIBLE);
-                snoozeClock.setVisibility(View.INVISIBLE);
-                snoozeTimer.cancel();
-                selection = String.valueOf(snoozeDuration.getSelectedItem().toString());
-                snooze(Integer.parseInt(selection));
-            }
-        });
-
         snoozeClock = findViewById(R.id.snooze_clock);
         snoozeClock.setVisibility(View.INVISIBLE);
 
         timeLeft = findViewById(R.id.time_left);
         timeLeft.setVisibility(View.INVISIBLE);
 
+        snoozeBtn = findViewById(R.id.snooze_btn);
+        snoozeBtn.setVisibility(View.INVISIBLE);
+
+        snoozeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                snoozeBtn.setVisibility(View.INVISIBLE); // Hide snooze button
+                snoozeClock.setVisibility(View.INVISIBLE); // Hide countdown to click snooze
+                snoozeDuration.setVisibility(View.INVISIBLE); // Hide duration spinner
+                snoozeTimer.cancel();
+                snoozeTimer.purge();
+                clockTimer.cancel();
+                clockTimer.purge();
+                selection = String.valueOf(snoozeDuration.getSelectedItem().toString());
+                snooze(Integer.parseInt(selection));
+            }
+        });
+
+
+
         endAlert = findViewById(R.id.end_alert_btn);
         endAlert.setVisibility(View.INVISIBLE);
         endAlert.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 endSession.setVisibility(View.VISIBLE);
                 endAlert.setVisibility(View.INVISIBLE);
-                snoozeDecide();
+                alertAnsweredTimer.cancel();
+                alertAnsweredTimer.purge();
+                checkAlertAnsweredTask.cancel();
                 resolveAlert();
-                soundCapture.start();
-                startDetectingSounds();
+                snoozeDecide();
+
             }
         });
 
@@ -223,7 +227,7 @@ public class SoundDetectorActivity extends AppCompatActivity {
     public void declareAlert(){
         Log.d(TAG, "Inside declareAlert - HideEndSession() Should get called ");
         new HideEndSession().execute();
-
+        soundCapture.stop();
         stopDetectingSounds();
         //t1.start();
 
@@ -274,6 +278,8 @@ public class SoundDetectorActivity extends AppCompatActivity {
             @Override
             public void run() {
 
+                // TODO: Check that update works
+
                 Log.d(TAG, "30second passed: closing the alert and starting sound detection again");
                 resolveAlert();
 
@@ -313,6 +319,7 @@ public class SoundDetectorActivity extends AppCompatActivity {
                 AlertHandler.updateAlertBool(database, path, false);
 
                 Log.d(TAG, "call startDetectingSounds();");
+                soundCapture.start();
                 startDetectingSounds();
             }
         };
@@ -326,13 +333,21 @@ public class SoundDetectorActivity extends AppCompatActivity {
                 .setMessage("Do you want to set a delay before next alert?")
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
+                        Log.d(TAG, "Inside snoozeDecide - Starting 30s timer");
+                        new ShowSnoozeDuration().execute(); // Show snooze duration spiner
+                        new ShowSnoozeBtn().execute(); // Show snooze button
+                        new ShowTimeLeft().execute(); // Show snooze time left countdown
+
                         snoozeTimer = new Timer();
                         snoozeTask = new TimerTask() {
                             @Override
                             public void run() {
-                                snoozeBtn.setVisibility(View.INVISIBLE);
-                                snoozeClock.setVisibility(View.INVISIBLE);
+                                Log.d(TAG, "Inside snoozeDecide - 30s timer is up. Starting sound detection soon");
+                                new HideSnoozeDuration().execute();
+                                new HideSnoozeBtn().execute();
+                                new HideSnoozeClock().execute();
                                 clockTimer.cancel();
+                                soundCapture.start();
                                 startDetectingSounds();
                             }
                         };
@@ -341,32 +356,47 @@ public class SoundDetectorActivity extends AppCompatActivity {
                         clockTask = new TimerTask() {
                             @Override
                             public void run() {
-                                snoozeClock.setText(seconds);
+                                Log.d(TAG, "Inside snoozeDecide - Should log the countdown every seconds:" + seconds);
+                                new SetTextSnoozeClock().execute(); // Update time left to click snooze button
                                 seconds -= 1;
                             }
                         };
+
+
+
                         snoozeTimer.schedule(snoozeTask, 32000);
                         seconds = 30;
-                        snoozeClock.setVisibility(View.VISIBLE);
                         clockTimer.schedule(clockTask, 0, 1000);
+
+
 
 
                     }})
                 .setNegativeButton("No", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
+                        Log.d(TAG, "Inside snoozeDecide - You said no to snoozing. sound detection will start soon");
+
+                        soundCapture.start();
                         startDetectingSounds();
                     }}).show();
     }
 
     public void snooze(int snoozeDelay){
-        // take is the value chosen and start a timer with that period of time
+        Log.d(TAG, "Inside snooze - Snoozing for the chosen duration: " + snoozeDelay + " minutes");
+
+        // TODO: Check that snoozing work
+
         //when timer end, call startDetectingSounds()
+        new ShowTimeLeft().execute(); // Show snooze time left countdown
+        new SetTextTimeLeft().execute(String.valueOf(seconds)); // Test this
         snoozeTimer = new Timer();
         snoozeTask = new TimerTask() {
             @Override
             public void run() {
-                timeLeft.setVisibility(View.INVISIBLE); // make invisible
+                Log.d(TAG, "Inside snooze - Snoozer is done, time to go back to monitoring. sound detection will resume soon");
+                new HideTimeLeft().execute();
                 snoozeTimeLeft.cancel();
+                soundCapture.start();
                 startDetectingSounds();
             }
         };
@@ -375,19 +405,19 @@ public class SoundDetectorActivity extends AppCompatActivity {
         clockTask = new TimerTask() {
             @Override
             public void run() {
-
-                timeLeft.setText(minutes);
+                Log.d(TAG, "Inside snooze - This should log the snoozing time left every minute. Time left: " + minutes + " minutes");
+                new SetTextTimeLeft().execute(String.valueOf(seconds)); // Update snooze time left countdown TODO: not working, not showing count down
                 minutes -= 1;
             }
         };
         minutes = snoozeDelay; // snoozeDelay is in minutes
         int delay = minutes * 60 * 1000 + 200;
         snoozeTimer.schedule(snoozeTask, delay);
-        snoozeClock.setVisibility(View.VISIBLE);
         snoozeTimeLeft.schedule(clockTask, 0, 60000);
     }
 
     public void stopDetectingSounds(){
+        Log.d(TAG, "Inside snooze - stopDetectingSounds");
         timer.cancel();
     }
 
@@ -405,6 +435,8 @@ public class SoundDetectorActivity extends AppCompatActivity {
 
     // TODO this could be a Java class accessible to the whole program
     public void updateAlertEndDb(String time){
+
+        // TODO: Check that update works
         DatabaseReference database = FirebaseDatabase.getInstance().getReference();
         Map<String, Object> childUpdates = new HashMap<>();
         childUpdates.put("/MainUsers/" + userUid + "/SleepSessions/" + sleepSession.getStart_time() + "/Alerts/" + alert.getStartTime() + "/endTime/", time);
@@ -425,6 +457,7 @@ public class SoundDetectorActivity extends AppCompatActivity {
     // add items into spinner dynamically
     public void addItemsOnSpinner(Spinner spinner) {
         List<String> list = new ArrayList<>();
+        list.add("2");
         list.add("10");
         list.add("15");
         list.add("20");
