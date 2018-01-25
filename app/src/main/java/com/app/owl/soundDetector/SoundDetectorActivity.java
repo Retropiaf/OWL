@@ -73,9 +73,10 @@ public class SoundDetectorActivity extends AppCompatActivity {
 
 
 
-        Intent intent = getIntent();
-        circle = (SleepCircle) intent.getSerializableExtra("Sleep Circle");
-        sleepSession = (SleepSession) intent.getSerializableExtra("Sleep Session");
+        Intent intentFromNewSession = getIntent();
+        circle = (SleepCircle) intentFromNewSession.getSerializableExtra("Sleep Circle");
+        sleepSession = (SleepSession) intentFromNewSession.getSerializableExtra("Sleep Session");
+        Log.d(TAG, "The sleep session received as extra as timestamp = " + sleepSession.getTimestamp());
         activityCurrentResponder =  sleepSession.getFirstResponder();
 
         snoozeDuration = findViewById(R.id.snooze_duration);
@@ -128,6 +129,7 @@ public class SoundDetectorActivity extends AppCompatActivity {
         endSession.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Log.d(TAG, "Someone clicked end session button");
                 if(timer != null){
                     timer.cancel();
                     timer.purge();
@@ -141,15 +143,18 @@ public class SoundDetectorActivity extends AppCompatActivity {
                 udpdateSessionEndTime(timeNow, circle.getUser1());
                 udpdateSessionEndTime(timeNow, circle.getUser2());
 
-                Intent intent = new Intent(SoundDetectorActivity.this, UserMainActivity.class);
-                startActivity(intent);
+                Log.d(TAG, "Redirection to welcome page");
+                Intent intentReturnToWelcome = new Intent(SoundDetectorActivity.this, UserMainActivity.class);
+                startActivity(intentReturnToWelcome);
             }
         });
 
-        Query query = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions");
-        query.addValueEventListener(new ValueEventListener() {
+        //Query query = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions");
+        Query query = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions").orderByChild("timestamp").limitToLast(1);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+
                 Log.d(TAG, "Change happened to the sleep session");
                 Log.d(TAG, "dataSnapshot: " + dataSnapshot);
                 for(DataSnapshot sessionSnapshot : dataSnapshot.getChildren()){
@@ -157,8 +162,22 @@ public class SoundDetectorActivity extends AppCompatActivity {
 
                     SleepSession localSleepSession = sessionSnapshot.getValue(SleepSession.class);
 
-                    if(localSleepSession.getStartTime().equals(sleepSession.getStartTime()) && !localSleepSession.getEndTime().equals("")){
-                        Log.d(TAG, "Someone ended the session from a phone. Probably by ignoring the new Session notification. Time to shutDown");
+                    if(localSleepSession.getNotificationIgnored()){
+                        Log.d(TAG, "Someone ended the session from a phone. ");
+
+                        Log.d(TAG, "localSleepSession.getStartTime(): " + localSleepSession.getStartTime());
+                        Log.d(TAG, "sleepSession.getStartTime(): " + sleepSession.getStartTime());
+                        Log.d(TAG, "localSleepSession.getNotificationIgnored(): " + localSleepSession.getNotificationIgnored());
+                        Log.d(TAG, "localSleepSession.getTimestamp(): " + localSleepSession.getTimestamp());
+                        Log.d(TAG, "sleepSession.getTimestamp(): " + sleepSession.getTimestamp());
+
+                        database = FirebaseDatabase.getInstance().getReference();
+                        Map<String, Object> childUpdates = new HashMap<>();
+                        String path1 = "/MainUsers/" + sleepSession.getFirstResponder() + "/insideSession";
+                        String path2 = "/MainUsers/" + sleepSession.getFirstResponder() + "/insideSession";
+                        childUpdates.put(path1, false);
+                        childUpdates.put(path2, false);
+                        database.updateChildren(childUpdates);
 
                         if(timer != null){
                             timer.cancel();
@@ -170,11 +189,65 @@ public class SoundDetectorActivity extends AppCompatActivity {
                         udpdateUserOngoingSession(false, circle.getUser1());
                         udpdateUserOngoingSession(false, circle.getUser2());
 
-                        Intent intent = new Intent(SoundDetectorActivity.this, UserMainActivity.class);
-                        startActivity(intent);
+
+                        Log.d(TAG, "Redirection to welcome page");
+                        Intent leaveIntent = new Intent(SoundDetectorActivity.this, UserMainActivity.class);
+                        startActivity(leaveIntent);
+                        break;
                     }
                 }
 
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+
+        // TODO: solve onGoingSession flag problem(not nonified when need to quit a session, only keep this method or the previous one
+        Query query2 = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions").child("onGoingSession");
+        query2.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d(TAG, "inside query2");
+                Log.d(TAG, "dataSnapshot " + dataSnapshot);
+                for(DataSnapshot innerSnapshot : dataSnapshot.getChildren()){
+                    Log.d(TAG, "innerSnapshot" + innerSnapshot);
+                }
+                /*
+                Boolean isOngoing = dataSnapshot.getValue(Boolean.class);
+                Log.d(TAG, "isOngoing: " + isOngoing);
+
+
+                if(!isOngoing){
+                    Log.d(TAG, "inside if loop of query2");
+                    database = FirebaseDatabase.getInstance().getReference();
+                    Map<String, Object> childUpdates = new HashMap<>();
+                    String path1 = "/MainUsers/" + sleepSession.getFirstResponder() + "/insideSession";
+                    String path2 = "/MainUsers/" + sleepSession.getFirstResponder() + "/insideSession";
+                    childUpdates.put(path1, false);
+                    childUpdates.put(path2, false);
+                    database.updateChildren(childUpdates);
+
+                    if(timer != null){
+                        timer.cancel();
+                        timer.purge();
+                    }
+                    soundCapture.stop();
+                    updateOnGoingAlertDb(false,  circle.getUser1());
+                    updateOnGoingAlertDb(false,  circle.getUser2());
+                    udpdateUserOngoingSession(false, circle.getUser1());
+                    udpdateUserOngoingSession(false, circle.getUser2());
+
+
+                    Log.d(TAG, "Redirection to welcome page");
+                    Intent leaveIntent = new Intent(SoundDetectorActivity.this, UserMainActivity.class);
+                    startActivity(leaveIntent);
+
+                }
+                */
             }
 
             @Override
@@ -600,6 +673,7 @@ public class SoundDetectorActivity extends AppCompatActivity {
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(dataAdapter);
     }
+
 
     /*
     public void toggleListener(final ToggleListener listener) {

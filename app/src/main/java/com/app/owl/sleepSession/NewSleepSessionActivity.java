@@ -1,5 +1,6 @@
 package com.app.owl.sleepSession;
 
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
@@ -199,25 +200,38 @@ public class NewSleepSessionActivity extends AppCompatActivity {
                                                 Log.d(TAG, "secondResponder: " + secondResponder);
                                                 String sleepSessionId =  database.push().getKey();
 
-                                                sleepSession = new SleepSession(selected, sleepSessionId, firstResponder, firstResponder, secondResponder);
+                                                SleepSession newSleepSession = new SleepSession(selected, sleepSessionId, firstResponder, firstResponder, secondResponder);
 
-                                                Log.d(TAG, "sleepSession.getTimestamp()" + sleepSession.getTimestamp());
+                                                Log.d(TAG, "newSleepSession.getTimestamp()" + newSleepSession.getTimestamp());
 
-                                                addSessionDb(firstResponder, sleepSession.getStartTime(), sleepSession);
-                                                addSessionDb(secondResponder, sleepSession.getStartTime(), sleepSession);
+                                                addSessionDb(firstResponder, newSleepSession.getStartTime(), newSleepSession);
+                                                addSessionDb(secondResponder, newSleepSession.getStartTime(), newSleepSession);
+
+                                                Log.d(TAG, "Before udpdateUserOngoingSession, firstResponder: " + firstResponder);
+                                                Log.d(TAG, "Before udpdateUserOngoingSession, firstResponder: " + secondResponder);
 
                                                 udpdateUserOngoingSession(true, firstResponder);
                                                 udpdateUserOngoingSession(true, secondResponder);
 
                                                 //TODO update MainUser with ongoingSleepSession = true
 
-                                                Intent intent = new Intent(NewSleepSessionActivity.this, SoundDetectorActivity.class);
-                                                intent.putExtra(CIRCLE, circle);
-                                                intent.putExtra(SLEEP_SESSION, sleepSession);
+                                                String timestampsString = String.valueOf(newSleepSession.getTimestamp());
+                                                int timestamInt = Integer.parseInt(timestampsString.substring(0, 8));
 
-                                                startActivity(intent);
+                                                Intent openDetectorIntent = new Intent(NewSleepSessionActivity.this, SoundDetectorActivity.class);
+                                                openDetectorIntent.putExtra(CIRCLE, circle);
+                                                openDetectorIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                                PendingIntent _pIntent = PendingIntent.getActivity(NewSleepSessionActivity.this, timestamInt, openDetectorIntent, PendingIntent.FLAG_ONE_SHOT);
+
+                                                Log.d(TAG, "The sleep session passed as extra as timestamp = " + newSleepSession.getTimestamp());
+
+                                                openDetectorIntent.putExtra(SLEEP_SESSION, newSleepSession);
 
                                                 Toast.makeText(NewSleepSessionActivity.this, "Starting sleep session", Toast.LENGTH_SHORT).show();
+
+                                                startActivity(openDetectorIntent);
+
+
 
                                             }else{
                                                 //  toast: user already has an ongoing session
@@ -443,6 +457,7 @@ public class NewSleepSessionActivity extends AppCompatActivity {
     }
 
     private void udpdateUserOngoingSession(Boolean isOngoing, String localUserUid){
+        Log.d(TAG, "Updating ongoing session to: " + isOngoing);
         database = FirebaseDatabase.getInstance().getReference();
 
         final String path = "/MainUsers/" + localUserUid + "/onGoingSession/";

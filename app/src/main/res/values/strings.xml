@@ -76,4 +76,8 @@
     <string name="ignore">Ignore</string>
     <string name="join">Join</string>
 
+
+    <!-- Bluetooth -->
+    <string name="search_devices">Search for devices</string>
+    <string name="turn_on">Turn your audio device on to make it findable.</string>
 </resources>

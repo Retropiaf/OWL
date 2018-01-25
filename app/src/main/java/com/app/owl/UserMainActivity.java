@@ -12,7 +12,7 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.app.owl.sleepCircle.SleepCirclesActivity;
-import com.app.owl.sleepSession.OnGoingSleepSessionActivity;
+import com.app.owl.sleepSession.ConnectAudioDeviceActivity;
 import com.app.owl.sleepSession.SleepSession;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -36,6 +36,7 @@ public class UserMainActivity extends AppCompatActivity {
     FirebaseUser user;
     String userUid;
     View notification;
+    LayoutInflater inflater;
 
     private static final String TAG = "UserMainActivity";
 
@@ -50,6 +51,8 @@ public class UserMainActivity extends AppCompatActivity {
         notification = null;
 
         pageLayout = (LinearLayout) findViewById(R.id.activity_user_main);
+        inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
 
         user = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -159,16 +162,26 @@ public class UserMainActivity extends AppCompatActivity {
                 if(localOnGoingSession && !localUser.getInsideSession()){
                     Log.d(TAG, "Session is ongoing and user haven't joined yet");
                     // show notification
-                    LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    notification = inflater.inflate(R.layout.new_session_notification, null);
-                    // Add the new row before the add field button.
-                    pageLayout.addView(notification, 0);
-                }else if(localOnGoingSession && notification != null){
-                    /*
+
+
+                    if(!(notification instanceof View)  || notification == null ){
+                        Log.d(TAG, "Notification was null or something similar");
+                        Log.d(TAG, "notification instanceof View: " + String.valueOf(notification instanceof View));
+
+                        Log.d(TAG, "notification instanceof View: " + String.valueOf(notification == null));
+                        notification = inflater.inflate(R.layout.new_session_notification, null);
+
+                        inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                        pageLayout.addView(notification, 0);
+                    }
+
+                }else if(!localOnGoingSession && (notification instanceof View) || notification != null){
+
                     pageLayout.removeView((View) notification.getParent());
+                    notification = null;
                     Log.d(TAG, "Removed alert notification");
                     // TODO: check if a notification was removed because of someone hitting the ignor button. if so show Toast
-                    */ // Being done lower
+
                 }
 
             }
@@ -200,14 +213,20 @@ public class UserMainActivity extends AppCompatActivity {
                         public void onSuccess(DataSnapshot dataSnapshot) {
                             MainUser localUser = dataSnapshot.getValue(MainUser.class);
                             String localUserName = localUser.getUserName();
-                            if(!localSleepSession.getNotificationIgnoredBy().equals(localUserName)){
+                            if(!localSleepSession.getNotificationIgnoredBy().equals(localUserName) && localSleepSession.getNotificationIgnored()){
 
                                 Log.d(TAG, "New SleepSession was ignored by the other user");
 
-                                pageLayout.removeView((View) notification.getParent());
-                                Log.d(TAG, "Removed alert notification");
-                                // TODO: check if a notification was removed because of someone hitting the ignor button. if so show Toast
-                                Toast.makeText(UserMainActivity.this, "Sleep Session was cancelled by " + localSleepSession.getNotificationIgnoredBy(), Toast.LENGTH_SHORT).show();
+                                if((notification instanceof View) || notification != null){
+
+                                    pageLayout.removeView((View) notification.getParent());
+                                    notification = null;
+                                    Log.d(TAG, "Removed alert notification");
+                                    // TODO: check if a notification was removed because of someone hitting the ignore button. if so show Toast
+                                    Toast.makeText(UserMainActivity.this, "Sleep Session was cancelled by " + localSleepSession.getNotificationIgnoredBy(), Toast.LENGTH_SHORT).show();
+                                }
+
+
                             }
                         }
                         @Override
@@ -237,6 +256,8 @@ public class UserMainActivity extends AppCompatActivity {
 
             }
         });
+
+
 
             // if onGoingSleepSession: add notification
             // else do nothing
@@ -350,7 +371,8 @@ public class UserMainActivity extends AppCompatActivity {
 
     public void onJoin(View v) {
         Log.d(TAG, "Someone clicked onJoin");
-        pageLayout.removeView((View) v.getParent());
+        if(notification != null){pageLayout.removeView((View) notification.getParent());
+            Log.d(TAG, "Removed alert notification");}
 
         DatabaseReference localDatabase = FirebaseDatabase.getInstance().getReference();
         String path = "/MainUsers/" + userUid + "/insideSession/";
@@ -360,7 +382,7 @@ public class UserMainActivity extends AppCompatActivity {
         // set MainUser insideSession = true
 
 
-        Intent intent = new Intent(UserMainActivity.this, OnGoingSleepSessionActivity.class);
+        Intent intent = new Intent(UserMainActivity.this, ConnectAudioDeviceActivity.class);
         startActivity(intent);
 
         // TODO change redirection toward connect to bluetooth device
@@ -368,15 +390,19 @@ public class UserMainActivity extends AppCompatActivity {
 
     public void onDelete(View v) {
         Log.d(TAG, "Someone clicked ignore");
+
         pageLayout.removeView((View) v.getParent());
+        Log.d(TAG, "Removed alert notification");
+
         notification = null;
+
         final String timeNow = String.valueOf(Calendar.getInstance().getTime());
 
         // find the sleep session
         // set notificationIgnored = true
         // set end time on sleep session
         Query query = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions").orderByChild("timestamp").limitToLast(1);
-        query.addValueEventListener(new ValueEventListener() {
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.d(TAG, "dataSnapshot" + dataSnapshot);
@@ -431,7 +457,7 @@ public class UserMainActivity extends AppCompatActivity {
                         public void onFailure() {}
                     });
 
-                    break;
+                    //break;
                 }
             }
 
