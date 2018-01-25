@@ -1,5 +1,9 @@
 package com.app.owl.soundDetector;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 /**
  * Created by Christiane on 1/17/18.
  */
@@ -14,6 +18,7 @@ public class Alert {
     private Boolean alertAnswered; // did a responder click the button on their phones
     private Boolean alertEnded;
     private Boolean speaker;
+    String timestamp;
 
     public Alert(){}
 
@@ -25,6 +30,7 @@ public class Alert {
         this.alertEnded = false;
         this.speaker = false;
         this.endTime = "";
+        this.timestamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss", Locale.US).format(new Date());
     }
 
     public String getFirstResponderId(){ return firstResponderId; }
@@ -36,6 +42,7 @@ public class Alert {
     public Boolean getAlertAnswered(){ return alertAnswered; }
     public Boolean getAlertEnded(){ return alertEnded; }
     public Boolean getSpeaker(){ return speaker; }
+    public String getTimestamp(){return timestamp;}
 
     public void setFirstResponderId(String responder){this.firstResponderId = responder;}
     public void setSecondResponderId(String responder){this.secondResponderId = responder;}
@@ -47,4 +54,5 @@ public class Alert {
     public void setAlertAnswered(Boolean bool){ this.alertAnswered = bool; }
     public void setAlertEnded(Boolean bool){ this.alertEnded = bool; }
     public void setSpeaker(Boolean bool){ this.speaker = bool; }
+    public void setTimestamp(){this.timestamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss", Locale.US).format(new Date());}
 }

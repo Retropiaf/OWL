@@ -22,8 +22,12 @@ import com.app.owl.sleepCircle.SleepCircle;
 import com.app.owl.sleepSession.SleepSession;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -61,10 +65,13 @@ public class SoundDetectorActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sound_detector);
 
-
-
         user = FirebaseAuth.getInstance().getCurrentUser();
         userUid = user.getUid();
+
+
+
+
+
 
         Intent intent = getIntent();
         circle = (SleepCircle) intent.getSerializableExtra("Sleep Circle");
@@ -121,8 +128,10 @@ public class SoundDetectorActivity extends AppCompatActivity {
         endSession.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                timer.cancel();
-                timer.purge();
+                if(timer != null){
+                    timer.cancel();
+                    timer.purge();
+                }
                 soundCapture.stop();
                 updateOnGoingAlertDb(false,  circle.getUser1());
                 updateOnGoingAlertDb(false,  circle.getUser2());
@@ -137,6 +146,42 @@ public class SoundDetectorActivity extends AppCompatActivity {
             }
         });
 
+        Query query = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions");
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d(TAG, "Change happened to the sleep session");
+                Log.d(TAG, "dataSnapshot: " + dataSnapshot);
+                for(DataSnapshot sessionSnapshot : dataSnapshot.getChildren()){
+                    Log.d(TAG, "sessionSnapshot: " + sessionSnapshot);
+
+                    SleepSession localSleepSession = sessionSnapshot.getValue(SleepSession.class);
+
+                    if(localSleepSession.getStartTime().equals(sleepSession.getStartTime()) && !localSleepSession.getEndTime().equals("")){
+                        Log.d(TAG, "Someone ended the session from a phone. Probably by ignoring the new Session notification. Time to shutDown");
+
+                        if(timer != null){
+                            timer.cancel();
+                            timer.purge();
+                        }
+                        soundCapture.stop();
+                        updateOnGoingAlertDb(false,  circle.getUser1());
+                        updateOnGoingAlertDb(false,  circle.getUser2());
+                        udpdateUserOngoingSession(false, circle.getUser1());
+                        udpdateUserOngoingSession(false, circle.getUser2());
+
+                        Intent intent = new Intent(SoundDetectorActivity.this, UserMainActivity.class);
+                        startActivity(intent);
+                    }
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
 
         soundArray = new BuildSoundArray();

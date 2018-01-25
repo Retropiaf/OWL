@@ -28,7 +28,6 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
-
 public class UserMainActivity extends AppCompatActivity {
 
     Button testWireless, sleepCircle, signout;
@@ -155,17 +154,7 @@ public class UserMainActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.d(TAG, "dataSnapshot: " + dataSnapshot);
                 MainUser localUser = dataSnapshot.getValue(MainUser.class);
-                Log.d(TAG, "localUser: " + localUser);
                 Boolean localOnGoingSession = localUser.getOnGoingSession();
-                Log.d(TAG, "localUser.getIsSignedIn(): " + localUser.getIsSignedIn());
-                Log.d(TAG, "localUser.getUserUid(): " + localUser.getUserUid());
-                Log.d(TAG, "localUser.getUserName(): " + localUser.getUserName());
-                Log.d(TAG, "localUser.getUid(): " + localUser.getUid());
-                Log.d(TAG, "localUser.getUserEmail(): " + localUser.getUserEmail());
-                Log.d(TAG, "localUser.getOnGoingSession(): " + String.valueOf(localUser.getOnGoingSession()));
-                final SleepSession sleepSession = dataSnapshot.child("SleepSession").getValue(SleepSession.class);
-
-                Log.d(TAG, "!localUser.getInsideSession: " + !localUser.getInsideSession());
 
                 if(localOnGoingSession && !localUser.getInsideSession()){
                     Log.d(TAG, "Session is ongoing and user haven't joined yet");
@@ -174,6 +163,12 @@ public class UserMainActivity extends AppCompatActivity {
                     notification = inflater.inflate(R.layout.new_session_notification, null);
                     // Add the new row before the add field button.
                     pageLayout.addView(notification, 0);
+                }else if(localOnGoingSession && notification != null){
+                    /*
+                    pageLayout.removeView((View) notification.getParent());
+                    Log.d(TAG, "Removed alert notification");
+                    // TODO: check if a notification was removed because of someone hitting the ignor button. if so show Toast
+                    */ // Being done lower
                 }
 
             }
@@ -186,7 +181,7 @@ public class UserMainActivity extends AppCompatActivity {
 
 
         // Listen for notificationIgnored event
-        Query query = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions").limitToLast(1);;
+        Query query = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions").limitToLast(1);
 
         query.addChildEventListener(new ChildEventListener() {
             @Override
@@ -209,7 +204,10 @@ public class UserMainActivity extends AppCompatActivity {
 
                                 Log.d(TAG, "New SleepSession was ignored by the other user");
 
-                                // TODO inflate "notification ignored by" alert
+                                pageLayout.removeView((View) notification.getParent());
+                                Log.d(TAG, "Removed alert notification");
+                                // TODO: check if a notification was removed because of someone hitting the ignor button. if so show Toast
+                                Toast.makeText(UserMainActivity.this, "Sleep Session was cancelled by " + localSleepSession.getNotificationIgnoredBy(), Toast.LENGTH_SHORT).show();
                             }
                         }
                         @Override
@@ -351,14 +349,15 @@ public class UserMainActivity extends AppCompatActivity {
 
 
     public void onJoin(View v) {
+        Log.d(TAG, "Someone clicked onJoin");
         pageLayout.removeView((View) v.getParent());
 
-            database = FirebaseDatabase.getInstance().getReference();
-            String path = "MainUsers" + userUid + "insideSession";
-            Map<String, Object> childUpdates = new HashMap<>();
-            childUpdates.put(path, true);
-            database.updateChildren(childUpdates);
-            // set MainUser insideSession = true
+        DatabaseReference localDatabase = FirebaseDatabase.getInstance().getReference();
+        String path = "/MainUsers/" + userUid + "/insideSession/";
+        Map<String, Object> childUpdates = new HashMap<>();
+        childUpdates.put(path, true);
+        localDatabase.updateChildren(childUpdates);
+        // set MainUser insideSession = true
 
 
         Intent intent = new Intent(UserMainActivity.this, OnGoingSleepSessionActivity.class);
@@ -368,6 +367,7 @@ public class UserMainActivity extends AppCompatActivity {
     }
 
     public void onDelete(View v) {
+        Log.d(TAG, "Someone clicked ignore");
         pageLayout.removeView((View) v.getParent());
         notification = null;
         final String timeNow = String.valueOf(Calendar.getInstance().getTime());
@@ -375,37 +375,64 @@ public class UserMainActivity extends AppCompatActivity {
         // find the sleep session
         // set notificationIgnored = true
         // set end time on sleep session
-        Query query = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions");
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
+        Query query = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions").orderByChild("timestamp").limitToLast(1);
+        query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-
                 Log.d(TAG, "dataSnapshot" + dataSnapshot);
-                for(DataSnapshot sessionsSnapshots: dataSnapshot.getChildren()){
-                    Log.d(TAG, "sessionsSnapshots" + sessionsSnapshots);
-                }
 
-                Log.d(TAG, "WRONG (should go inside for/if dataSnapshot" + dataSnapshot);
-                SleepSession localSleepSession = dataSnapshot.getValue(SleepSession.class);
-                String user1 = localSleepSession.getFirstResponder();
-                String user2 = localSleepSession.getSecondResponder();
-                String sessionStartTime = localSleepSession.getStartTime();
-                database = FirebaseDatabase.getInstance().getReference();
-                String path1 = "MainUsers"+ user1 + "SleepSessions" + sessionStartTime + "notificationIgnored";
-                String path2 = "MainUsers"+ user2 + "SleepSessions" + sessionStartTime + "notificationIgnored";
-                String path3 = "MainUsers"+ user1 + "SleepSessions" + sessionStartTime + "endTime";
-                String path4 = "MainUsers"+ user2 + "SleepSessions" + sessionStartTime + "endTime";
-                String path5 = "MainUsers"+ user1 + "onGoingSession" ;
-                String path6 = "MainUsers"+ user2 + "onGoingSession";
-                Map<String, Object> childUpdates = new HashMap<>();
-                childUpdates.put(path1, true);
-                childUpdates.put(path2, true);
-                childUpdates.put(path3, timeNow);
-                childUpdates.put(path4, timeNow);
-                // Set onGoingSleep session = false on both users
-                childUpdates.put(path5, false);
-                childUpdates.put(path6, false);
-                database.updateChildren(childUpdates);
+                for (DataSnapshot sessionSnapshot : dataSnapshot.getChildren()) {
+
+                    Log.d(TAG, "sessionSnapshot" + sessionSnapshot);
+                    final SleepSession localSleepSession = sessionSnapshot.getValue(SleepSession.class);
+
+                    findUserName(database, new OnGetDataListener() {
+                        @Override
+                        public void onSuccess(DataSnapshot dataSnapshot) {
+                            MainUser localUser = dataSnapshot.getValue(MainUser.class);
+                            String localUserName = localUser.getUserName();
+
+                            Log.d(TAG, "I know my name: " + localUserName);
+
+                            String user1 = localSleepSession.getFirstResponder();
+                            String user2 = localSleepSession.getSecondResponder();
+                            Log.d(TAG, "user1: " + user1 + " user2: " + user2);
+                            String sessionStartTime = localSleepSession.getStartTime();
+                            Log.d(TAG, "sessionStartTime: " + sessionStartTime);
+                            DatabaseReference localDatabase = FirebaseDatabase.getInstance().getReference();
+                            Log.d(TAG, "localDatabase: " + localDatabase);
+                            Log.d(TAG, "database path to string =  " + String.valueOf(localDatabase));
+                            String path1 = "/MainUsers/"+ user1 + "/SleepSessions/" + sessionStartTime + "/notificationIgnored/";
+                            String path2 = "/MainUsers/"+ user2 + "/SleepSessions/" + sessionStartTime + "/notificationIgnored/";
+                            String path7 = "/MainUsers/"+ user1 + "/SleepSessions/" + sessionStartTime + "/notificationIgnoredBy/";
+                            String path8 = "/MainUsers/"+ user2 + "/SleepSessions/" + sessionStartTime + "/notificationIgnoredBy/";
+                            String path3 = "/MainUsers/"+ user1 + "/SleepSessions/" + sessionStartTime + "/endTime/";
+                            String path4 = "/MainUsers/"+ user2 + "/SleepSessions/" + sessionStartTime + "/endTime/";
+                            String path5 = "/MainUsers/"+ user1 + "/onGoingSession/" ;
+                            String path6 = "/MainUsers/"+ user2 + "/onGoingSession/";
+                            Map<String, Object> childUpdates = new HashMap<>();
+                            childUpdates.put(path1, true);
+                            childUpdates.put(path2, true);
+                            childUpdates.put(path3, timeNow);
+                            childUpdates.put(path4, timeNow);
+                            // Set onGoingSleep session = false on both users
+                            childUpdates.put(path5, false);
+                            childUpdates.put(path6, false);
+                            childUpdates.put(path7, localUserName);
+                            childUpdates.put(path8, localUserName);
+                            localDatabase.updateChildren(childUpdates);
+                            Log.d(TAG, "I'm special, I only happen once");
+
+                        }
+                        @Override
+                        public void onStart() {}
+
+                        @Override
+                        public void onFailure() {}
+                    });
+
+                    break;
+                }
             }
 
             @Override
@@ -414,6 +441,54 @@ public class UserMainActivity extends AppCompatActivity {
             }
         });
 
+
+        /*
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                Log.d(TAG, "dataSnapshot" + dataSnapshot);
+
+                for(DataSnapshot sessionSnapshot : dataSnapshot.getChildren()){
+                    Log.d(TAG, "sessionSnapshot" + sessionSnapshot);
+                    SleepSession localSleepSession = sessionSnapshot.getValue(SleepSession.class);
+                    if(localSleepSession.getEndTime().equals("")){
+                        Log.d(TAG, "Found the ongoing session");
+
+
+
+                        String user1 = localSleepSession.getFirstResponder();
+                        String user2 = localSleepSession.getSecondResponder();
+                        String sessionStartTime = localSleepSession.getStartTime();
+                        DatabaseReference localDatabase = FirebaseDatabase.getInstance().getReference();
+                        String path1 = "/MainUsers/"+ user1 + "/SleepSessions/" + sessionStartTime + "/notificationIgnored/";
+                        String path2 = "/MainUsers/"+ user2 + "/SleepSessions/" + sessionStartTime + "/notificationIgnored/";
+                        String path3 = "/MainUsers/"+ user1 + "/SleepSessions/" + sessionStartTime + "/endTime/";
+                        String path4 = "/MainUsers/"+ user2 + "SleepSessions" + sessionStartTime + "/endTime/";
+                        String path5 = "/MainUsers/"+ user1 + "/onGoingSession/" ;
+                        String path6 = "MainUsers"+ user2 + "/onGoingSession/";
+                        Map<String, Object> childUpdates = new HashMap<>();
+                        childUpdates.put(path1, true);
+                        childUpdates.put(path2, true);
+                        childUpdates.put(path3, timeNow);
+                        childUpdates.put(path4, timeNow);
+                        // Set onGoingSleep session = false on both users
+                        childUpdates.put(path5, false);
+                        childUpdates.put(path6, false);
+                        localDatabase.updateChildren(childUpdates);
+
+                    }
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+
+        });
+*/
 
 
 

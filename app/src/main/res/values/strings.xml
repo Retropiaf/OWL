@@ -74,5 +74,6 @@
     <!-- New Session Alert -->
     <string name="new_session_alert">A new session just started.</string>
     <string name="ignore">Ignore</string>
+    <string name="join">Join</string>
 
 </resources>

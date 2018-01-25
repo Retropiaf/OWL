@@ -163,6 +163,8 @@ public class NewSleepSessionActivity extends AppCompatActivity {
                     public void onSuccess(DataSnapshot dataSnapshot) {
                         final SleepCircle circle = dataSnapshot.getValue(SleepCircle.class);
 
+                        Log.d(TAG, "I come out of findCircle");
+
                         // TODO: Check if any of the user already in a session if so toast and nothing. Else do the rest
 
                         database = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(circle.getUser1());
@@ -173,6 +175,8 @@ public class NewSleepSessionActivity extends AppCompatActivity {
                                 Log.d(TAG, "dataSnapshot: " + dataSnapshot);
                                 final MainUser localUser1 = dataSnapshot.getValue(MainUser.class);
                                 Log.d(TAG, "localUser1: " + localUser1);
+                                Log.d(TAG, "localUser1.getOnGoingSession(): " + localUser1.getOnGoingSession());
+                                Log.d(TAG, "When localUser1.getOnGoingSession() is false, nothing happens. It is: " + localUser1.getOnGoingSession());
                                 if(!localUser1.getOnGoingSession()){
                                     database = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(circle.getUser2());
                                     database.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -196,6 +200,8 @@ public class NewSleepSessionActivity extends AppCompatActivity {
                                                 String sleepSessionId =  database.push().getKey();
 
                                                 sleepSession = new SleepSession(selected, sleepSessionId, firstResponder, firstResponder, secondResponder);
+
+                                                Log.d(TAG, "sleepSession.getTimestamp()" + sleepSession.getTimestamp());
 
                                                 addSessionDb(firstResponder, sleepSession.getStartTime(), sleepSession);
                                                 addSessionDb(secondResponder, sleepSession.getStartTime(), sleepSession);
@@ -224,6 +230,9 @@ public class NewSleepSessionActivity extends AppCompatActivity {
 
                                         }
                                     });
+                                }else{
+                                    //  toast: user already has an ongoing session
+                                    Toast.makeText(NewSleepSessionActivity.this, "One of the user already has an ongoing session", Toast.LENGTH_SHORT).show();
                                 }
                             }
 

@@ -3,6 +3,7 @@ package com.app.owl.sleepSession;
 import com.app.owl.soundDetector.Alert;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.HashMap;
 
@@ -19,6 +20,7 @@ public class SleepSession  implements Serializable {
     String firstResponder;
     String secondResponder;
     String circleName;
+    long timestamp;
     Boolean onGoingAlert;
     Boolean notificationIgnored;
     String notificationIgnoredBy;
@@ -38,7 +40,7 @@ public class SleepSession  implements Serializable {
         this.alerts = new HashMap();
         this.notificationIgnored = false;
         this.notificationIgnoredBy = "";
-
+        this.timestamp = new Timestamp(System.currentTimeMillis()).getTime();
     }
 
     public String getSleepSessionId(){return sleepSessionId;}
@@ -52,6 +54,7 @@ public class SleepSession  implements Serializable {
     public Boolean getNotificationIgnored (){return notificationIgnored;}
     //public Boolean getOnGoingAlert(){return onGoingAlert;}
     //public HashMap<Integer, Alert> alerts(){return alerts;}
+    public long getTimestamp(){return timestamp;}
 
     public void setEndTime(String time ){this.endTime = time;}
     public void  setCurrentResponder(){
@@ -64,4 +67,5 @@ public class SleepSession  implements Serializable {
     public void setNotificationIgnored (Boolean bool){this.notificationIgnored = bool;}
     public void setNotificationIgnoredBy(String userName){this.notificationIgnoredBy = userName;}
     //public void setOnGoingAlert(Boolean bool){this.onGoingAlert = bool;}
+    public void setTimestamp(){this.timestamp = new Timestamp(System.currentTimeMillis()).getTime();}
 }
