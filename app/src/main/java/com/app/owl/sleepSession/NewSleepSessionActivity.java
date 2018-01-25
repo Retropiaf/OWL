@@ -1,6 +1,5 @@
 package com.app.owl.sleepSession;
 
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
@@ -220,8 +219,10 @@ public class NewSleepSessionActivity extends AppCompatActivity {
 
                                                 Intent openDetectorIntent = new Intent(NewSleepSessionActivity.this, SoundDetectorActivity.class);
                                                 openDetectorIntent.putExtra(CIRCLE, circle);
-                                                openDetectorIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                                PendingIntent _pIntent = PendingIntent.getActivity(NewSleepSessionActivity.this, timestamInt, openDetectorIntent, PendingIntent.FLAG_ONE_SHOT);
+                                                //openDetectorIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                                //PendingIntent _pIntent = PendingIntent.getActivity(NewSleepSessionActivity.this, timestamInt, openDetectorIntent, PendingIntent.FLAG_ONE_SHOT);
+
+                                                openDetectorIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
                                                 Log.d(TAG, "The sleep session passed as extra as timestamp = " + newSleepSession.getTimestamp());
 
@@ -230,6 +231,7 @@ public class NewSleepSessionActivity extends AppCompatActivity {
                                                 Toast.makeText(NewSleepSessionActivity.this, "Starting sleep session", Toast.LENGTH_SHORT).show();
 
                                                 startActivity(openDetectorIntent);
+                                                finish();
 
 
 

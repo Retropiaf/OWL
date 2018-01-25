@@ -331,6 +331,9 @@ public class SoundDetectorActivity extends AppCompatActivity {
                     onGoingAlert = true;
                     updateOnGoingAlertDb(true,  circle.getUser1());
                     updateOnGoingAlertDb(true,  circle.getUser2());
+                    // TODO: Add “isnotified” flag to each MainUser. Set flag to false when alert is created in Detector, at the same time you set onGoing alert to true.
+                    updateIsNotified(true,  circle.getUser1());
+                    updateIsNotified(true,  circle.getUser2());
                     declareAlert();
 
                 }
@@ -606,6 +609,18 @@ public class SoundDetectorActivity extends AppCompatActivity {
         // set alertAnswered == false
         AlertHandler.updateAlertBool(database, path, answered);
 
+
+    }
+
+    public void updateIsNotified(Boolean isOngoing,  String localUserUid){
+
+        database = FirebaseDatabase.getInstance().getReference();
+
+        String path = "/MainUsers/" + localUserUid + "/SleepSessions/" + sleepSession.getStartTime() + "/isNotified/";
+
+        Map<String, Object> childUpdates = new HashMap<>();
+        childUpdates.put(path, isOngoing);
+        database.updateChildren(childUpdates);
 
     }
 

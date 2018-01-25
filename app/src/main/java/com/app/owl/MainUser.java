@@ -21,6 +21,7 @@ public class MainUser {
     private Boolean isRegistered;
     private Boolean isSignedIn;
     public Boolean onGoingSession;
+    public Boolean isNotified;
     public HashMap<String, SleepSession> SleepSessions;
     public Boolean insideSession;
     public HashMap<String, SleepCircle> circles;
@@ -38,6 +39,7 @@ public class MainUser {
         this.isRegistered = false;
         this.isSignedIn = false;
         this.onGoingSession = false;
+        this.isNotified = false;
         this.insideSession = false;
         this.circles = new HashMap<>();
     }
@@ -69,10 +71,14 @@ public class MainUser {
 
     public Boolean getOnGoingSession(){ return onGoingSession; }
 
+    public Boolean getIsNotified(){ return isNotified; }
+
     public Boolean getInsideSession(){ return insideSession; }
 
 
     public void setOnGoingSession(Boolean bool){ this.onGoingSession = bool; }
+
+    public void setIsNotified(Boolean bool){ this.isNotified = bool; }
 
     public void setInsideSession(Boolean bool){ this.insideSession = bool; }
 

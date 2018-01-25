@@ -69,27 +69,6 @@ public class UserMainActivity extends AppCompatActivity {
 
         userUid = user.getUid();
 
-        //find userName
-
-
-
-
-
-        /*
-
-        database.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                MainUser localUser = dataSnapshot.getValue(MainUser.class);
-                String otherUSerName = localUser.getUserName();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-        */
 
         // TODO add a timer countdown to join sleep session
         // When timer runs out, call ignore alert
@@ -148,7 +127,7 @@ public class UserMainActivity extends AppCompatActivity {
         });
 
 */
-
+        // Display alert if user awaited
         database = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid);
         Log.d(TAG, "Checking if the user is awaited in a session");
         Log.d(TAG, "database: " + database);
@@ -173,6 +152,8 @@ public class UserMainActivity extends AppCompatActivity {
 
                         inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                         pageLayout.addView(notification, 0);
+
+                        updateIsNotified(String sessionStartTime);
                     }
 
                 }else if(!localOnGoingSession && (notification instanceof View) || notification != null){
@@ -382,10 +363,10 @@ public class UserMainActivity extends AppCompatActivity {
         // set MainUser insideSession = true
 
 
-        Intent intent = new Intent(UserMainActivity.this, ConnectAudioDeviceActivity.class);
-        startActivity(intent);
+        Intent intentConnectDevice = new Intent(this, ConnectAudioDeviceActivity.class);
+        startActivity(intentConnectDevice);
 
-        // TODO change redirection toward connect to bluetooth device
+
     }
 
     public void onDelete(View v) {
@@ -615,6 +596,18 @@ public class UserMainActivity extends AppCompatActivity {
             }
         });
 
+
+    }
+
+    public void updateIsNotified(String sessionStartTime){
+
+        database = FirebaseDatabase.getInstance().getReference();
+
+        String path = "/MainUsers/" + userUid + "/SleepSessions/" + sessionStartTime + "/isNotified/";
+
+        Map<String, Object> childUpdates = new HashMap<>();
+        childUpdates.put(path, true);
+        database.updateChildren(childUpdates);
 
     }
 }
