@@ -24,7 +24,7 @@ public class SleepSession  implements Serializable {
     Boolean onGoingAlert;
     Boolean notificationIgnored;
     String notificationIgnoredBy;
-    public HashMap<Integer, Alert> alerts;
+    public HashMap<String, Alert> alerts;
 
     SleepSession(){}
 
@@ -53,7 +53,7 @@ public class SleepSession  implements Serializable {
     public String getNotificationIgnoredBy(){return notificationIgnoredBy;}
     public Boolean getNotificationIgnored (){return notificationIgnored;}
     //public Boolean getOnGoingAlert(){return onGoingAlert;}
-    //public HashMap<Integer, Alert> alerts(){return alerts;}
+    public HashMap<String, Alert> getAlerts(){return alerts;}
     public long getTimestamp(){return timestamp;}
 
     public void setEndTime(String time ){this.endTime = time;}

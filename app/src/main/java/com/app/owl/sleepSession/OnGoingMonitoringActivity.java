@@ -1,24 +1,9 @@
 package com.app.owl.sleepSession;
 
-import android.content.Intent;
-import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
-import com.app.owl.MainUser;
-import com.app.owl.OnGetDataListener;
-import com.app.owl.R;
-import com.app.owl.UserMainActivity;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
-
 public class OnGoingMonitoringActivity extends AppCompatActivity {
+    /*
 
     FirebaseUser user;
     String userUid;
@@ -33,7 +18,7 @@ public class OnGoingMonitoringActivity extends AppCompatActivity {
         userUid = user.getUid();
 
         // Check is onGoingSession changed to false. If so, redirect to welcome page.
-        DatabaseReference onGoingSessionDatabase = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid);
+        DatabaseReference onGoingSessionDatabase = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid); // TODO: check spelling inside path
         onGoingSessionDatabase.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -51,30 +36,83 @@ public class OnGoingMonitoringActivity extends AppCompatActivity {
         });
 
         // Find the right Session
-        Query query = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions").orderByChild("timeStamps").limitToLast(1);
+        Query query = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions").orderByChild("timeStamps").limitToLast(1); // TODO: check spelling inside path
 
         findSession(query, new OnGetDataListener(){
             @Override
             public void onSuccess(DataSnapshot dataSnapshot) {
                 SleepSession localSleepSession = dataSnapshot.getValue(SleepSession.class);
-                String startTime = localSleepSession.getStartTime();
+                final String startTime = localSleepSession.getStartTime();
 
                 // Listen on the sleep session's changes
-                DatabaseReference sessionDatabase = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions").child(startTime);
+                DatabaseReference sessionDatabase = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions").child(startTime); // TODO: check spelling inside path
 
                 sessionDatabase.addChildEventListener(new ChildEventListener() {
                     @Override
                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                         // A new alert is created
-                        // TODO: check if s would be "Alerts" for new alerts. If so, add: if(s == "Alerts"){ rest of the code }
+                        // TODO: check if "s" would be "Alerts" for new alerts. If so, add: if(s == "Alerts"){ rest of the code }
 
-                        // Check currentResponder
+                        // Check if you are the currentResponder
                         SleepSession localSleepSession = dataSnapshot.getValue(SleepSession.class);
-                        // If you are the current responder, call handleAlert()
+
+                        // If you are the current responder: find the alert, then call handleAlert(alert)
+                        if(localSleepSession.getCurrentResponder() == userUid){
+                            // Get the last Alert
+                            Query alertsDatabase = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions").child(startTime).child("alerts").orderByChild("timestamp").limitToLast(1); // TODO: check spelling inside path
+
+                            alertsDatabase.addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    for(DataSnapshot alertSnapshot : dataSnapshot.getChildren()){
+                                        Alert alert = alertSnapshot.getValue(Alert.class);
+                                        if(alert.getEndTime() == null){ // TODO: check unused alertEnded field of alert
+                                            handleAlert(alert);
+                                        }
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
+
+                        }
+
+
                     }
 
                     @Override
                     public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                        // Check if you are the currentResponder
+                        SleepSession localSleepSession = dataSnapshot.getValue(SleepSession.class);
+
+                        // If you are the current responder: find the alert, then call handleAlert(alert)
+                        if(localSleepSession.getCurrentResponder() == userUid){
+                            // Get the last Alert
+                            Query alertsDatabase = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions").child(startTime).child("alerts").orderByChild("timestamp").limitToLast(1); // TODO: check spelling inside path
+
+                            alertsDatabase.addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    for(DataSnapshot alertSnapshot : dataSnapshot.getChildren()){
+                                        Alert alert = alertSnapshot.getValue(Alert.class);
+                                        if(alert.getEndTime() == null){ // TODO: check unused alertEnded field of alert
+                                            handleAlert(alert);
+                                        }
+
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
+
+                        }
 
                     }
 
@@ -92,7 +130,7 @@ public class OnGoingMonitoringActivity extends AppCompatActivity {
                     public void onCancelled(DatabaseError databaseError) {
 
                     }
-                })
+                });
 
 
 
@@ -106,6 +144,27 @@ public class OnGoingMonitoringActivity extends AppCompatActivity {
 
 
 
+    }
+
+    public void handleAlert(Alert alert){
+
+        snoozeTimer = new Timer();
+        snoozeTask = new TimerTask() {
+            @Override
+            public void run() {
+                Log.d(TAG, "Inside snoozeDecide - 30s timer is up. Starting sound detection soon");
+                new HideSnoozeDuration().execute();
+                new HideSnoozeBtn().execute();
+                new HideSnoozeClock().execute();
+                clockTimer.cancel();
+                soundCapture.start();
+                startDetectingSounds();
+            }
+        };
+        // Start Timer
+        // Start Alarm
+        // resolve at the end of timer
+        // Create "alert received" button and on click listener
     }
 
     public void findSession(Query query, final OnGetDataListener listener) {
@@ -126,4 +185,6 @@ public class OnGoingMonitoringActivity extends AppCompatActivity {
         });
 
     }
+
+    */
 }

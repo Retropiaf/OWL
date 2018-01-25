@@ -80,4 +80,9 @@
     <!-- Bluetooth -->
     <string name="search_devices">Search for devices</string>
     <string name="turn_on">Turn your audio device on to make it findable.</string>
+    <string name="respond_alert">On it!</string>
+    <string name="alert_button_info">Check the monitor device to end the alert.</string>
+
+
+
 </resources>
