@@ -94,15 +94,28 @@ public class UserMainActivity extends AppCompatActivity {
 
 
         // Is the user awaited in a session?
-        database = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid);
+        // Listen for notificationIgnored event
 
-        database.addValueEventListener(new ValueEventListener() {
+        /*
+        database = FirebaseDatabase.getInstance().getReference().child("MainUsers");
+
+        database.addChildEventListener(new ChildEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                Log.d(TAG, "Change registered inside current user");
+                Log.d(TAG, "dataSnapshot: " + dataSnapshot + "String: " + s);
                 MainUser localUser = dataSnapshot.getValue(MainUser.class);
-                Boolean onGoingSession = localUser.getOnGoingSessions();
+                Log.d(TAG, "localUser: " + localUser);
+                Boolean localOnGoingSession = localUser.getOnGoingSession();
                 final SleepSession sleepSession = dataSnapshot.child("SleepSession").getValue(SleepSession.class);
-                if(onGoingSession && !localUser.inOnGoingSessions){
+                Log.d(TAG, "localOnGoingSession: " + localOnGoingSession);
+                Log.d(TAG, "!localUser.getInsideSession: " + !localUser.getInsideSession());
+                if(localOnGoingSession && !localUser.getInsideSession()){
                     Log.d(TAG, "Session is ongoing and user haven't joined yet");
                     // show notification
                     LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -110,6 +123,20 @@ public class UserMainActivity extends AppCompatActivity {
                     // Add the new row before the add field button.
                     pageLayout.addView(notification, 0);
                 }
+
+
+
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
             }
 
             @Override
@@ -117,6 +144,46 @@ public class UserMainActivity extends AppCompatActivity {
 
             }
         });
+
+*/
+
+        database = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid);
+        Log.d(TAG, "Checking if the user is awaited in a session");
+        Log.d(TAG, "database: " + database);
+        database.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d(TAG, "dataSnapshot: " + dataSnapshot);
+                MainUser localUser = dataSnapshot.getValue(MainUser.class);
+                Log.d(TAG, "localUser: " + localUser);
+                Boolean localOnGoingSession = localUser.getOnGoingSession();
+                Log.d(TAG, "localUser.getIsSignedIn(): " + localUser.getIsSignedIn());
+                Log.d(TAG, "localUser.getUserUid(): " + localUser.getUserUid());
+                Log.d(TAG, "localUser.getUserName(): " + localUser.getUserName());
+                Log.d(TAG, "localUser.getUid(): " + localUser.getUid());
+                Log.d(TAG, "localUser.getUserEmail(): " + localUser.getUserEmail());
+                Log.d(TAG, "localUser.getOnGoingSession(): " + String.valueOf(localUser.getOnGoingSession()));
+                final SleepSession sleepSession = dataSnapshot.child("SleepSession").getValue(SleepSession.class);
+
+                Log.d(TAG, "!localUser.getInsideSession: " + !localUser.getInsideSession());
+
+                if(localOnGoingSession && !localUser.getInsideSession()){
+                    Log.d(TAG, "Session is ongoing and user haven't joined yet");
+                    // show notification
+                    LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    notification = inflater.inflate(R.layout.new_session_notification, null);
+                    // Add the new row before the add field button.
+                    pageLayout.addView(notification, 0);
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
 
         // Listen for notificationIgnored event
         Query query = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions").limitToLast(1);;
@@ -153,6 +220,7 @@ public class UserMainActivity extends AppCompatActivity {
                     });
 
                 }
+
 
             }
 
@@ -286,16 +354,17 @@ public class UserMainActivity extends AppCompatActivity {
         pageLayout.removeView((View) v.getParent());
 
             database = FirebaseDatabase.getInstance().getReference();
-            String path = "MainUsers" + userUid + "inOnGoingSession";
+            String path = "MainUsers" + userUid + "insideSession";
             Map<String, Object> childUpdates = new HashMap<>();
             childUpdates.put(path, true);
             database.updateChildren(childUpdates);
-            // set MainUser inOngoingSession = true
+            // set MainUser insideSession = true
+
 
         Intent intent = new Intent(UserMainActivity.this, OnGoingSleepSessionActivity.class);
         startActivity(intent);
 
-        // TODO handle redirection toward sleep session
+        // TODO change redirection toward connect to bluetooth device
     }
 
     public void onDelete(View v) {
@@ -306,10 +375,17 @@ public class UserMainActivity extends AppCompatActivity {
         // find the sleep session
         // set notificationIgnored = true
         // set end time on sleep session
-        Query query = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSession").child("endTime").equalTo("");
+        Query query = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions");
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+
+                Log.d(TAG, "dataSnapshot" + dataSnapshot);
+                for(DataSnapshot sessionsSnapshots: dataSnapshot.getChildren()){
+                    Log.d(TAG, "sessionsSnapshots" + sessionsSnapshots);
+                }
+
+                Log.d(TAG, "WRONG (should go inside for/if dataSnapshot" + dataSnapshot);
                 SleepSession localSleepSession = dataSnapshot.getValue(SleepSession.class);
                 String user1 = localSleepSession.getFirstResponder();
                 String user2 = localSleepSession.getSecondResponder();
@@ -319,8 +395,8 @@ public class UserMainActivity extends AppCompatActivity {
                 String path2 = "MainUsers"+ user2 + "SleepSessions" + sessionStartTime + "notificationIgnored";
                 String path3 = "MainUsers"+ user1 + "SleepSessions" + sessionStartTime + "endTime";
                 String path4 = "MainUsers"+ user2 + "SleepSessions" + sessionStartTime + "endTime";
-                String path5 = "MainUsers"+ user1 + "onGoingSessions" ;
-                String path6 = "MainUsers"+ user2 + "onGoingSessions";
+                String path5 = "MainUsers"+ user1 + "onGoingSession" ;
+                String path6 = "MainUsers"+ user2 + "onGoingSession";
                 Map<String, Object> childUpdates = new HashMap<>();
                 childUpdates.put(path1, true);
                 childUpdates.put(path2, true);

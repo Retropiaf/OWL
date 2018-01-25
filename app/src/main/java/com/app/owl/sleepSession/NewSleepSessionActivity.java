@@ -61,6 +61,9 @@ public class NewSleepSessionActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_sleep_session);
 
+        startMonitoringBtn = findViewById(R.id.start_monitoring_btn);
+        startMonitoringBtn.setVisibility(View.INVISIBLE);
+
         user = FirebaseAuth.getInstance().getCurrentUser();
         userUid = user.getUid();
         Log.d(TAG, "userUid = " + userUid);
@@ -140,7 +143,7 @@ public class NewSleepSessionActivity extends AppCompatActivity {
         });
 
 
-        startMonitoringBtn = findViewById(R.id.start_monitoring_btn);
+
         startMonitoringBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -162,22 +165,57 @@ public class NewSleepSessionActivity extends AppCompatActivity {
 
                         // TODO: Check if any of the user already in a session if so toast and nothing. Else do the rest
 
-                        database = FirebaseDatabase.getInstance().getReference().child("MainUser").child(circle.getUser1());
+                        database = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(circle.getUser1());
+                        Log.d(TAG, "database: " + database);
                         database.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
+                                Log.d(TAG, "dataSnapshot: " + dataSnapshot);
                                 final MainUser localUser1 = dataSnapshot.getValue(MainUser.class);
-                                if(!localUser1.getOnGoingSessions()){
-                                    database = FirebaseDatabase.getInstance().getReference().child("MainUser").child(circle.getUser2());
+                                Log.d(TAG, "localUser1: " + localUser1);
+                                if(!localUser1.getOnGoingSession()){
+                                    database = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(circle.getUser2());
                                     database.addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
                                         public void onDataChange(DataSnapshot dataSnapshot) {
                                             final MainUser localUser2 = dataSnapshot.getValue(MainUser.class);
-                                            if(!localUser2.getOnGoingSessions()) {
+                                            if(!localUser2.getOnGoingSession()) {
+                                                Log.d(TAG, "firstResponder: " + firstResponder);
+                                                Log.d(TAG, "circle.getUser1(): " + circle.getUser1());
+                                                Log.d(TAG, "circle.getUser2(): " + circle.getUser2());
 
+                                                if(firstResponder.equals(circle.getUser1())){
+                                                    secondResponder = circle.getUser2();
+                                                }else{
+                                                    secondResponder = circle.getUser1();
+                                                }
+
+                                                //TODO: Check why several SleepSessions nodes get added
+
+                                                Log.d(TAG, "secondResponder: " + secondResponder);
+                                                String sleepSessionId =  database.push().getKey();
+
+                                                sleepSession = new SleepSession(selected, sleepSessionId, firstResponder, firstResponder, secondResponder);
+
+                                                addSessionDb(firstResponder, sleepSession.getStartTime(), sleepSession);
+                                                addSessionDb(secondResponder, sleepSession.getStartTime(), sleepSession);
+
+                                                udpdateUserOngoingSession(true, firstResponder);
+                                                udpdateUserOngoingSession(true, secondResponder);
+
+                                                //TODO update MainUser with ongoingSleepSession = true
+
+                                                Intent intent = new Intent(NewSleepSessionActivity.this, SoundDetectorActivity.class);
+                                                intent.putExtra(CIRCLE, circle);
+                                                intent.putExtra(SLEEP_SESSION, sleepSession);
+
+                                                startActivity(intent);
+
+                                                Toast.makeText(NewSleepSessionActivity.this, "Starting sleep session", Toast.LENGTH_SHORT).show();
 
                                             }else{
-                                                // TODO: toast: user already has an ongoing session
+                                                //  toast: user already has an ongoing session
+                                                Toast.makeText(NewSleepSessionActivity.this, "One of the user already has an ongoing session", Toast.LENGTH_SHORT).show();
                                             }
                                         }
 
@@ -196,38 +234,7 @@ public class NewSleepSessionActivity extends AppCompatActivity {
                         });
 
 
-                        Log.d(TAG, "firstResponder: " + firstResponder);
-                        Log.d(TAG, "circle.getUser1(): " + circle.getUser1());
-                        Log.d(TAG, "circle.getUser2(): " + circle.getUser2());
 
-                        if(firstResponder.equals(circle.getUser1())){
-                            secondResponder = circle.getUser2();
-                        }else{
-                            secondResponder = circle.getUser1();
-                        }
-
-                        //TODO: Check why several SleepSessions nodes get added
-
-                        Log.d(TAG, "secondResponder: " + secondResponder);
-                        String sleepSessionId =  database.push().getKey();
-
-                        sleepSession = new SleepSession(selected, sleepSessionId, firstResponder, firstResponder, secondResponder);
-
-                        addSessionDb(firstResponder, sleepSession.getStartTime(), sleepSession);
-                        addSessionDb(secondResponder, sleepSession.getStartTime(), sleepSession);
-
-                        udpdateUserOngoingSession(true, firstResponder);
-                        udpdateUserOngoingSession(true, secondResponder);
-
-                        //TODO update MainUser with ongoingSleepSession = true
-
-                        Intent intent = new Intent(NewSleepSessionActivity.this, SoundDetectorActivity.class);
-                        intent.putExtra(CIRCLE, circle);
-                        intent.putExtra(SLEEP_SESSION, sleepSession);
-
-                        startActivity(intent);
-
-                        Toast.makeText(NewSleepSessionActivity.this, "Starting sleep session", Toast.LENGTH_SHORT).show();
 
                     }
                     @Override
@@ -296,6 +303,10 @@ public class NewSleepSessionActivity extends AppCompatActivity {
                         circleMonitorIp = circle.getMonitorIp();
 
                         if(selection.equals(circleName) && ip.equals(circleMonitorIp)){
+                            Log.d(TAG, "selection = " + selection);
+                            Log.d(TAG, "circleName = " + circleName);
+                            Log.d(TAG, "ip = " + ip);
+                            Log.d(TAG, "circleMonitorIp = " + circleMonitorIp);
                             Log.d(TAG, "Selected circle device and current device are the same");
                             startMonitoringBtn.setVisibility(View.VISIBLE);
                             // set startSleepBtn invisible
@@ -425,7 +436,7 @@ public class NewSleepSessionActivity extends AppCompatActivity {
     private void udpdateUserOngoingSession(Boolean isOngoing, String localUserUid){
         database = FirebaseDatabase.getInstance().getReference();
 
-        String path = "/MainUsers/" + localUserUid + "/OnGoingSessions/";
+        final String path = "/MainUsers/" + localUserUid + "/onGoingSession/";
 
         Map<String, Object> childUpdates = new HashMap<>();
         childUpdates.put(path, isOngoing);

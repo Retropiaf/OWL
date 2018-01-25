@@ -3,6 +3,7 @@ package com.app.owl;
 import android.util.Log;
 
 import com.app.owl.sleepCircle.SleepCircle;
+import com.app.owl.sleepSession.SleepSession;
 
 import java.util.HashMap;
 
@@ -12,24 +13,22 @@ import java.util.HashMap;
 
 public class MainUser {
 
-
-    //private String userId;
-    public String uid;
-    public String userUid;
-    public String userName;
-    public String name;
-    public String userEmail;
-    public Boolean isRegistered;
-    public Boolean isSignedIn;
-    public Boolean onGoingSessions;
-    public Boolean inOnGoingSessions;
-    HashMap<String, SleepCircle> circles;
+    private String uid;
+    private String userUid;
+    private String userName;
+    private String name;
+    private String userEmail;
+    private Boolean isRegistered;
+    private Boolean isSignedIn;
+    public Boolean onGoingSession;
+    public HashMap<String, SleepSession> SleepSessions;
+    public Boolean insideSession;
+    public HashMap<String, SleepCircle> circles;
 
 
     public MainUser(){
 
     }
-
 
     public MainUser(String userUid, String userEmail, String userName, String name) {
         this.uid = userUid;
@@ -38,16 +37,11 @@ public class MainUser {
         this.userEmail = userEmail;
         this.isRegistered = false;
         this.isSignedIn = false;
-        this.onGoingSessions = false;
-        this.inOnGoingSessions = false;
-        circles = new HashMap<>();
+        this.onGoingSession = false;
+        this.insideSession = false;
+        this.circles = new HashMap<>();
     }
 
-    /*
-    public String getUserId() {
-        return userId;
-    }
-    */
 
     public String getUserUid() {
         return userUid;
@@ -56,12 +50,6 @@ public class MainUser {
     public String getUid() {
         return uid;
     }
-
-    /*
-    public String getId() {
-        return userId;
-    }
-    */
 
     public String getUserName() {
         return userName;
@@ -79,13 +67,14 @@ public class MainUser {
 
     public Boolean getIsSignedIn(){ return isSignedIn; }
 
-    public Boolean getOnGoingSessions(){ return onGoingSessions; }
+    public Boolean getOnGoingSession(){ return onGoingSession; }
 
-    public Boolean getInOnGoingSessions(){ return inOnGoingSessions; }
+    public Boolean getInsideSession(){ return insideSession; }
 
-    public void setOnGoingSessions(Boolean bool){ onGoingSessions = bool; }
 
-    public void setInOnGoingSessions(Boolean bool){ inOnGoingSessions = bool; }
+    public void setOnGoingSession(Boolean bool){ this.onGoingSession = bool; }
+
+    public void setInsideSession(Boolean bool){ this.insideSession = bool; }
 
     public void setIsRegistered(){
         Log.d("Inside setIsRegistered", String.valueOf(this.isRegistered));

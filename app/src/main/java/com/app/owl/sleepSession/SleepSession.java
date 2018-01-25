@@ -22,8 +22,7 @@ public class SleepSession  implements Serializable {
     Boolean onGoingAlert;
     Boolean notificationIgnored;
     String notificationIgnoredBy;
-    //Boolean onGoingSession; Should be in MainUser
-    HashMap<Integer, Alert> alerts;
+    public HashMap<Integer, Alert> alerts;
 
     SleepSession(){}
 

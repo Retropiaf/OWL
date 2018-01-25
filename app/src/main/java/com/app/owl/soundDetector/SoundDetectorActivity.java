@@ -517,7 +517,7 @@ public class SoundDetectorActivity extends AppCompatActivity {
     private void udpdateUserOngoingSession(Boolean isOngoing, String localUserUid){
         database = FirebaseDatabase.getInstance().getReference();
 
-        String path = "/MainUsers/" + localUserUid + "/OnGoingSessions/";
+        String path = "/MainUsers/" + localUserUid + "/onGoingSession/";
 
         Map<String, Object> childUpdates = new HashMap<>();
         childUpdates.put(path, isOngoing);
