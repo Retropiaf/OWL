@@ -70,8 +70,16 @@ public class NewSleepSessionActivity extends AppCompatActivity {
 
 
         Intent intent = getIntent();
-        SleepCircle circleFromIntent = (SleepCircle) intent.getSerializableExtra("Sleep Circle");
-        clickedCircleName = circleFromIntent.getCircleName();
+
+        Bundle extras = intent.getExtras();
+        if (extras != null) {
+            SleepCircle circleFromIntent = (SleepCircle) intent.getSerializableExtra("Sleep Circle");
+            clickedCircleName = circleFromIntent.getCircleName();
+        }else{
+            clickedCircleName = null;
+        }
+        //SleepCircle circleFromIntent = (SleepCircle) intent.getSerializableExtra("Sleep Circle");
+        //clickedCircleName = circleFromIntent.getCircleName();
 
         sleepSessionInfo = findViewById(R.id.new_sleep_session_info);
 
@@ -433,17 +441,23 @@ public class NewSleepSessionActivity extends AppCompatActivity {
         super.onStart();
     }
 
-    private void selectSpinnerValue(Spinner spinner, String myString)
+    private void selectSpinnerValue(Spinner spinner, String circleNameFromExtra)
     {
-        Log.d(TAG, "Inside selectSpinnerValue");
-        for(int i = 0; i < spinner.getCount(); i++){
-            if(String.valueOf(spinner.getItemAtPosition(i)).equals(myString)){
-                spinner.setSelection(i);
-                Log.d(TAG, "i:" + i);
-                break;
+        if(circleNameFromExtra != null){
+            Log.d(TAG, "Inside selectSpinnerValue");
+            for(int i = 0; i < spinner.getCount(); i++){
+                if(String.valueOf(spinner.getItemAtPosition(i)).equals(circleNameFromExtra)){
+                    spinner.setSelection(i);
+                    Log.d(TAG, "i:" + i);
+                    break;
+                }
             }
+            spinner.setSelection(0);
+        }else{
+            spinner.setSelection(0);
         }
-        spinner.setSelection(0);
+
+
     }
 
     private void addSessionDb(String localUserUid, String sessionStartTime, SleepSession localNewSleepSession){
