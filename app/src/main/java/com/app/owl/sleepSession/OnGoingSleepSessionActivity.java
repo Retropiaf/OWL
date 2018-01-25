@@ -118,7 +118,7 @@ public class OnGoingSleepSessionActivity extends AppCompatActivity {
                         // TODO: check if "s" would be "Alerts" for new alerts. If so, add: if(s == "Alerts"){ rest of the code }
 
                         // Check if you are the currentResponder
-                        SleepSession localSleepSession = dataSnapshot.getValue(SleepSession.class);
+                        final SleepSession localSleepSession = dataSnapshot.getValue(SleepSession.class);
 
                         // If you are the current responder: find the alert, then call handleAlert(alert)
                         if(localSleepSession.getCurrentResponder() == userUid){
@@ -131,7 +131,7 @@ public class OnGoingSleepSessionActivity extends AppCompatActivity {
                                     for(DataSnapshot alertSnapshot : dataSnapshot.getChildren()){
                                         Alert alert = alertSnapshot.getValue(Alert.class);
                                         if(alert.getEndTime() == null){ // TODO: check unused alertEnded field of alert
-                                            handleAlert(alert);
+                                            handleAlert(alert, localSleepSession);
                                         }
                                     }
                                 }
@@ -151,7 +151,7 @@ public class OnGoingSleepSessionActivity extends AppCompatActivity {
                     public void onChildChanged(DataSnapshot dataSnapshot, String s) {
 
                         // Check if you are the currentResponder
-                        SleepSession localSleepSession = dataSnapshot.getValue(SleepSession.class);
+                        final SleepSession localSleepSession = dataSnapshot.getValue(SleepSession.class);
 
                         // If you are the current responder: find the alert, then call handleAlert(alert)
                         if(localSleepSession.getCurrentResponder() == userUid){
