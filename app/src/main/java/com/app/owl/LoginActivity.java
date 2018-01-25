@@ -67,40 +67,6 @@ public class LoginActivity extends AppCompatActivity {
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             hideDialog();
 
-                            /*
-
-                            database = FirebaseDatabase.getInstance().getReference().child("MainUsers");
-                            database.addListenerForSingleValueEvent(new ValueEventListener() {
-
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-
-                                        MainUser mainUser = snapshot.getValue(MainUser.class);
-
-                                        if(mainUser.getUid().equals(CurrentUser.uid) && (mainUser.isRegistered == null || !mainUser.isRegistered)){
-
-                                            Log.d(TAG, "Found the user");
-
-                                            Map<String, Object> childUpdates = new HashMap<>();
-                                            childUpdates.put(CurrentUser.uid + "/isRegistered/", true);
-                                            childUpdates.put(CurrentUser.uid + "/isSignedIn/", true);
-                                            database.updateChildren(childUpdates);
-
-                                        }
-
-
-
-                                    } // TODO HANDLE ELSE CASE: NO EMAIL FOR USER 2
-                                }
-
-                                @Override
-                                public void onCancelled(DatabaseError databaseError) {
-                                    // TODO: Handle database error
-                                }
-                            });
-*/
-
 
                         }
                     }).addOnFailureListener(new OnFailureListener() {

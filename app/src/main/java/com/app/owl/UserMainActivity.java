@@ -77,62 +77,178 @@ public class UserMainActivity extends AppCompatActivity {
 
         // Is the user awaited in a session?
         // Display alert if user awaited
+
         database = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid);
-        Log.d(TAG, "Checking if the user is awaited in a session");
         Log.d(TAG, "database: " + database);
-        database.addValueEventListener(new ValueEventListener() {
+
+        ChildEventListener childEventListener2 = new ChildEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.d(TAG, "dataSnapshot: " + dataSnapshot);
-                MainUser localUser = dataSnapshot.getValue(MainUser.class);
-                Boolean localOnGoingSession = localUser.getOnGoingSession();
-                Boolean userIsNotified = localUser.getIsNotified();
+            public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
+                Log.d(TAG, "Change in MainUsers - onChildAdded");
+            }
 
-                if(localOnGoingSession && !userIsNotified){
-                    Log.d(TAG, "Session is ongoing and user hasn't been notified");
-                    // show notification
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
 
-                    notification = inflater.inflate(R.layout.new_session_notification, null);
+                Log.d(TAG, "Change in MainUsers - onChildChanged");
+                Log.d(TAG, "dataSnapshot " + dataSnapshot);
+                Log.d(TAG, "s" + previousChildName);
 
-                    inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    pageLayout.addView(notification, 0);
+                Log.d(TAG, "dataSnapshot.getKey(): " + dataSnapshot.getKey());
 
-                    // Todo updateIsNotified(String sessionStartTime);
-                    Query query = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions").orderByChild("timestamp").limitToLast(1);
-                    query.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            Log.d(TAG, "dataSnapshot" + dataSnapshot);
+                if(dataSnapshot.getKey().equals("onGoingSession")){
+                    Log.d(TAG, "Change to ongoingSession status");
 
-                            for (DataSnapshot sessionSnapshot : dataSnapshot.getChildren()) {
+                    Boolean ongoingSession = dataSnapshot.getValue(Boolean.class);
 
-                                Log.d(TAG, "sessionSnapshot" + sessionSnapshot);
-                                final SleepSession localSleepSession = sessionSnapshot.getValue(SleepSession.class);
-                                String sessionStartTime = localSleepSession.getStartTime();
+                    if(ongoingSession){
+                        Log.d(TAG, "Session started");
 
-                                updateIsNotified(String sessionStartTime);
+
+                        // Check if the user has an OnGoingSession and check if the user was notified
+                        DatabaseReference localDatabase = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("isNotified");
+                        Log.d(TAG, "database: " + database);
+
+                        localDatabase.addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                Log.d(TAG, "Looking at the user object: " + dataSnapshot);
+
+                                if(!dataSnapshot.getValue(Boolean.class)){
+                                    Log.d(TAG, "The user has not been notified of the ongoing session yet");
+
+                                    // show notification
+                                    notification = inflater.inflate(R.layout.new_session_notification, null);
+
+                                    inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                                    pageLayout.addView(notification, 0);
+
+                                    // Updates isNotified field
+                                    Query query = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions").orderByChild("timestamp").limitToLast(1);
+
+                                    query.addValueEventListener(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                            Log.d(TAG, "dataSnapshot" + dataSnapshot);
+
+                                            for (DataSnapshot sessionSnapshot : dataSnapshot.getChildren()) {
+
+                                                Log.d(TAG, "sessionSnapshot" + sessionSnapshot);
+                                                final SleepSession localSleepSession = sessionSnapshot.getValue(SleepSession.class);
+                                                String sessionStartTime = localSleepSession.getStartTime();
+
+                                                updateIsNotified(sessionStartTime);
+
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(DatabaseError databaseError) {
+
+                                        }
+                                    });
+                                }
 
                             }
-                        }
 
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
 
-                        }
-                    });
+                            }
+                        });
+
+
+                    }else{Log.d(TAG, "Session ended");}
+
+
 
                 }
+
+
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                Log.d(TAG, "Change in MainUsers - onCancelled");
             }
-        });
+        };
+        database.addChildEventListener(childEventListener2);
+
 
 
         // Listen for notificationIgnored event
-        Query query = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions").limitToLast(1);
+
+        //Query query = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions").limitToLast(1);
+
+
+
+        DatabaseReference localDatabase = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions");
+
+        ChildEventListener childEventListener3 = new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
+                Log.d(TAG, "Change in MainUsers (listening for notificationIgnored event) - onChildAdded");
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
+
+                Log.d(TAG, "Change in MainUsers (listening for notificationIgnored event) -  onChildChanged");
+                Log.d(TAG, "dataSnapshot" + dataSnapshot);
+                Log.d(TAG, "s" + previousChildName);
+
+                Log.d(TAG, "dataSnapshot.getKey(): " + dataSnapshot.getKey());
+
+
+                    SleepSession localSession = dataSnapshot.getValue(SleepSession.class); // We are assuming that only the most recent sleep session from this user can change. TODO: Find a way to only grab the last sleep session
+
+                    if(localSession.getNotificationIgnored() && !localSession.getNotificationIgnoredBy().equals(userUid)){
+                        Log.d(TAG, "The notification was just ignored");
+                        Log.d(TAG, "New SleepSession was ignored by the other user");
+
+                        if((notification instanceof View) || notification != null){
+
+                            pageLayout.removeView((View) notification.getParent());
+                            notification = null;
+                            Log.d(TAG, "Removed alert notification");
+
+                            // Check if a notification was removed because of someone hitting the ignore button. if so show Toast
+                            Toast.makeText(UserMainActivity.this, "Sleep Session was cancelled by " + localSession.getNotificationIgnoredBy(), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                }
+
+
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d(TAG, "Change in MainUsers - onCancelled");
+            }
+        };
+        localDatabase.addChildEventListener(childEventListener3);
+
+
+
+        /*
+
 
         query.addChildEventListener(new ChildEventListener() {
             @Override
@@ -195,6 +311,8 @@ public class UserMainActivity extends AppCompatActivity {
 
             }
         });
+
+        */
 
 
 
@@ -292,7 +410,7 @@ public class UserMainActivity extends AppCompatActivity {
 
                 for (DataSnapshot sessionSnapshot : dataSnapshot.getChildren()) {
 
-                    Log.d(TAG, "sessionSnapshot" + sessionSnapshot);
+                    Log.d(TAG, "sessionSnapshot " + sessionSnapshot);
                     final SleepSession localSleepSession = sessionSnapshot.getValue(SleepSession.class);
 
                     findUserName(database, new OnGetDataListener() {

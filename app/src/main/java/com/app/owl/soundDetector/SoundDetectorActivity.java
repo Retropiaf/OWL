@@ -267,7 +267,7 @@ public class SoundDetectorActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        timer.cancel();
+        if(timer != null){timer.cancel();}
         soundCapture.stop();
         //wakeLock.release();
         // TODO LOCK THE SCREEN ON

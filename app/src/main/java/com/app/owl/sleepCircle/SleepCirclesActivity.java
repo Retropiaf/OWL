@@ -64,6 +64,68 @@ public class SleepCirclesActivity extends AppCompatActivity {
             }
         });
 
+
+
+        String currentUserUid = CurrentUser.uid;
+        Log.d(TAG, "currentUserUid: " + currentUserUid);
+
+        DatabaseReference localDatabase = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(currentUserUid).child("circles");
+
+        Log.d(TAG, "localDatabase: " + localDatabase);
+
+        localDatabase.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                Log.d(TAG, "Building the list - dataSnapshot" + dataSnapshot);
+
+                list.clear();
+
+
+                for (DataSnapshot circleSnapshot : dataSnapshot.getChildren()) {
+                    Log.d(TAG, "Building the list - circleSnapshot" + circleSnapshot);
+                    //getting artist
+                    SleepCircle circle = circleSnapshot.getValue(SleepCircle.class);
+                    //adding artist to the list
+                    Log.d(TAG, String.valueOf(circle));
+                    list.add(circle);
+                }
+
+                //creating adapter
+                sleepCircleList = new SleepCircleList(SleepCirclesActivity.this, list);
+
+                //attaching adapter to the listview
+                listViewSleepCircle.setAdapter(sleepCircleList);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+
+
+        });
+
+        listViewSleepCircle.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                SleepCircle circle = sleepCircleList.getItem(i);
+                Intent intent = new Intent(getApplicationContext(), SleepCircleDetailsActivity.class);
+                intent.putExtra(CIRCLE, circle);
+                /*
+                intent.putExtra(CIRCLE_NAME, circle.getCircleName());
+                intent.putExtra(CIRCLE_ID, circle.getCircleId());
+                intent.putExtra(USER_1, circle.getUser1());
+                intent.putExtra(USER_2, circle.getUser2());
+                intent.putExtra(USERNAME_2, circle.secondUserName);
+                intent.putExtra(MONITOR, circle.getMonitorIp());
+                intent.putExtra(MONITOR_NAME, circle.getMonitorName());
+                */
+
+                startActivity(intent);
+            }
+        });
+
         /*
 
 
@@ -220,15 +282,23 @@ public class SleepCirclesActivity extends AppCompatActivity {
 */
 
         String currentUserUid = CurrentUser.uid;
+        Log.d(TAG, "currentUserUid: " + currentUserUid);
 
-        database = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(currentUserUid).child("circles");
-        database.addValueEventListener(new ValueEventListener() {
+        DatabaseReference localDatabase = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(currentUserUid).child("circles");
+
+        Log.d(TAG, "localDatabase: " + localDatabase);
+
+        localDatabase.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
+                Log.d(TAG, "Building the list - dataSnapshot" + dataSnapshot);
+
                 list.clear();
 
+
                 for (DataSnapshot circleSnapshot : dataSnapshot.getChildren()) {
+                    Log.d(TAG, "Building the list - circleSnapshot" + circleSnapshot);
                     //getting artist
                     SleepCircle circle = circleSnapshot.getValue(SleepCircle.class);
                     //adding artist to the list
