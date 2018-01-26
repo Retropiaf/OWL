@@ -166,8 +166,9 @@ public class OnGoingSleepSessionActivity extends AppCompatActivity {
                     final String alertStart = currentAlert;
 
                     // find session's current responder. If current user find alert
-                    final Query localSessionDatabase2 = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions").equalTo(currentSession);
-                    Log.d(TAG, "localSessionDatabase: " + localSessionDatabase2);
+                    Log.d(TAG, "currentSession: " + currentSession);
+                    final Query localSessionDatabase2 = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions").child(currentSession);
+                    Log.d(TAG, "localSessionDatabase2: " + localSessionDatabase2);
                     ValueEventListener localSessionListener = new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {

@@ -54,7 +54,7 @@ public class SoundDetectorActivity extends AppCompatActivity {
     Alert alert;
     public static Button endSession, endAlert, snoozeBtn;
     DatabaseReference database, sleepSessionDatabase;
-    String circleName, selection, userUid, activityCurrentResponder, activityFirstResponder, activitySecondResponder;
+    String circleName, selection, userUid, activityCurrentResponder, activityFirstResponder, activitySecondResponder, activitySleepSession;
     public static TextView snoozeClock, timeLeft;
     public static Spinner snoozeDuration;
     SleepCircle circle;
@@ -92,6 +92,7 @@ public class SoundDetectorActivity extends AppCompatActivity {
         activityCurrentResponder =  sleepSession.getFirstResponder();
         activityFirstResponder = sleepSession.getFirstResponder();
         activitySecondResponder = sleepSession.getSecondResponder();
+        activitySleepSession = sleepSession.getStartTime();
 
 
         snoozeDuration = findViewById(R.id.snooze_duration);
@@ -182,6 +183,36 @@ public class SoundDetectorActivity extends AppCompatActivity {
                 childUpdates.put(path2, timeNow);
                 database.updateChildren(childUpdates);
 
+                if(activityCurrentResponder != null ){
+                    Log.d(TAG, "activityCurrentResponder != null");
+
+                    String secondResp = activityCurrentResponder == activityFirstResponder ? activitySecondResponder : activityFirstResponder;
+                    DatabaseReference database2 = FirebaseDatabase.getInstance().getReference();
+                    Map<String, Object> childUpdates2 = new HashMap<>();
+                    String path3 = "/MainUsers/"+ circle.getUser1() + "/SleepSessions/" + activitySleepSession + "currentResponder";
+                    String path4 = "/MainUsers/"+ circle.getUser1() + "/SleepSessions/" + activitySleepSession + "currentResponder";
+                    childUpdates.put(path3, activityCurrentResponder);
+                    childUpdates.put(path4, activityCurrentResponder);
+                    database2.updateChildren(childUpdates2);
+
+                    Log.d(TAG, "activityCurrentResponder:" + activityCurrentResponder);
+                    Log.d(TAG, "secondResp:" + secondResp);
+                }else{
+                    Log.d(TAG, "activityCurrentResponder == null");
+
+                    activityCurrentResponder = activitySecondResponder;
+                    DatabaseReference database2 = FirebaseDatabase.getInstance().getReference();
+                    Map<String, Object> childUpdates2 = new HashMap<>();
+                    String path3 = "/MainUsers/"+ circle.getUser1() + "/SleepSessions/" + activitySleepSession + "currentResponder";
+                    String path4 = "/MainUsers/"+ circle.getUser1() + "/SleepSessions/" + activitySleepSession + "currentResponder";
+                    childUpdates.put(path3, activitySecondResponder);
+                    childUpdates.put(path4, activitySecondResponder);
+                    database2.updateChildren(childUpdates2);
+
+                    Log.d(TAG, "activitySecondResponder:" + activitySecondResponder);
+                    Log.d(TAG, "activityFirstResponder:" + activityFirstResponder);
+                }
+
 
             }
         });
@@ -215,8 +246,25 @@ public class SoundDetectorActivity extends AppCompatActivity {
                 udpdateSessionEndTime(timeNow, circle.getUser1());
                 udpdateSessionEndTime(timeNow, circle.getUser2());
 
-                updateCurrent(circle.getUser1());
-                updateCurrent(circle.getUser2());
+                DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+                Map<String, Object> childUpdates = new HashMap<>();
+                String path1 = "/MainUsers/"+ circle.getUser1() + "/currentAlert/";
+                String path2 = "/MainUsers/"+ circle.getUser2() + "/currentAlert/";
+                String path3 = "/MainUsers/"+ circle.getUser1() + "/insideSession/";
+                String path4 = "/MainUsers/"+ circle.getUser2() + "/insideSession/";
+                String path5 = "/MainUsers/"+ circle.getUser1() + "/onGoingSession/";
+                String path6 = "/MainUsers/"+ circle.getUser2() + "/onGoingSession/";
+                childUpdates.put(path1, "");
+                childUpdates.put(path2, "");
+                childUpdates.put(path3, false);
+                childUpdates.put(path4, false);
+                childUpdates.put(path5, false);
+                childUpdates.put(path6, false);
+                database.updateChildren(childUpdates);
+
+
+                updateCurrent(circle.getUser1(), "", "", "");
+                updateCurrent(circle.getUser2(), "", "", "");
 
                 Log.d(TAG, "Redirection to welcome page");
                 Intent intentReturnToWelcome = new Intent(SoundDetectorActivity.this, UserMainActivity.class);
@@ -365,8 +413,8 @@ public class SoundDetectorActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        updateCurrent(circle.getUser1());
-        updateCurrent(circle.getUser2());
+        updateCurrent(circle.getUser1(), "", "", "");
+        updateCurrent(circle.getUser2(), "", "", "");
         updateOnGoingAlertDb(false,  circle.getUser1());
         updateOnGoingAlertDb(false,  circle.getUser2());
         udpdateUserOngoingSession(false, circle.getUser1());
@@ -520,12 +568,14 @@ public class SoundDetectorActivity extends AppCompatActivity {
 
         if(activityCurrentResponder != null ){
             Log.d(TAG, "activityCurrentResponder != null");
+            // TODO UPDATE THE DATABASE INSTEAD
             alert.setFirstResponderId(activityCurrentResponder);
             String secondResp = activityCurrentResponder == activityFirstResponder ? activitySecondResponder : activityFirstResponder;
             alert.setSecondResponderId(secondResp);
             Log.d(TAG, "activityCurrentResponder:" + activityCurrentResponder);
             Log.d(TAG, "secondResp:" + secondResp);
         }else{
+            // TODO UPDATE THE DATABASE INSTEAD
             Log.d(TAG, "activityCurrentResponder == null");
             activityCurrentResponder = activitySecondResponder;
             alert.setFirstResponderId(activitySecondResponder);
@@ -533,7 +583,6 @@ public class SoundDetectorActivity extends AppCompatActivity {
             Log.d(TAG, "activitySecondResponder:" + activitySecondResponder);
             Log.d(TAG, "activityFirstResponder:" + activityFirstResponder);
         }
-
 
         Log.d(TAG, "Inside declareAlert, alert:" + alert);
         // Add alert to database for each user
@@ -551,18 +600,6 @@ public class SoundDetectorActivity extends AppCompatActivity {
         childUpdates.put(path1, timeNow);
         childUpdates.put(path2, timeNow);
         database.updateChildren(childUpdates);
-
-        DatabaseReference database2 = FirebaseDatabase.getInstance().getReference();
-        Map<String, Object> childUpdates2 = new HashMap<>();
-        String path3= "/MainUsers/"+ circle.getUser1() + "/currentAlert/";
-        String path4 = "/MainUsers/"+ circle.getUser2() + "/currentAlert/";
-        childUpdates.put(path3, timeNow);
-        childUpdates.put(path4, timeNow);
-        database2.updateChildren(childUpdates2);
-
-        updateCurrent(circle.getUser1());
-        updateCurrent(circle.getUser2());
-
 
         countDownForResponse();
 
@@ -584,54 +621,21 @@ public class SoundDetectorActivity extends AppCompatActivity {
                 updateOnGoingAlertDb(false,  circle.getUser1());
                 updateOnGoingAlertDb(false,  circle.getUser2());
 
+                // TODO update the user here
+
 
                 String timeNow = String.valueOf(Calendar.getInstance().getTime());
 
                 updateAlertEndDb(timeNow, circle.getUser1(), false);
                 updateAlertEndDb(timeNow, circle.getUser2(), false);
 
-/*
-
-                // no one answered the alert after 30s
-                database = FirebaseDatabase.getInstance().getReference();
-
-
-
-                String path = "/MainUsers/" + circle.getUser1() + "/SleepSessions/" + sleepSession.getStart_time() + "/Alerts/" + alert.getStartTime() + "/alertEnded/";
-                // set alert.getAlertEnded() = true;
-                AlertHandler.updateAlertBool(database, path, true);
-                */
-
-                /*
+                DatabaseReference database = FirebaseDatabase.getInstance().getReference();
                 Map<String, Object> childUpdates = new HashMap<>();
-                childUpdates.put(path, true);
+                String path1 = "/MainUsers/"+ circle.getUser1() + "/currentAlert/";
+                String path2 = "/MainUsers/"+ circle.getUser2() + "/currentAlert/";
+                childUpdates.put(path1, "");
+                childUpdates.put(path2, "");
                 database.updateChildren(childUpdates);
-                */
-/*
-
-
-                String now = String.valueOf(Calendar.getInstance().getTime());
-                path = "/MainUsers/" + circle.getUser1() + "/SleepSessions/" + sleepSession.getStart_time() + "/Alerts/" + alert.getStartTime() + "/endTime/";
-                // set alert.endTime = now
-                AlertHandler.updateAlertTime(database, path, now);
-
-                path = "/MainUsers/" + circle.getUser1() + "/SleepSessions/" + sleepSession.getStart_time() + "/Alerts/" + alert.getStartTime() + "/alertAnswered/";
-                // set alertAnswered == false
-                AlertHandler.updateAlertBool(database, path, false);
-
-                path = "/MainUsers/" + circle.getUser2() + "/SleepSessions/" + sleepSession.getStart_time() + "/Alerts/" + alert.getStartTime() + "/alertEnded/";
-                // set alert.getAlertEnded() = true;
-                AlertHandler.updateAlertBool(database, path, true);
-
-                now = String.valueOf(Calendar.getInstance().getTime());
-                path = "/MainUsers/" + circle.getUser2() + "/SleepSessions/" + sleepSession.getStart_time() + "/Alerts/" + alert.getStartTime() + "/endTime/";
-                // set alert.endTime = now
-                AlertHandler.updateAlertTime(database, path, now);
-
-                path = "/MainUsers/" + circle.getUser2() + "/SleepSessions/" + sleepSession.getStart_time() + "/Alerts/" + alert.getStartTime() + "/alertAnswered/";
-                // set alertAnswered == false
-                AlertHandler.updateAlertBool(database, path, false);
-                */
 
                 Log.d(TAG, "call startDetectingSounds();");
                 new ShowEndSession().execute();
@@ -762,10 +766,14 @@ public class SoundDetectorActivity extends AppCompatActivity {
         updateAlertEndDb(timeNow, circle.getUser2(), true);
         updateOnGoingAlertDb(false,  circle.getUser1());
         updateOnGoingAlertDb(false,  circle.getUser2());
-        updateCurrent(circle.getUser1());
-        updateCurrent(circle.getUser2());
 
-
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+        Map<String, Object> childUpdates = new HashMap<>();
+        String path1 = "/MainUsers/"+ circle.getUser1() + "/currentAlert/";
+        String path2 = "/MainUsers/"+ circle.getUser2() + "/currentAlert/";
+        childUpdates.put(path1, "");
+        childUpdates.put(path2, "");
+        database.updateChildren(childUpdates);
 
        // TODO: Make sure to call "alert.setAlertResponderId" from responder's device
 
@@ -888,7 +896,7 @@ public class SoundDetectorActivity extends AppCompatActivity {
     }
     */
 
-    public void updateCurrent(String localUser){
+    public void updateCurrent(String localUser, String circle, String secondUser, String currentSession){
         DatabaseReference database = FirebaseDatabase.getInstance().getReference();
         String path1 = "/MainUsers/"+ localUser + "/currentCircle/";
         String path2 = "/MainUsers/"+ localUser + "/currentCircle/";

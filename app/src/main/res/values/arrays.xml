@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="preloaded_fonts">
+        <item>@font/cabin</item>
+        <item>@font/dosis</item>
+        <item>@font/josephine_sans</item>
+        <item>@font/lobster</item>
+        <item>@font/montserrat</item>
+        <item>@font/noto_sans</item>
+        <item>@font/oxygen</item>
+        <item>@font/pacifico</item>
+    </array>
+</resources>

@@ -12,5 +12,17 @@
         android:layout_height="291dp"
         app:srcCompat="@drawable/owly_logo_copy"
         tools:layout_editor_absoluteX="90dp"
-        tools:layout_editor_absoluteY="85dp" />
+        tools:layout_editor_absoluteY="85dp"
+        android:layout_gravity="center"/>
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/dosis"
+        android:text="Owly"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+        tools:layout_editor_absoluteX="151dp"
+        tools:layout_editor_absoluteY="394dp"
+        android:layout_gravity="center"/>
 </android.support.constraint.ConstraintLayout>
