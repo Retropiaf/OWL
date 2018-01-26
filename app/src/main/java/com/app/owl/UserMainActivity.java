@@ -8,7 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.app.owl.sleepCircle.SleepCirclesActivity;
@@ -33,7 +33,7 @@ public class UserMainActivity extends AppCompatActivity {
 
     Button testWireless, sleepCircle, signout;
     DatabaseReference database;
-    LinearLayout pageLayout;
+    RelativeLayout pageLayout;
     FirebaseUser user;
     String userUid;
     View notification;
@@ -50,7 +50,7 @@ public class UserMainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_main);
 
-        pageLayout = (LinearLayout) findViewById(R.id.activity_user_main);
+        pageLayout = (RelativeLayout) findViewById(R.id.activity_user_main);
 
         inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 

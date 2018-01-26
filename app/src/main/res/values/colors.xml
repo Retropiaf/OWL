@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorPrimaryDark">#d6d2bc</color>
+    <color name="colorAccent">#449EAA</color>
 
     <color name="Black">#000000</color>
     <color name="linkBlue">#4d94ff</color>
@@ -11,6 +11,20 @@
     <color name="blue5">#007f85</color>
     <color name="yellow_alert">#f8f3d8</color>
     <color name="yellow_alert_border">#cdca98</color>
+    <color name="palette_cyan">#6DD2E6</color>
+    <color name="palette_cyan2">#83CCD6</color>
+    <color name="palette_cyan3">#65C2CE</color>
+    <color name="palette_cyan4">#50A6AD</color>
+    <color name="palette_cyan5">#449EAA</color>
+    <color name="palette_light_blue">#A9DBD8</color>
+    <color name="palette_beige">#E0E4CD</color>
+    <color name="palette_beige2">#CBCEB2</color>
+
+    <color name="palette_orange">#F1853C</color>
+    <color name="palette_orange2">#E5803C</color>
+
+
+    <color name="palette_deep_orange">#F86921</color>
 
     <color name="black_overlay">#66000000</color>
 </resources>
