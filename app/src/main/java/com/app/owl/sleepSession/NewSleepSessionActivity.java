@@ -240,8 +240,8 @@ public class NewSleepSessionActivity extends AppCompatActivity {
                                                 childUpdates.put(path2, circle.getCircleName());
                                                 childUpdates.put(path3, secondResponder);
                                                 childUpdates.put(path4, firstResponder);
-                                                childUpdates.put(path5, sleepSession.getStartTime());
-                                                childUpdates.put(path6, sleepSession.getStartTime());
+                                                childUpdates.put(path5, newSleepSession.getStartTime());
+                                                childUpdates.put(path6, newSleepSession.getStartTime());
                                                 database.updateChildren(childUpdates);
 
                                                 openDetectorIntent.putExtra(CIRCLE, circle);

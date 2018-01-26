@@ -17,6 +17,7 @@
         android:id="@+id/respond_alert_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/respond_alert"/>
+        android:text="@string/respond_alert"
+        android:onClick="onChecking"/>
 
 </android.widget.LinearLayout>

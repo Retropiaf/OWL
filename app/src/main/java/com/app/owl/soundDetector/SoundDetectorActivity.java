@@ -78,6 +78,11 @@ public class SoundDetectorActivity extends AppCompatActivity {
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
+        pageLayout = (LinearLayout) findViewById(R.id.activity_sound_detector);
+        inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        button = inflater.inflate(R.layout.demo_button, null);
+        demoButton.findViewById(R.id.demo_btn);
+
         // Todo: close session when isIgnored == true
         //DatabaseReference localDatabase = Query query = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions")
 
@@ -246,17 +251,11 @@ public class SoundDetectorActivity extends AppCompatActivity {
                 Boolean localDemo = dataSnapshot.getValue(Boolean.class);
                 if(localDemo){
                     Log.d(TAG, "Demo mode started");
-                    pageLayout = (LinearLayout) findViewById(R.id.activity_sound_detector);
+
                     inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                     button = inflater.inflate(R.layout.demo_button, null);
                     pageLayout.addView(button, 0);
-                    demoButton.findViewById(R.id.demo_btn);
-                    demoButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            declareAlert();
-                        }
-                    });
+
 
                 }else if(button != null){
                     pageLayout.removeView((View) button.getParent());
@@ -284,6 +283,11 @@ public class SoundDetectorActivity extends AppCompatActivity {
         soundCapture = new SoundCapture();
         alertHandler = new AlertHandler();
         askPermissions();
+    }
+
+    public void onAlert(View v){
+        Log.d(TAG, "Giving sound alert");
+        declareAlert();
     }
 
     @Override

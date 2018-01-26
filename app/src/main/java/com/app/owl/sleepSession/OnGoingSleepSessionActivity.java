@@ -55,6 +55,12 @@ public class OnGoingSleepSessionActivity extends AppCompatActivity {
         user = FirebaseAuth.getInstance().getCurrentUser();
         userUid = user.getUid();
 
+        pageLayout = (LinearLayout) findViewById(R.id.activity_user_main);
+
+        inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        button = inflater.inflate(R.layout.new_session_notification, null);
+
         // listen for new alert where you are the person in charge
         // when new alert received alarm rings and a buttons appears/ Alarm becomes louder and louder until responded. after 20s the other person is woken up
 
@@ -218,6 +224,33 @@ public class OnGoingSleepSessionActivity extends AppCompatActivity {
 
     }
 
+    public void onChecking(View button, String alertStartTime, String sessionStartTime, String userUid2) {
+        String timeNow = String.valueOf(Calendar.getInstance().getTime());
+
+        // update alert
+        String path1 = "/MainUsers/" + userUid + "/SleepSessions/" + sessionStartTime + "/alerts/" + alertStartTime + "/endTime/"; // TODO: check spelling inside path
+        String path2 = "/MainUsers/" + userUid + "/SleepSessions/" + sessionStartTime + "/alerts/" + alertStartTime + "/alertResponderId/"; // TODO: check spelling inside path
+        String path3 = "/MainUsers/" + userUid + "/SleepSessions/" + sessionStartTime + "/alerts/" + alertStartTime + "/alertAnswered/"; // TODO: check spelling inside path
+        String path4 = "/MainUsers/" + userUid + "/SleepSessions/" + sessionStartTime + "/alerts/" + alertStartTime + "/alertEnded/"; // TODO: check spelling inside path
+        DatabaseReference localDatabase = FirebaseDatabase.getInstance().getReference();
+        Map<String, Object> childUpdates = new HashMap<>();
+        childUpdates.put(path1, timeNow);
+        childUpdates.put(path2, userUid);
+        childUpdates.put(path3, true);
+        childUpdates.put(path4, true);
+        localDatabase.updateChildren(childUpdates);
+
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+        Map<String, Object> childUpdates2 = new HashMap<>();
+        String path5 = "/MainUsers/"+ userUid + "/currentAlert/";
+        String path6 = "/MainUsers/"+ userUid2 + "/currentAlert/"; // TODO add second user
+        childUpdates.put(path5, timeNow);
+        childUpdates.put(path6, timeNow);
+        database.updateChildren(childUpdates2);
+        pageLayout.removeView((View) button.getParent());
+        Toast.makeText(OnGoingSleepSessionActivity.this, "Don't forget to go check the monitor device.", Toast.LENGTH_SHORT).show();
+    }
+
     public void handleAlert(Alert alert, SleepSession localSleepSession, String secondUser){
         final String alertStartTime = alert.getStartTime();
         final String sessionStartTime = localSleepSession.getStartTime();
@@ -230,42 +263,13 @@ public class OnGoingSleepSessionActivity extends AppCompatActivity {
             alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         }
 
-        pageLayout = (LinearLayout) findViewById(R.id.activity_user_main);
         inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        button = inflater.inflate(R.layout.respond_alert, null);
+        button = inflater.inflate(R.layout.new_session_notification, null);
         pageLayout.addView(button, 0);
 
 
-        respondAlertBtn = findViewById(R.id.respond_alert_btn);
-        respondAlertBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String timeNow = String.valueOf(Calendar.getInstance().getTime());
-
-                // update alert
-                String path1 = "/MainUsers/" + userUid + "/SleepSessions/" + sessionStartTime + "/alerts/" + alertStartTime + "/endTime/"; // TODO: check spelling inside path
-                String path2 = "/MainUsers/" + userUid + "/SleepSessions/" + sessionStartTime + "/alerts/" + alertStartTime + "/alertResponderId/"; // TODO: check spelling inside path
-                String path3 = "/MainUsers/" + userUid + "/SleepSessions/" + sessionStartTime + "/alerts/" + alertStartTime + "/alertAnswered/"; // TODO: check spelling inside path
-                String path4 = "/MainUsers/" + userUid + "/SleepSessions/" + sessionStartTime + "/alerts/" + alertStartTime + "/alertEnded/"; // TODO: check spelling inside path
-                DatabaseReference localDatabase = FirebaseDatabase.getInstance().getReference();
-                Map<String, Object> childUpdates = new HashMap<>();
-                childUpdates.put(path1, timeNow);
-                childUpdates.put(path2, userUid);
-                childUpdates.put(path3, true);
-                childUpdates.put(path4, true);
-                localDatabase.updateChildren(childUpdates);
-
-                DatabaseReference database = FirebaseDatabase.getInstance().getReference();
-                Map<String, Object> childUpdates2 = new HashMap<>();
-                String path5 = "/MainUsers/"+ userUid + "/currentAlert/";
-                String path6 = "/MainUsers/"+ userUid2 + "/currentAlert/"; // TODO add second user
-                childUpdates.put(path5, timeNow);
-                childUpdates.put(path6, timeNow);
-                database.updateChildren(childUpdates2);
-                pageLayout.removeView((View) button.getParent());
-                Toast.makeText(OnGoingSleepSessionActivity.this, "Don't forget to go check the monitor device.", Toast.LENGTH_SHORT).show();
-            }
-        });
+git a
+        onChecking(button, alertStartTime, sessionStartTime, userUid2);
 
         ringtone = RingtoneManager.getRingtone(OnGoingSleepSessionActivity.this, alarmUri);
         ringtone.play();
@@ -301,7 +305,6 @@ public class OnGoingSleepSessionActivity extends AppCompatActivity {
                 childUpdates.put(path5, "");
                 childUpdates.put(path6, "");
                 localDatabase2.updateChildren(childUpdates2);
-
 
                 pageLayout.removeView((View) button.getParent());
 
