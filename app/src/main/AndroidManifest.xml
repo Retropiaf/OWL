@@ -62,7 +62,8 @@
         <activity android:name=".sleepSession.SleepSessionDetailsActivity" />
         <activity android:name=".sleepSession.OnGoingSleepSessionActivity" />
         <activity android:name=".sleepSession.NewSleepSessionActivity" />
-        <activity android:name=".sleepSession.OnGoingMonitoringActivity"></activity>
+        <activity android:name=".sleepSession.ConnectAudioDeviceActivity"/>
+        <activity android:name=".sleepSession.OnGoingMonitoringActivity"/>
     </application>
 
 </manifest>

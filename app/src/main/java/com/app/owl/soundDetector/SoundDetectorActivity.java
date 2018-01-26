@@ -10,6 +10,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
@@ -68,7 +69,7 @@ public class SoundDetectorActivity extends AppCompatActivity {
         user = FirebaseAuth.getInstance().getCurrentUser();
         userUid = user.getUid();
 
-
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 
 
@@ -257,6 +258,8 @@ public class SoundDetectorActivity extends AppCompatActivity {
             }
         });
 
+
+        // TODO Check if the session is ignored, if so end session
 
         soundArray = new BuildSoundArray();
         alertHandler = new AlertHandler();

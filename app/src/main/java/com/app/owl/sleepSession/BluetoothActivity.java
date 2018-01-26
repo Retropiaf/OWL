@@ -3,7 +3,6 @@ package com.app.owl.sleepSession;
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -24,18 +23,18 @@ import android.widget.Toast;
 
 import com.app.owl.DeviceListAdapter;
 import com.app.owl.R;
+import com.app.owl.p2p.VideoStreamActivity;
 
 import java.util.ArrayList;
 import java.util.Set;
 
-public class ConnectAudioDeviceActivity extends AppCompatActivity  implements AdapterView.OnItemClickListener {
+public class BluetoothActivity extends AppCompatActivity  implements AdapterView.OnItemClickListener {
     private static final String TAG = "SetSleepSessionActivity";
 
     //ProgressDialog mProgressDlg;
 
     // private static final int REQUEST_ENABLE_BT=1;
     BluetoothA2dp mBluetoothEarbuds;
-    BluetoothHeadset mBluetoothHeadset;
     //Set<BluetoothDevice> pairedDevices;
     TextView chooseDevice;
     TextView discoverBtn;
@@ -110,12 +109,12 @@ public class ConnectAudioDeviceActivity extends AppCompatActivity  implements Ad
 
             if (action.equals(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)){
 
-                Toast toast = Toast.makeText(ConnectAudioDeviceActivity.this, "Search over. " + String.valueOf(mBTDevices.size()) + " device(s) found.", Toast.LENGTH_LONG);
+                Toast toast = Toast.makeText(BluetoothActivity.this, "Search over. " + String.valueOf(mBTDevices.size()) + " device(s) found.", Toast.LENGTH_LONG);
                 toast.show();
 
                 Log.d(TAG, "mBroadcastReceiver1 - ACTION_DISCOVERY_FINISHED");
 
-                mDeviceListAdapter = new DeviceListAdapter(ConnectAudioDeviceActivity.this, R.layout.device_adapter_view, mBTDevices);
+                mDeviceListAdapter = new DeviceListAdapter(BluetoothActivity.this, R.layout.device_adapter_view, mBTDevices);
                 lvNewDevices.setAdapter(mDeviceListAdapter);
 
             }
@@ -133,6 +132,18 @@ public class ConnectAudioDeviceActivity extends AppCompatActivity  implements Ad
 
         discoverBtn = (TextView) findViewById(R.id.discover); // Button
 
+        TextView goToVideo = (TextView) findViewById(R.id.go_to_video); // Go to video button
+
+        goToVideo.setOnClickListener(new View.OnClickListener() {
+
+            public void onClick(View v) {   Intent goTovideo = new Intent(BluetoothActivity.this, VideoStreamActivity.class);
+                startActivity(goTovideo);
+            }
+
+        });
+
+
+
         discoverBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -142,14 +153,14 @@ public class ConnectAudioDeviceActivity extends AppCompatActivity  implements Ad
 
         mBTDevices = new ArrayList<>(); // Create an empty list of bluetooth devices
 
-        lvNewDevices.setOnItemClickListener(ConnectAudioDeviceActivity.this); // Set an onItemClick listener for elements of the bluetooth device list
+        lvNewDevices.setOnItemClickListener(BluetoothActivity.this); // Set an onItemClick listener for elements of the bluetooth device list
 
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter(); // Get the default adapter
 
         // Check if the user's device has bluetooth
         if(mBluetoothAdapter == null){
             Log.d(TAG, "No bluetooth functionality");
-            Toast toast = Toast.makeText(ConnectAudioDeviceActivity.this, "This device doesn't support bluetooth connections", Toast.LENGTH_LONG);
+            Toast toast = Toast.makeText(BluetoothActivity.this, "This device doesn't support bluetooth connections", Toast.LENGTH_LONG);
             toast.show();
             //finish();
         }
@@ -160,39 +171,14 @@ public class ConnectAudioDeviceActivity extends AppCompatActivity  implements Ad
     protected void onDestroy() {
         Log.d(TAG, "onDestroy: called");
         super.onDestroy();
-        if(mBluetoothAdapter != null){
-            mBluetoothAdapter.closeProfileProxy(BluetoothProfile.A2DP, mBluetoothEarbuds);
-            mBluetoothAdapter.disable();
-            mBluetoothAdapter.cancelDiscovery();
-        }
-
-        // TODO LATER: add headset as possibility
-        /*
-        if(mBluetoothHeadset != null){
-            mBluetoothHeadset.closeProfileProxy(BluetoothProfile.HEADSET, mBluetoothHeadset);
-            mBluetoothHeadset.disable();
-            mBluetoothHeadset.cancelDiscovery();
-        }
-         */
 
         // Close proxy connection after use.
-
-        try {
-            unregisterReceiver(mBroadcastReceiver4);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        try {
-            unregisterReceiver(mBroadcastReceiver3);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        try {
-            unregisterReceiver(mBroadcastReceiver1);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+        mBluetoothAdapter.closeProfileProxy(BluetoothProfile.A2DP, mBluetoothEarbuds);
+        mBluetoothAdapter.disable();
+        if (mBroadcastReceiver4 != null) {unregisterReceiver(mBroadcastReceiver4);}
+        if (mBroadcastReceiver3 != null) {unregisterReceiver(mBroadcastReceiver3);}
+        if (mBroadcastReceiver1 != null) {unregisterReceiver(mBroadcastReceiver1);}
+        mBluetoothAdapter.cancelDiscovery();
     } // End of onDestroy
 
     public void discoverDevices(){
@@ -261,7 +247,7 @@ public class ConnectAudioDeviceActivity extends AppCompatActivity  implements Ad
             mBTDevices.get(i).createBond();
 
             // Establish connection to the proxy.
-            mBluetoothAdapter.getProfileProxy(ConnectAudioDeviceActivity.this, mProfileListener, BluetoothProfile.A2DP);
+            mBluetoothAdapter.getProfileProxy(BluetoothActivity.this, mProfileListener, BluetoothProfile.A2DP);
 
             IntentFilter discoverDevicesIntent = new IntentFilter(BluetoothDevice.ACTION_FOUND);
             registerReceiver(mBroadcastReceiver4, discoverDevicesIntent);
@@ -273,30 +259,15 @@ public class ConnectAudioDeviceActivity extends AppCompatActivity  implements Ad
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
             if (profile == BluetoothProfile.A2DP) {
 
-
                 mBluetoothEarbuds = (BluetoothA2dp) proxy;
 
-                Log.d(TAG, "Connected to a device: " + mBluetoothEarbuds);
-
-                Intent enterSessionIntent = new Intent(ConnectAudioDeviceActivity.this, OnGoingSleepSessionActivity.class);
+                Intent enterSessionIntent = new Intent(BluetoothActivity.this, OnGoingSleepSessionActivity.class);
                 startActivity(enterSessionIntent);
 
 
-            }
-            /*
-            TODO HEADSET
-            else if(profile == BluetoothProfile.HEADSET){
-                mBluetoothHeadset = (BluetoothHeadset) proxy;
-
-                Log.d(TAG, "Connected to a headset: " + mBluetoothHeadset);
-
-                Intent enterSessionIntent = new Intent(ConnectAudioDeviceActivity.this, OnGoingSleepSessionActivity.class);
-                startActivity(enterSessionIntent);
-            }
-             */
-            else{
+            }else{
                 Log.d(TAG, "The device chosen is not bluetooth earbuds or headphones");
-                Toast toast = Toast.makeText(ConnectAudioDeviceActivity.this, "Please connect to bluetooth earbuds or headphones", Toast.LENGTH_LONG);
+                Toast toast = Toast.makeText(BluetoothActivity.this, "Please connect to bluetooth earbuds or headphones", Toast.LENGTH_LONG);
                 toast.show();
                 // Close proxy connection after use.
                 mBluetoothAdapter.closeProfileProxy(profile, proxy);
@@ -308,14 +279,6 @@ public class ConnectAudioDeviceActivity extends AppCompatActivity  implements Ad
                 Log.d(TAG, "profile == BluetoothProfile.A2DP - Disconnecting");
                 mBluetoothEarbuds = null;
             }
-            /*
-            TODO HEADSET
-            if (profile == BluetoothProfile.HEADSET) {
-                Log.d(TAG, "profile == BluetoothProfile.HEADSET - Disconnecting");
-                mBluetoothHeadset = null;
-            }
-             */
-
         }
     };
 
@@ -363,7 +326,7 @@ public class ConnectAudioDeviceActivity extends AppCompatActivity  implements Ad
             // Check if the device has already been found and added to the list
             if(!isInList(mBTDevices, device)){
                 mBTDevices.add(device);
-                mDeviceListAdapter = new DeviceListAdapter(ConnectAudioDeviceActivity.this, R.layout.device_adapter_view, mBTDevices);
+                mDeviceListAdapter = new DeviceListAdapter(BluetoothActivity.this, R.layout.device_adapter_view, mBTDevices);
                 lvNewDevices.setAdapter(mDeviceListAdapter);
                 Log.d(TAG, "Added a new device to mBTDevices: " + deviceName + " - " + deviceAddress);
             }else{

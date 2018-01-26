@@ -7,8 +7,10 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -36,7 +38,7 @@ import java.util.TimerTask;
 
 public class OnGoingSleepSessionActivity extends AppCompatActivity {
 
-
+    String TAG = "OnGoingSleepSessionActivity";
     FirebaseUser user;
     String userUid;
     Timer waitResponseTimer;
@@ -73,6 +75,9 @@ public class OnGoingSleepSessionActivity extends AppCompatActivity {
 
 
 
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        // TODO Check if the session is ignored, if so end session
 
 
 
@@ -114,6 +119,7 @@ public class OnGoingSleepSessionActivity extends AppCompatActivity {
                 sessionDatabase.addChildEventListener(new ChildEventListener() {
                     @Override
                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                        Log.d(TAG, "dataSnapshot: " + dataSnapshot);
                         // A new alert is created
                         // TODO: check if "s" would be "Alerts" for new alerts. If so, add: if(s == "Alerts"){ rest of the code }
 
