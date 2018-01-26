@@ -171,6 +171,15 @@ public class SoundDetectorActivity extends AppCompatActivity {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                String timeNow = String.valueOf(Calendar.getInstance().getTime());
+                DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+                Map<String, Object> childUpdates = new HashMap<>();
+                String path1 = "/MainUsers/"+ circle.getUser1() + "/currentAlert/";
+                String path2 = "/MainUsers/"+ circle.getUser2() + "/currentAlert/";
+                childUpdates.put(path1, timeNow);
+                childUpdates.put(path2, timeNow);
+                database.updateChildren(childUpdates);
+
 
             }
         });
@@ -195,6 +204,7 @@ public class SoundDetectorActivity extends AppCompatActivity {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+
                 updateOnGoingAlertDb(false,  circle.getUser1());
                 updateOnGoingAlertDb(false,  circle.getUser2());
                 udpdateUserOngoingSession(false, circle.getUser1());
@@ -529,6 +539,9 @@ public class SoundDetectorActivity extends AppCompatActivity {
         childUpdates.put(path4, timeNow);
         database2.updateChildren(childUpdates2);
 
+        updateCurrent(circle.getUser1());
+        updateCurrent(circle.getUser2());
+        toggleCurrentResponder();
 
 
         countDownForResponse();
@@ -729,7 +742,10 @@ public class SoundDetectorActivity extends AppCompatActivity {
         updateAlertEndDb(timeNow, circle.getUser2(), true);
         updateOnGoingAlertDb(false,  circle.getUser1());
         updateOnGoingAlertDb(false,  circle.getUser2());
+        updateCurrent(circle.getUser1());
+        updateCurrent(circle.getUser2());
         toggleCurrentResponder();
+
 
 
        // TODO: Make sure to call "alert.setAlertResponderId" from responder's device

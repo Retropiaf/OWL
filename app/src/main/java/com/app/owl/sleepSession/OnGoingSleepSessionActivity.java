@@ -175,7 +175,7 @@ public class OnGoingSleepSessionActivity extends AppCompatActivity {
                             final SleepSession localSession = dataSnapshot.getValue(SleepSession.class);
                             Log.d(TAG, "localSession.getCurrentResponder(): " + localSession.getCurrentResponder());
                             Log.d(TAG, "userUid: " + userUid);
-                            if(localSession.getCurrentResponder().equals(userUid)){
+                            if(localSession.getCurrentResponder() != null && localSession.getCurrentResponder().equals(userUid)){
 
                                 Log.d(TAG, "I'm the current responder");
 
