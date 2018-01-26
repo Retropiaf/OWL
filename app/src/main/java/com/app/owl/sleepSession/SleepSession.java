@@ -55,6 +55,7 @@ public class SleepSession  implements Serializable {
     //public Boolean getOnGoingAlert(){return onGoingAlert;}
     public HashMap<String, Alert> getAlerts(){return alerts;}
     public long getTimestamp(){return timestamp;}
+    public Boolean getOnGoingAlert(){return onGoingAlert;}
 
     public void setEndTime(String time ){this.endTime = time;}
     public void  setCurrentResponder(){
@@ -66,6 +67,6 @@ public class SleepSession  implements Serializable {
     }
     public void setNotificationIgnored (Boolean bool){this.notificationIgnored = bool;}
     public void setNotificationIgnoredBy(String userName){this.notificationIgnoredBy = userName;}
-    //public void setOnGoingAlert(Boolean bool){this.onGoingAlert = bool;}
+    public void setOnGoingAlert(Boolean bool){this.onGoingAlert = bool;}
     public void setTimestamp(){this.timestamp = new Timestamp(System.currentTimeMillis()).getTime();}
 }

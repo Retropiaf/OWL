@@ -38,6 +38,7 @@ public class UserMainActivity extends AppCompatActivity {
     String userUid;
     View notification;
     LayoutInflater inflater;
+    Boolean activityOngoingSession;
 
     private static final String TAG = "UserMainActivity";
 
@@ -49,10 +50,13 @@ public class UserMainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_main);
 
-        notification = null;
-
         pageLayout = (LinearLayout) findViewById(R.id.activity_user_main);
+
         inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        notification = inflater.inflate(R.layout.new_session_notification, null);
+
+        //pageLayout.addView(notification, 0);
 
 
         user = FirebaseAuth.getInstance().getCurrentUser();
@@ -100,8 +104,9 @@ public class UserMainActivity extends AppCompatActivity {
                     Log.d(TAG, "Change to ongoingSession status");
 
                     Boolean ongoingSession = dataSnapshot.getValue(Boolean.class);
+                    activityOngoingSession = ongoingSession;
 
-                    if(ongoingSession){
+                    if(activityOngoingSession){
                         Log.d(TAG, "Session started");
 
 
@@ -114,16 +119,23 @@ public class UserMainActivity extends AppCompatActivity {
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 Log.d(TAG, "Looking at the user object: " + dataSnapshot);
 
-                                if(!dataSnapshot.getValue(Boolean.class)){
+                                if(!dataSnapshot.getValue(Boolean.class) && activityOngoingSession){
                                     Log.d(TAG, "The user has not been notified of the ongoing session yet");
+
+
+
+                                    inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
                                     // show notification
                                     notification = inflater.inflate(R.layout.new_session_notification, null);
 
-                                    inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                                     pageLayout.addView(notification, 0);
 
+                                    //updateIsNotified(true);
+
                                     // Updates isNotified field
+
+                                    /*
                                     Query query = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions").orderByChild("timestamp").limitToLast(1);
 
                                     query.addValueEventListener(new ValueEventListener() {
@@ -140,6 +152,7 @@ public class UserMainActivity extends AppCompatActivity {
                                                 updateIsNotified(sessionStartTime);
 
                                             }
+
                                         }
 
                                         @Override
@@ -147,7 +160,9 @@ public class UserMainActivity extends AppCompatActivity {
 
                                         }
                                     });
+                                    */
                                 }
+
 
                             }
 
@@ -185,33 +200,35 @@ public class UserMainActivity extends AppCompatActivity {
 
 
 
-        // Listen for notificationIgnored event
+
 
         //Query query = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions").limitToLast(1);
 
 
 
+        // Listen for notificationIgnored event
         DatabaseReference localDatabase = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions");
 
         ChildEventListener childEventListener3 = new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
-                Log.d(TAG, "Change in MainUsers (listening for notificationIgnored event) - onChildAdded");
+                Log.d(TAG, "Change in SleepSessions (listening for notificationIgnored event) - onChildAdded");
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
 
-                Log.d(TAG, "Change in MainUsers (listening for notificationIgnored event) -  onChildChanged");
+                Log.d(TAG, "SleepSessions (listening for notificationIgnored event) -  onChildChanged");
                 Log.d(TAG, "dataSnapshot" + dataSnapshot);
                 Log.d(TAG, "s" + previousChildName);
 
                 Log.d(TAG, "dataSnapshot.getKey(): " + dataSnapshot.getKey());
 
 
-                    SleepSession localSession = dataSnapshot.getValue(SleepSession.class); // We are assuming that only the most recent sleep session from this user can change. TODO: Find a way to only grab the last sleep session
+                SleepSession localSession = dataSnapshot.getValue(SleepSession.class); // We are assuming that only the most recent sleep session from this user can change. TODO: Find a way to only grab the last sleep session
 
-                    if(localSession.getNotificationIgnored() && !localSession.getNotificationIgnoredBy().equals(userUid)){
+                if(localSession.getNotificationIgnoredBy() != null && !(localSession.getNotificationIgnoredBy().equals(""))){
+                    if(localSession.getNotificationIgnored().equals(true) && !localSession.getNotificationIgnoredBy().equals(userUid)){
                         Log.d(TAG, "The notification was just ignored");
                         Log.d(TAG, "New SleepSession was ignored by the other user");
 
@@ -221,12 +238,27 @@ public class UserMainActivity extends AppCompatActivity {
                             notification = null;
                             Log.d(TAG, "Removed alert notification");
 
-                            // Check if a notification was removed because of someone hitting the ignore button. if so show Toast
                             Toast.makeText(UserMainActivity.this, "Sleep Session was cancelled by " + localSession.getNotificationIgnoredBy(), Toast.LENGTH_SHORT).show();
                         }
                     }
+                }else{
+                    if(localSession.getNotificationIgnored().equals(true)){
+                        Log.d(TAG, "The notification was just ignored");
+                        Log.d(TAG, "New SleepSession was ignored by the other user");
 
+                        if((notification instanceof View) || notification != null){
+
+                            pageLayout.removeView((View) notification.getParent());
+                            notification = null;
+                            Log.d(TAG, "Removed alert notification");
+
+                            Toast.makeText(UserMainActivity.this, "Sleep Session was cancelled by a user", Toast.LENGTH_SHORT).show();
+                        }
+                    }
                 }
+
+
+            }
 
 
 
@@ -244,77 +276,6 @@ public class UserMainActivity extends AppCompatActivity {
             }
         };
         localDatabase.addChildEventListener(childEventListener3);
-
-
-
-        /*
-
-
-        query.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                final SleepSession localSleepSession = dataSnapshot.getValue(SleepSession.class);
-                if(localSleepSession.getNotificationIgnored()){
-
-                    database = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid);
-                    findUserName(database, new OnGetDataListener() {
-                        @Override
-                        public void onSuccess(DataSnapshot dataSnapshot) {
-                            MainUser localUser = dataSnapshot.getValue(MainUser.class);
-                            String localUserName = localUser.getUserName();
-                            if(localSleepSession.getNotificationIgnored() && !localSleepSession.getNotificationIgnoredBy().equals(localUserName)){
-
-                                Log.d(TAG, "New SleepSession was ignored by the other user");
-
-                                if((notification instanceof View) || notification != null){
-
-                                    pageLayout.removeView((View) notification.getParent());
-                                    notification = null;
-                                    Log.d(TAG, "Removed alert notification");
-
-                                    // Check if a notification was removed because of someone hitting the ignore button. if so show Toast
-                                    Toast.makeText(UserMainActivity.this, "Sleep Session was cancelled by " + localSleepSession.getNotificationIgnoredBy(), Toast.LENGTH_SHORT).show();
-                                }
-
-
-                            }
-                        }
-                        @Override
-                        public void onStart() {}
-
-                        @Override
-                        public void onFailure() {}
-                    });
-
-                }
-
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-        */
-
-
 
         signout = findViewById(R.id.sign_out_btn);
         signout.setOnClickListener(new View.OnClickListener() {
@@ -508,11 +469,11 @@ public class UserMainActivity extends AppCompatActivity {
         });
     }
 
-    public void updateIsNotified(String sessionStartTime){
+    public void updateIsNotified(Boolean bool){
         database = FirebaseDatabase.getInstance().getReference();
-        String path = "/MainUsers/" + userUid + "/SleepSessions/" + sessionStartTime + "/isNotified/";
+        String path = "/MainUsers/" + userUid + "/isNotified/";
         Map<String, Object> childUpdates = new HashMap<>();
-        childUpdates.put(path, true);
+        childUpdates.put(path, bool);
         database.updateChildren(childUpdates);
 
     }

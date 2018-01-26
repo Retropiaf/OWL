@@ -116,6 +116,7 @@ public class SoundDetectorActivity extends AppCompatActivity {
             public void onClick(View view) {
                 endSession.setVisibility(View.VISIBLE);
                 endAlert.setVisibility(View.INVISIBLE);
+                updateIsNotified(false, userUid);
                 alertAnsweredTimer.cancel();
                 alertAnsweredTimer.purge();
                 checkAlertAnsweredTask.cancel();
@@ -329,11 +330,11 @@ public class SoundDetectorActivity extends AppCompatActivity {
                 if (significant) {
                     Log.d(TAG, "This is an alert!");
                     onGoingAlert = true;
+                    // Set “isnotified” flag to each MainUser. Set flag to false when alert is created in Detector, at the same time you set onGoing alert to true.
                     updateOnGoingAlertDb(true,  circle.getUser1());
                     updateOnGoingAlertDb(true,  circle.getUser2());
-                    // TODO: Add “isnotified” flag to each MainUser. Set flag to false when alert is created in Detector, at the same time you set onGoing alert to true.
-                    updateIsNotified(true,  circle.getUser1());
-                    updateIsNotified(true,  circle.getUser2());
+                    updateIsNotified(false,  circle.getUser1());
+                    updateIsNotified(false,  circle.getUser2());
                     declareAlert();
 
                 }
@@ -578,6 +579,8 @@ public class SoundDetectorActivity extends AppCompatActivity {
         new ShowEndSession().execute();
         String timeNow = String.valueOf(Calendar.getInstance().getTime());
         //updateAlertEndDb(timeNow);
+        updateIsNotified(false, circle.getUser1());
+        updateIsNotified(false, circle.getUser2());
         updateAlertEndDb(timeNow, circle.getUser1(), true);
         updateAlertEndDb(timeNow, circle.getUser2(), true);
         updateOnGoingAlertDb(false,  circle.getUser1());
@@ -612,14 +615,14 @@ public class SoundDetectorActivity extends AppCompatActivity {
 
     }
 
-    public void updateIsNotified(Boolean isOngoing,  String localUserUid){
+    public void updateIsNotified(Boolean isNotified, String localUserUid){
 
         database = FirebaseDatabase.getInstance().getReference();
 
-        String path = "/MainUsers/" + localUserUid + "/SleepSessions/" + sleepSession.getStartTime() + "/isNotified/";
+        String path = "/MainUsers/" + localUserUid + "/isNotified/";
 
         Map<String, Object> childUpdates = new HashMap<>();
-        childUpdates.put(path, isOngoing);
+        childUpdates.put(path, false);
         database.updateChildren(childUpdates);
 
     }
