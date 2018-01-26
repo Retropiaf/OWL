@@ -29,6 +29,7 @@ public class MainUser {
     public String currentAlert;
     public String currentSecondUser;
     public String currentCircle;
+    public Boolean demo;
 
 
     public MainUser(){
@@ -50,6 +51,7 @@ public class MainUser {
         this.currentAlert = "";
         this.currentSecondUser = "";
         this.currentCircle = "";
+        this.demo = false;
     }
 
 
@@ -87,6 +89,7 @@ public class MainUser {
     public String getCurrentAlert(){return currentAlert;}
     public String getCurrentSecondUser(){return currentSecondUser; }
     public String getCurrentCircle(){return currentCircle; }
+    public Boolean getDemo(){ return demo; }
 
 
     public void setOnGoingSession(Boolean bool){ this.onGoingSession = bool; }
@@ -105,6 +108,7 @@ public class MainUser {
     public void setCurrentAlert(String alert){ currentAlert = alert;}
     public void setCurrentSecondUser(String secondUser){ currentSecondUser = secondUser; }
     public void setCurrentCircle(String circle){currentCircle = circle; }
+    public void setDemo(Boolean bool){ demo = bool; }
 
 
 

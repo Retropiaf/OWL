@@ -226,6 +226,24 @@ public class NewSleepSessionActivity extends AppCompatActivity {
                                                 int timestamInt = Integer.parseInt(timestampsString.substring(0, 8));
 
                                                 Intent openDetectorIntent = new Intent(NewSleepSessionActivity.this, SoundDetectorActivity.class);
+
+                                                DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+                                                String path1 = "/MainUsers/"+ firstResponder + "/currentCircle/";
+                                                String path2 = "/MainUsers/"+ secondResponder + "/currentCircle/";
+                                                String path3 = "/MainUsers/"+ firstResponder + "/currentSecondUser/";
+                                                String path4 = "/MainUsers/"+ secondResponder + "/currentSecondUser/";
+                                                String path5 = "/MainUsers/"+ firstResponder + "/currentSession/";
+                                                String path6 = "/MainUsers/"+ secondResponder + "/currentSession/";
+
+                                                Map<String, Object> childUpdates = new HashMap<>();
+                                                childUpdates.put(path1, circle.getCircleName());
+                                                childUpdates.put(path2, circle.getCircleName());
+                                                childUpdates.put(path3, secondResponder);
+                                                childUpdates.put(path4, firstResponder);
+                                                childUpdates.put(path5, sleepSession.getStartTime());
+                                                childUpdates.put(path6, sleepSession.getStartTime());
+                                                database.updateChildren(childUpdates);
+
                                                 openDetectorIntent.putExtra(CIRCLE, circle);
                                                 //openDetectorIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                                 //PendingIntent _pIntent = PendingIntent.getActivity(NewSleepSessionActivity.this, timestamInt, openDetectorIntent, PendingIntent.FLAG_ONE_SHOT);

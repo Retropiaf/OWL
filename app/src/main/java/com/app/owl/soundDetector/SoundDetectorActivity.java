@@ -1,6 +1,7 @@
 package com.app.owl.soundDetector;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -9,10 +10,12 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -59,6 +62,10 @@ public class SoundDetectorActivity extends AppCompatActivity {
     int seconds, minutes;
     FirebaseUser user;
     Boolean onGoingAlert;
+    Button demoButton;
+    View button;
+    LayoutInflater inflater;
+    LinearLayout pageLayout;
 
 
     @Override
@@ -79,6 +86,7 @@ public class SoundDetectorActivity extends AppCompatActivity {
         sleepSession = (SleepSession) intentFromNewSession.getSerializableExtra("Sleep Session");
         Log.d(TAG, "The sleep session received as extra as timestamp = " + sleepSession.getTimestamp());
         activityCurrentResponder =  sleepSession.getFirstResponder();
+
 
         snoozeDuration = findViewById(R.id.snooze_duration);
         addItemsOnSpinner(snoozeDuration);
@@ -145,13 +153,15 @@ public class SoundDetectorActivity extends AppCompatActivity {
                 udpdateSessionEndTime(timeNow, circle.getUser1());
                 udpdateSessionEndTime(timeNow, circle.getUser2());
 
+                updateCurrent(circle.getUser1());
+                updateCurrent(circle.getUser2());
+
                 Log.d(TAG, "Redirection to welcome page");
                 Intent intentReturnToWelcome = new Intent(SoundDetectorActivity.this, UserMainActivity.class);
                 startActivity(intentReturnToWelcome);
             }
         });
 
-        //Query query = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions");
         Query query = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions").orderByChild("timestamp").limitToLast(1);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -218,38 +228,7 @@ public class SoundDetectorActivity extends AppCompatActivity {
                 for(DataSnapshot innerSnapshot : dataSnapshot.getChildren()){
                     Log.d(TAG, "innerSnapshot" + innerSnapshot);
                 }
-                /*
-                Boolean isOngoing = dataSnapshot.getValue(Boolean.class);
-                Log.d(TAG, "isOngoing: " + isOngoing);
 
-
-                if(!isOngoing){
-                    Log.d(TAG, "inside if loop of query2");
-                    database = FirebaseDatabase.getInstance().getReference();
-                    Map<String, Object> childUpdates = new HashMap<>();
-                    String path1 = "/MainUsers/" + sleepSession.getFirstResponder() + "/insideSession";
-                    String path2 = "/MainUsers/" + sleepSession.getFirstResponder() + "/insideSession";
-                    childUpdates.put(path1, false);
-                    childUpdates.put(path2, false);
-                    database.updateChildren(childUpdates);
-
-                    if(timer != null){
-                        timer.cancel();
-                        timer.purge();
-                    }
-                    soundCapture.stop();
-                    updateOnGoingAlertDb(false,  circle.getUser1());
-                    updateOnGoingAlertDb(false,  circle.getUser2());
-                    udpdateUserOngoingSession(false, circle.getUser1());
-                    udpdateUserOngoingSession(false, circle.getUser2());
-
-
-                    Log.d(TAG, "Redirection to welcome page");
-                    Intent leaveIntent = new Intent(SoundDetectorActivity.this, UserMainActivity.class);
-                    startActivity(leaveIntent);
-
-                }
-                */
             }
 
             @Override
@@ -257,6 +236,45 @@ public class SoundDetectorActivity extends AppCompatActivity {
 
             }
         });
+
+
+        // Check if in demo mode
+        DatabaseReference localDatabase = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("demo");
+        ValueEventListener demoListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Boolean localDemo = dataSnapshot.getValue(Boolean.class);
+                if(localDemo){
+                    Log.d(TAG, "Demo mode started");
+                    pageLayout = (LinearLayout) findViewById(R.id.activity_sound_detector);
+                    inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    button = inflater.inflate(R.layout.demo_button, null);
+                    pageLayout.addView(button, 0);
+                    demoButton.findViewById(R.id.demo_btn);
+                    demoButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            declareAlert();
+                        }
+                    });
+
+                }else if(button != null){
+                    pageLayout.removeView((View) button.getParent());
+                    Log.d(TAG, "Demo mode ended");
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // Getting Post failed, log a message
+                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
+                // ...
+            }
+        };
+        localDatabase.addValueEventListener(demoListener);
+
+
 
 
         // TODO Check if the session is ignored, if so end session
@@ -273,6 +291,8 @@ public class SoundDetectorActivity extends AppCompatActivity {
         super.onDestroy();
         if(timer != null){timer.cancel();}
         soundCapture.stop();
+        updateCurrent(circle.getUser1());
+        updateCurrent(circle.getUser2());
         //wakeLock.release();
         // TODO LOCK THE SCREEN ON
     }
@@ -334,10 +354,7 @@ public class SoundDetectorActivity extends AppCompatActivity {
                     Log.d(TAG, "This is an alert!");
                     onGoingAlert = true;
                     // Set “isnotified” flag to each MainUser. Set flag to false when alert is created in Detector, at the same time you set onGoing alert to true.
-                    updateOnGoingAlertDb(true,  circle.getUser1());
-                    updateOnGoingAlertDb(true,  circle.getUser2());
-                    updateIsNotified(false,  circle.getUser1());
-                    updateIsNotified(false,  circle.getUser2());
+
                     declareAlert();
 
                 }
@@ -382,9 +399,9 @@ public class SoundDetectorActivity extends AppCompatActivity {
         });
         */
 
+        String timeNow = String.valueOf(Calendar.getInstance().getTime());
 
-
-        alert = new Alert(String.valueOf(Calendar.getInstance().getTime()));
+        alert = new Alert(timeNow);
 
         Log.d(TAG, "Inside declareAlert, activityCurrentResponder:" + activityCurrentResponder);
         Log.d(TAG, "Inside declareAlert, sleepSession.getFirstResponder():" + sleepSession.getFirstResponder());
@@ -402,6 +419,20 @@ public class SoundDetectorActivity extends AppCompatActivity {
         // Add alert to database for each user
         alertHandler.registerAlertInUserDb(alert, sleepSession.getFirstResponder(), circleName, sleepSession.getStartTime());
         alertHandler.registerAlertInUserDb(alert, sleepSession.getSecondResponder(), circleName, sleepSession.getStartTime());
+        updateOnGoingAlertDb(true,  circle.getUser1());
+        updateOnGoingAlertDb(true,  circle.getUser2());
+        updateIsNotified(false,  circle.getUser1());
+        updateIsNotified(false,  circle.getUser2());
+
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+        Map<String, Object> childUpdates = new HashMap<>();
+        String path1 = "/MainUsers/"+ circle.getUser1() + "/currentAlert/";
+        String path2 = "/MainUsers/"+ circle.getUser2() + "/currentAlert/";
+        childUpdates.put(path1, timeNow);
+        childUpdates.put(path2, timeNow);
+        database.updateChildren(childUpdates);
+
+
 
         countDownForResponse();
 
@@ -707,6 +738,24 @@ public class SoundDetectorActivity extends AppCompatActivity {
     }
     */
 
+    public void updateCurrent(String localUser){
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+        String path1 = "/MainUsers/"+ localUser + "/currentCircle/";
+        String path2 = "/MainUsers/"+ localUser + "/currentCircle/";
+        String path3 = "/MainUsers/"+ localUser + "/currentSecondUser/";
+        String path4 = "/MainUsers/"+ localUser + "/currentSecondUser/";
+        String path5 = "/MainUsers/"+ localUser + "/currentSession/";
+        String path6 = "/MainUsers/"+ localUser + "/currentSession/";
+
+        Map<String, Object> childUpdates = new HashMap<>();
+        childUpdates.put(path1, "");
+        childUpdates.put(path2, "");
+        childUpdates.put(path3, "");
+        childUpdates.put(path4, "");
+        childUpdates.put(path5, "");
+        childUpdates.put(path6, "");
+        database.updateChildren(childUpdates);
+    }
 
 
 }
