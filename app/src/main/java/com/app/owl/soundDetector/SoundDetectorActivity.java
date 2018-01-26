@@ -183,6 +183,8 @@ public class SoundDetectorActivity extends AppCompatActivity {
                 childUpdates.put(path2, timeNow);
                 database.updateChildren(childUpdates);
 
+                toggleCurrentResponder();
+
                 if(activityCurrentResponder != null ){
                     Log.d(TAG, "activityCurrentResponder != null");
 
@@ -191,26 +193,23 @@ public class SoundDetectorActivity extends AppCompatActivity {
                     Map<String, Object> childUpdates2 = new HashMap<>();
                     String path3 = "/MainUsers/"+ circle.getUser1() + "/SleepSessions/" + activitySleepSession + "currentResponder";
                     String path4 = "/MainUsers/"+ circle.getUser1() + "/SleepSessions/" + activitySleepSession + "currentResponder";
-                    childUpdates.put(path3, activityCurrentResponder);
-                    childUpdates.put(path4, activityCurrentResponder);
+                    childUpdates2.put(path3, activityCurrentResponder);
+                    childUpdates2.put(path4, activityCurrentResponder);
                     database2.updateChildren(childUpdates2);
 
-                    Log.d(TAG, "activityCurrentResponder:" + activityCurrentResponder);
+                    Log.d(TAG, "activityCurrentResponder: " + activityCurrentResponder);
                     Log.d(TAG, "secondResp:" + secondResp);
-                }else{
+                }else {
                     Log.d(TAG, "activityCurrentResponder == null");
 
                     activityCurrentResponder = activitySecondResponder;
                     DatabaseReference database2 = FirebaseDatabase.getInstance().getReference();
                     Map<String, Object> childUpdates2 = new HashMap<>();
-                    String path3 = "/MainUsers/"+ circle.getUser1() + "/SleepSessions/" + activitySleepSession + "currentResponder";
-                    String path4 = "/MainUsers/"+ circle.getUser1() + "/SleepSessions/" + activitySleepSession + "currentResponder";
-                    childUpdates.put(path3, activitySecondResponder);
-                    childUpdates.put(path4, activitySecondResponder);
+                    String path3 = "/MainUsers/" + circle.getUser1() + "/SleepSessions/" + activitySleepSession + "currentResponder";
+                    String path4 = "/MainUsers/" + circle.getUser1() + "/SleepSessions/" + activitySleepSession + "currentResponder";
+                    childUpdates2.put(path3, activitySecondResponder);
+                    childUpdates2.put(path4, activitySecondResponder);
                     database2.updateChildren(childUpdates2);
-
-                    Log.d(TAG, "activitySecondResponder:" + activitySecondResponder);
-                    Log.d(TAG, "activityFirstResponder:" + activityFirstResponder);
                 }
 
 
@@ -560,7 +559,6 @@ public class SoundDetectorActivity extends AppCompatActivity {
 
         alert = new Alert(timeNow);
 
-        toggleCurrentResponder();
 
         Log.d(TAG, "Inside declareAlert, activityCurrentResponder:" + activityCurrentResponder);
         Log.d(TAG, "Inside declareAlert, sleepSession.getFirstResponder():" + sleepSession.getFirstResponder());
@@ -621,7 +619,37 @@ public class SoundDetectorActivity extends AppCompatActivity {
                 updateOnGoingAlertDb(false,  circle.getUser1());
                 updateOnGoingAlertDb(false,  circle.getUser2());
 
-                // TODO update the user here
+                toggleCurrentResponder();
+
+                if(activityCurrentResponder != null ){
+                    Log.d(TAG, "activityCurrentResponder != null");
+
+                    String secondResp = activityCurrentResponder == activityFirstResponder ? activitySecondResponder : activityFirstResponder;
+                    DatabaseReference database2 = FirebaseDatabase.getInstance().getReference();
+                    Map<String, Object> childUpdates2 = new HashMap<>();
+                    String path3 = "/MainUsers/"+ circle.getUser1() + "/SleepSessions/" + activitySleepSession + "currentResponder";
+                    String path4 = "/MainUsers/"+ circle.getUser1() + "/SleepSessions/" + activitySleepSession + "currentResponder";
+                    childUpdates2.put(path3, activityCurrentResponder);
+                    childUpdates2.put(path4, activityCurrentResponder);
+                    database2.updateChildren(childUpdates2);
+
+                    Log.d(TAG, "activityCurrentResponder: " + activityCurrentResponder);
+                    Log.d(TAG, "secondResp:" + secondResp);
+                }else{
+                    Log.d(TAG, "activityCurrentResponder == null");
+
+                    activityCurrentResponder = activitySecondResponder;
+                    DatabaseReference database2 = FirebaseDatabase.getInstance().getReference();
+                    Map<String, Object> childUpdates2 = new HashMap<>();
+                    String path3 = "/MainUsers/"+ circle.getUser1() + "/SleepSessions/" + activitySleepSession + "currentResponder";
+                    String path4 = "/MainUsers/"+ circle.getUser1() + "/SleepSessions/" + activitySleepSession + "currentResponder";
+                    childUpdates2.put(path3, activitySecondResponder);
+                    childUpdates2.put(path4, activitySecondResponder);
+                    database2.updateChildren(childUpdates2);
+
+                    Log.d(TAG, "activitySecondResponder:" + activitySecondResponder);
+                    Log.d(TAG, "activityFirstResponder:" + activityFirstResponder);
+                }
 
 
                 String timeNow = String.valueOf(Calendar.getInstance().getTime());

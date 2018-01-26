@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -12,7 +13,8 @@ public class IntroScreenActivity extends AppCompatActivity {
 
 
     /** Duration of wait **/
-    private final int SPLASH_DISPLAY_LENGTH = 1000;
+    private final int SPLASH_DISPLAY_LENGTH = 5000;
+    String TAG = "IntroScreenActivity";
 
     /** Called when the activity is first created. */
     @Override
@@ -25,6 +27,7 @@ public class IntroScreenActivity extends AppCompatActivity {
         new Handler().postDelayed(new Runnable(){
             @Override
             public void run() {
+                Log.d("Intro Screen", "running");
                 /* Create an Intent that will start the Menu-Activity. */
                 if(FirebaseAuth.getInstance().getCurrentUser() != null){
                     Intent mainIntent = new Intent(IntroScreenActivity.this,UserMainActivity.class);

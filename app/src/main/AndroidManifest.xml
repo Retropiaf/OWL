@@ -45,6 +45,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".IntroScreenActivity"/>
         <activity android:name=".RegisterActivity" />
         <activity android:name=".LoginActivity" />
         <activity android:name=".UserMainActivity" />
@@ -65,7 +66,7 @@
         <activity android:name=".sleepSession.NewSleepSessionActivity" />
         <activity android:name=".sleepSession.ConnectAudioDeviceActivity" />
         <activity android:name=".sleepSession.OnGoingMonitoringActivity" />
-        <activity android:name=".IntroScreenActivity"></activity>
+
     </application>
 
 </manifest>

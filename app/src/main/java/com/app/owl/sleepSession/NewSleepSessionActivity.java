@@ -175,13 +175,13 @@ public class NewSleepSessionActivity extends AppCompatActivity {
 
                         // TODO: Check if any of the user already in a session if so toast and nothing. Else do the rest
 
-                        database = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(circle.getUser1());
+                        DatabaseReference newDatabase = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(circle.getUser1());
                         Log.d(TAG, "database: " + database);
-                        database.addListenerForSingleValueEvent(new ValueEventListener() {
+                        newDatabase.addValueEventListener(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 Log.d(TAG, "dataSnapshot: " + dataSnapshot);
-                                final MainUser localUser1 = dataSnapshot.getValue(MainUser.class);
+                                MainUser localUser1 = dataSnapshot.getValue(MainUser.class);
                                 Log.d(TAG, "localUser1: " + localUser1);
                                 Log.d(TAG, "localUser1.getOnGoingSession(): " + localUser1.getOnGoingSession());
                                 Log.d(TAG, "When localUser1.getOnGoingSession() is false, nothing happens. It is: " + localUser1.getOnGoingSession());
