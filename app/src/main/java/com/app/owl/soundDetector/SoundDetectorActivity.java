@@ -521,6 +521,14 @@ public class SoundDetectorActivity extends AppCompatActivity {
         childUpdates.put(path2, timeNow);
         database.updateChildren(childUpdates);
 
+        DatabaseReference database2 = FirebaseDatabase.getInstance().getReference();
+        Map<String, Object> childUpdates2 = new HashMap<>();
+        String path3= "/MainUsers/"+ circle.getUser1() + "/currentAlert/";
+        String path4 = "/MainUsers/"+ circle.getUser2() + "/currentAlert/";
+        childUpdates.put(path3, timeNow);
+        childUpdates.put(path4, timeNow);
+        database2.updateChildren(childUpdates2);
+
 
 
         countDownForResponse();

@@ -167,20 +167,31 @@ public class OnGoingSleepSessionActivity extends AppCompatActivity {
 
                     // find session's current responder. If current user find alert
                     DatabaseReference localSessionDatabase = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions").child(currentSession);
+                    Log.d(TAG, "localSessionDatabase: " + localSessionDatabase);
                     ValueEventListener localSessionListener = new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
+                            Log.d(TAG, "onDatachange 2");
                             final SleepSession localSession = dataSnapshot.getValue(SleepSession.class);
+                            Log.d(TAG, "localSession.getCurrentResponder(): " + localSession.getCurrentResponder());
+                            Log.d(TAG, "userUid: " + userUid);
                             if(localSession.getCurrentResponder().equals(userUid)){
+
+                                Log.d(TAG, "I'm the current responder");
 
                                 // find alert
                                 DatabaseReference innerAlertDatabase = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions").child(currentSession).child("alerts").child(alertStart);
+
+                                Log.d(TAG, "innerAlertDatabase; " + innerAlertDatabase);
                                 ValueEventListener innerAlertListener = new ValueEventListener() {
                                     @Override
                                     public void onDataChange(DataSnapshot dataSnapshot) {
+                                        Log.d(TAG, "onDatachange 3");
+                                        Log.d(TAG, "dataSnapshot:  " + dataSnapshot);
+
+                                        Log.d(TAG, "before calling handle Alert");
                                         Alert currentAlert = dataSnapshot.getValue(Alert.class);
                                         handleAlert(currentAlert, localSession, currentSecondUser);
-
                                     }
 
                                     @Override
@@ -225,6 +236,9 @@ public class OnGoingSleepSessionActivity extends AppCompatActivity {
     }
 
     public void onChecking(View button, String alertStartTime, String sessionStartTime, String userUid2) {
+
+        Log.d(TAG, "onChecking");
+
         String timeNow = String.valueOf(Calendar.getInstance().getTime());
 
         // update alert
@@ -252,6 +266,9 @@ public class OnGoingSleepSessionActivity extends AppCompatActivity {
     }
 
     public void handleAlert(Alert alert, SleepSession localSleepSession, String secondUser){
+
+        Log.d(TAG, "in  handle Alert");
+
         final String alertStartTime = alert.getStartTime();
         final String sessionStartTime = localSleepSession.getStartTime();
         final String userUid2 = secondUser;
