@@ -161,9 +161,21 @@ public class ConnectAudioDeviceActivity extends AppCompatActivity  implements Ad
         Log.d(TAG, "onDestroy: called");
         super.onDestroy();
         if(mBluetoothAdapter != null){
-            mBluetoothAdapter.closeProfileProxy(BluetoothProfile.A2DP, mBluetoothEarbuds);
-            mBluetoothAdapter.disable();
-            mBluetoothAdapter.cancelDiscovery();
+            try {
+                mBluetoothAdapter.closeProfileProxy(BluetoothProfile.A2DP, mBluetoothEarbuds);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            try {
+                mBluetoothAdapter.disable();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            try {
+                mBluetoothAdapter.cancelDiscovery();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         // TODO LATER: add headset as possibility
@@ -245,7 +257,11 @@ public class ConnectAudioDeviceActivity extends AppCompatActivity  implements Ad
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         //mBluetoothAdapter.closeProfileProxy(BluetoothProfile.A2DP, mBluetoothEarbuds);
-        mBluetoothAdapter.cancelDiscovery();
+        try {
+            mBluetoothAdapter.cancelDiscovery();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         Log.d(TAG, "onItemClick: You clicked on a device.");
         String deviceName = mBTDevices.get(i).getName();

@@ -234,7 +234,11 @@ public class UserMainActivity extends AppCompatActivity {
 
                         if((notification instanceof View) || notification != null){
 
-                            pageLayout.removeView((View) notification.getParent());
+                            try {
+                                pageLayout.removeView((View) notification.getParent());
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                             notification = null;
                             Log.d(TAG, "Removed alert notification");
 
@@ -248,7 +252,11 @@ public class UserMainActivity extends AppCompatActivity {
 
                         if((notification instanceof View) || notification != null){
 
-                            pageLayout.removeView((View) notification.getParent());
+                            try {
+                                pageLayout.removeView((View) notification.getParent());
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                             notification = null;
                             Log.d(TAG, "Removed alert notification");
 
@@ -295,7 +303,9 @@ public class UserMainActivity extends AppCompatActivity {
                 Toast.makeText(UserMainActivity.this, "You successfully logged-out.", Toast.LENGTH_SHORT).show();
 
                 Intent intent = new Intent(UserMainActivity.this, LoginActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
+                finish();
 
 
 
@@ -309,6 +319,7 @@ public class UserMainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(UserMainActivity.this, NewSleepSessionActivity.class);
                 startActivity(intent);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 finish();
             }
         });
@@ -319,6 +330,7 @@ public class UserMainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(UserMainActivity.this, SleepCirclesActivity.class);
                 startActivity(intent);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 finish();
             }
         });
@@ -345,6 +357,7 @@ public class UserMainActivity extends AppCompatActivity {
         // Open Bluetooth connection page
         Intent intentConnectDevice = new Intent(UserMainActivity.this, ConnectAudioDeviceActivity.class);
         startActivity(intentConnectDevice);
+        intentConnectDevice.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         finish();
 
 

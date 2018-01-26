@@ -81,7 +81,6 @@ public class SoundDetectorActivity extends AppCompatActivity {
         pageLayout = (LinearLayout) findViewById(R.id.activity_sound_detector);
         inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         button = inflater.inflate(R.layout.demo_button, null);
-        demoButton.findViewById(R.id.demo_btn);
 
         // Todo: close session when isIgnored == true
         //DatabaseReference localDatabase = Query query = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions")
@@ -112,10 +111,26 @@ public class SoundDetectorActivity extends AppCompatActivity {
                 snoozeBtn.setVisibility(View.INVISIBLE); // Hide snooze button
                 snoozeClock.setVisibility(View.INVISIBLE); // Hide countdown to click snooze
                 snoozeDuration.setVisibility(View.INVISIBLE); // Hide duration spinner
-                snoozeTimer.cancel();
-                snoozeTimer.purge();
-                clockTimer.cancel();
-                clockTimer.purge();
+                try {
+                    snoozeTimer.cancel();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                try {
+                    snoozeTimer.purge();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                try {
+                    clockTimer.cancel();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                try {
+                    clockTimer.purge();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 selection = String.valueOf(snoozeDuration.getSelectedItem().toString());
                 snooze(Integer.parseInt(selection));
             }
@@ -131,11 +146,31 @@ public class SoundDetectorActivity extends AppCompatActivity {
                 endSession.setVisibility(View.VISIBLE);
                 endAlert.setVisibility(View.INVISIBLE);
                 updateIsNotified(false, userUid);
-                alertAnsweredTimer.cancel();
-                alertAnsweredTimer.purge();
-                checkAlertAnsweredTask.cancel();
-                resolveAlert();
-                snoozeDecide();
+                try {
+                    alertAnsweredTimer.cancel();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                try {
+                    alertAnsweredTimer.purge();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                try {
+                    checkAlertAnsweredTask.cancel();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                try {
+                    resolveAlert();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                try {
+                    snoozeDecide();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
             }
         });
@@ -145,11 +180,21 @@ public class SoundDetectorActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Log.d(TAG, "Someone clicked end session button");
-                if(timer != null){
+
+                try {
                     timer.cancel();
+                } catch (Exception e) {e.printStackTrace();}
+                try {
                     timer.purge();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-                soundCapture.stop();
+
+                try {
+                    soundCapture.stop();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 updateOnGoingAlertDb(false,  circle.getUser1());
                 updateOnGoingAlertDb(false,  circle.getUser2());
                 udpdateUserOngoingSession(false, circle.getUser1());
@@ -196,11 +241,21 @@ public class SoundDetectorActivity extends AppCompatActivity {
                         childUpdates.put(path2, false);
                         database.updateChildren(childUpdates);
 
-                        if(timer != null){
+                        try {
                             timer.cancel();
-                            timer.purge();
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
-                        soundCapture.stop();
+                        try {
+                            timer.purge();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        try {
+                            soundCapture.stop();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                         updateOnGoingAlertDb(false,  circle.getUser1());
                         updateOnGoingAlertDb(false,  circle.getUser2());
                         udpdateUserOngoingSession(false, circle.getUser1());
@@ -258,7 +313,11 @@ public class SoundDetectorActivity extends AppCompatActivity {
 
 
                 }else if(button != null){
-                    pageLayout.removeView((View) button.getParent());
+                    try {
+                        pageLayout.removeView((View) button.getParent());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     Log.d(TAG, "Demo mode ended");
                 }
 
@@ -293,10 +352,33 @@ public class SoundDetectorActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(timer != null){timer.cancel();}
-        soundCapture.stop();
         updateCurrent(circle.getUser1());
         updateCurrent(circle.getUser2());
+        updateOnGoingAlertDb(false,  circle.getUser1());
+        updateOnGoingAlertDb(false,  circle.getUser2());
+        udpdateUserOngoingSession(false, circle.getUser1());
+        udpdateUserOngoingSession(false, circle.getUser2());
+        String timeNow = String.valueOf(Calendar.getInstance().getTime());
+        udpdateSessionEndTime(timeNow, circle.getUser1());
+        udpdateSessionEndTime(timeNow, circle.getUser2());
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+        Map<String, Object> childUpdates = new HashMap<>();
+        String path1 = "/MainUsers/"+ circle.getUser1() + "/currentAlert/";
+        String path2 = "/MainUsers/"+ circle.getUser2() + "/currentAlert/";
+        childUpdates.put(path1, timeNow);
+        childUpdates.put(path2, timeNow);
+        database.updateChildren(childUpdates);
+        try {
+            timer.cancel();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            soundCapture.stop();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        finish();
         //wakeLock.release();
         // TODO LOCK THE SCREEN ON
     }
@@ -536,7 +618,11 @@ public class SoundDetectorActivity extends AppCompatActivity {
                                 new HideSnoozeDuration().execute();
                                 new HideSnoozeBtn().execute();
                                 new HideSnoozeClock().execute();
-                                clockTimer.cancel();
+                                try {
+                                    clockTimer.cancel();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
                                 soundCapture.start();
                                 startDetectingSounds();
                             }
@@ -584,7 +670,11 @@ public class SoundDetectorActivity extends AppCompatActivity {
             public void run() {
                 Log.d(TAG, "Inside snooze - Snoozer is done, time to go back to monitoring. sound detection will resume soon");
                 new HideTimeLeft().execute();
-                snoozeTimeLeft.cancel();
+                try {
+                    snoozeTimeLeft.cancel();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 soundCapture.start();
                 startDetectingSounds();
             }
@@ -608,7 +698,12 @@ public class SoundDetectorActivity extends AppCompatActivity {
 
     public void stopDetectingSounds(){
         Log.d(TAG, "Inside snooze - stopDetectingSounds");
-        timer.cancel();
+
+        try {
+            timer.cancel();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void resolveAlert(){

@@ -268,7 +268,7 @@ public class OnGoingSleepSessionActivity extends AppCompatActivity {
         pageLayout.addView(button, 0);
 
 
-git a
+
         onChecking(button, alertStartTime, sessionStartTime, userUid2);
 
         ringtone = RingtoneManager.getRingtone(OnGoingSleepSessionActivity.this, alarmUri);

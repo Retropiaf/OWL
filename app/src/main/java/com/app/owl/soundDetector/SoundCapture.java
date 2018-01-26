@@ -13,33 +13,74 @@ public class SoundCapture {
 
     public void start() {
         if (mRecorder == null) {
-            mRecorder = new MediaRecorder();
-            mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-            mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-            mRecorder.setOutputFile("/dev/null");
+            try {
+                mRecorder = new MediaRecorder();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            try {
+                mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
+            }
+            try {
+                mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
+            }
+            try {
+                mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
+            }
+            try {
+                mRecorder.setOutputFile("/dev/null");
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
+            }
             try {
                 mRecorder.prepare();
             } catch (Exception e) {
             }
-            mRecorder.start();
+            try {
+                mRecorder.start();
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
+            }
         }
 
     }
 
     public void stop() {
         if (mRecorder != null) {
-            mRecorder.stop();
-            mRecorder.release();
-            mRecorder = null;
+            try {
+                mRecorder.stop();
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
+            }
+            try {
+                mRecorder.release();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            try {
+                mRecorder = null;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
     public double getAmplitude() {
         if (mRecorder != null) {
-            double sound = mRecorder.getMaxAmplitude();
-            Log.d("In SoundCapture", String.valueOf(sound));
-            return sound;
+            try {
+                double sound = mRecorder.getMaxAmplitude();
+                Log.d("In SoundCapture", String.valueOf(sound));
+                return sound;
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
+            }
+            return 0;
 
         } else {
             return 0;

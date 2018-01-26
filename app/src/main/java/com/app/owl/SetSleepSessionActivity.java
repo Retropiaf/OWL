@@ -194,12 +194,36 @@ public class SetSleepSessionActivity extends AppCompatActivity  implements Adapt
         super.onDestroy();
 
         // Close proxy connection after use.
-        mBluetoothAdapter.closeProfileProxy(BluetoothProfile.A2DP, mBluetoothEarbuds);
-        mBluetoothAdapter.disable();
-        if (mBroadcastReceiver4 != null) {unregisterReceiver(mBroadcastReceiver4);}
-        if (mBroadcastReceiver3 != null) {unregisterReceiver(mBroadcastReceiver3);}
-        if (mBroadcastReceiver1 != null) {unregisterReceiver(mBroadcastReceiver1);}
-        mBluetoothAdapter.cancelDiscovery();
+        try {
+            mBluetoothAdapter.closeProfileProxy(BluetoothProfile.A2DP, mBluetoothEarbuds);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            mBluetoothAdapter.disable();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            unregisterReceiver(mBroadcastReceiver4);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            unregisterReceiver(mBroadcastReceiver3);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            unregisterReceiver(mBroadcastReceiver1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            mBluetoothAdapter.cancelDiscovery();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     } // End of onDestroy
 
     public void discoverDevices(){
@@ -252,7 +276,11 @@ public class SetSleepSessionActivity extends AppCompatActivity  implements Adapt
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         //mBluetoothAdapter.closeProfileProxy(BluetoothProfile.A2DP, mBluetoothEarbuds);
-        mBluetoothAdapter.cancelDiscovery();
+        try {
+            mBluetoothAdapter.cancelDiscovery();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         Log.d(TAG, "onItemClick: You clicked on a device.");
         String deviceName = mBTDevices.get(i).getName();
