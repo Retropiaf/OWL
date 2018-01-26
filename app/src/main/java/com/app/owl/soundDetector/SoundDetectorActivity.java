@@ -341,7 +341,8 @@ public class SoundDetectorActivity extends AppCompatActivity {
         alertHandler = new AlertHandler();
         soundCapture = new SoundCapture();
         alertHandler = new AlertHandler();
-        askPermissions();
+        startDetectingSounds();
+
     }
 
     public void onAlert(View v){
@@ -422,6 +423,8 @@ public class SoundDetectorActivity extends AppCompatActivity {
     }
 
     public void startDetectingSounds() {
+
+        askPermissions();
 
         timer = new Timer();
 

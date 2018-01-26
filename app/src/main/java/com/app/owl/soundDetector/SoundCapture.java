@@ -22,20 +22,36 @@ public class SoundCapture {
                 mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
             } catch (IllegalStateException e) {
                 e.printStackTrace();
+            } catch (RuntimeException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
             try {
                 mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
             } catch (IllegalStateException e) {
+                e.printStackTrace();
+            } catch (RuntimeException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             try {
                 mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
             } catch (IllegalStateException e) {
                 e.printStackTrace();
+            } catch (RuntimeException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
             try {
                 mRecorder.setOutputFile("/dev/null");
             } catch (IllegalStateException e) {
+                e.printStackTrace();
+            } catch (RuntimeException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             try {
@@ -45,6 +61,8 @@ public class SoundCapture {
             try {
                 mRecorder.start();
             } catch (IllegalStateException e) {
+                e.printStackTrace();
+            }  catch (Exception e) {
                 e.printStackTrace();
             }
         }
