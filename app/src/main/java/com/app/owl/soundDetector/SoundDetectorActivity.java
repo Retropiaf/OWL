@@ -71,8 +71,8 @@ public class SoundDetectorActivity extends AppCompatActivity {
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-
-
+        // Todo: close session when isIgnored == true
+        //DatabaseReference localDatabase = Query query = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions")
 
         Intent intentFromNewSession = getIntent();
         circle = (SleepCircle) intentFromNewSession.getSerializableExtra("Sleep Circle");
@@ -176,7 +176,7 @@ public class SoundDetectorActivity extends AppCompatActivity {
                         database = FirebaseDatabase.getInstance().getReference();
                         Map<String, Object> childUpdates = new HashMap<>();
                         String path1 = "/MainUsers/" + sleepSession.getFirstResponder() + "/insideSession";
-                        String path2 = "/MainUsers/" + sleepSession.getFirstResponder() + "/insideSession";
+                        String path2 = "/MainUsers/" + sleepSession.getSecondResponder() + "/insideSession";
                         childUpdates.put(path1, false);
                         childUpdates.put(path2, false);
                         database.updateChildren(childUpdates);

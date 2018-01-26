@@ -93,8 +93,11 @@ public class OnGoingSleepSessionActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 MainUser localUser = dataSnapshot.getValue(MainUser.class);
                 if(!localUser.getOnGoingSession()){
+                    Log.d(TAG, "No open session");
                     Intent returnIntent = new Intent(OnGoingSleepSessionActivity.this, UserMainActivity.class);
                     startActivity(returnIntent);
+                }else{
+                    Log.d(TAG, "Ongoing session");
                 }
             }
 
@@ -106,22 +109,34 @@ public class OnGoingSleepSessionActivity extends AppCompatActivity {
 
         // Find the right Session
         Query query = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions").orderByChild("timeStamps").limitToLast(1); // TODO: check spelling inside path
+        Log.d(TAG, "query: " + query);
 
         findSession(query, new OnGetDataListener(){
             @Override
             public void onSuccess(DataSnapshot dataSnapshot) {
+                Log.d(TAG, "Session was found" );
+                Log.d(TAG, "dataSnapshot: " + dataSnapshot);
+
                 SleepSession localSleepSession = dataSnapshot.getValue(SleepSession.class);
+
                 final String startTime = localSleepSession.getStartTime();
+                Log.d(TAG, "if the datashot was really a session, startTime should be a time. startTime: " + startTime);
 
                 // Listen on the sleep session's changes
                 DatabaseReference sessionDatabase = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions").child(startTime); // TODO: check spelling inside path
+                Log.d(TAG, "Get current session: " + sessionDatabase);
 
                 sessionDatabase.addChildEventListener(new ChildEventListener() {
                     @Override
                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                        Log.d(TAG, "onAdded. The snapshot should say what change happened.");
                         Log.d(TAG, "dataSnapshot: " + dataSnapshot);
                         // A new alert is created
                         // TODO: check if "s" would be "Alerts" for new alerts. If so, add: if(s == "Alerts"){ rest of the code }
+                        Log.d(TAG, "If the datashapshot is an alert, change the code below this log");
+
+
+                        /*
 
                         // Check if you are the currentResponder
                         final SleepSession localSleepSession = dataSnapshot.getValue(SleepSession.class);
@@ -149,13 +164,18 @@ public class OnGoingSleepSessionActivity extends AppCompatActivity {
                             });
 
                         }
+
+
+                         */
 
 
                     }
 
                     @Override
                     public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                        Log.d(TAG, "On changed");
 
+                        /*
                         // Check if you are the currentResponder
                         final SleepSession localSleepSession = dataSnapshot.getValue(SleepSession.class);
 
@@ -183,6 +203,9 @@ public class OnGoingSleepSessionActivity extends AppCompatActivity {
                             });
 
                         }
+
+                         */
+
 
                     }
 
