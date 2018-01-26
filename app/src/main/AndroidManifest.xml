@@ -31,7 +31,7 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/owly_logo_copy"
         android:label="@string/app_name"
         android:largeHeap="true"
         android:roundIcon="@mipmap/ic_launcher_round"
@@ -62,8 +62,9 @@
         <activity android:name=".sleepSession.SleepSessionDetailsActivity" />
         <activity android:name=".sleepSession.OnGoingSleepSessionActivity" />
         <activity android:name=".sleepSession.NewSleepSessionActivity" />
-        <activity android:name=".sleepSession.ConnectAudioDeviceActivity"/>
-        <activity android:name=".sleepSession.OnGoingMonitoringActivity"/>
+        <activity android:name=".sleepSession.ConnectAudioDeviceActivity" />
+        <activity android:name=".sleepSession.OnGoingMonitoringActivity" />
+        <activity android:name=".IntroScreenActivity"></activity>
     </application>
 
 </manifest>

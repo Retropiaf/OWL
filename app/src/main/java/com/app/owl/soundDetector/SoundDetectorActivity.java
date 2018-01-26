@@ -54,7 +54,7 @@ public class SoundDetectorActivity extends AppCompatActivity {
     Alert alert;
     public static Button endSession, endAlert, snoozeBtn;
     DatabaseReference database, sleepSessionDatabase;
-    String circleName, selection, userUid, activityCurrentResponder;
+    String circleName, selection, userUid, activityCurrentResponder, activityFirstResponder, activitySecondResponder;
     public static TextView snoozeClock, timeLeft;
     public static Spinner snoozeDuration;
     SleepCircle circle;
@@ -90,6 +90,8 @@ public class SoundDetectorActivity extends AppCompatActivity {
         sleepSession = (SleepSession) intentFromNewSession.getSerializableExtra("Sleep Session");
         Log.d(TAG, "The sleep session received as extra as timestamp = " + sleepSession.getTimestamp());
         activityCurrentResponder =  sleepSession.getFirstResponder();
+        activityFirstResponder = sleepSession.getFirstResponder();
+        activitySecondResponder = sleepSession.getSecondResponder();
 
 
         snoozeDuration = findViewById(R.id.snooze_duration);
@@ -376,8 +378,16 @@ public class SoundDetectorActivity extends AppCompatActivity {
         Map<String, Object> childUpdates = new HashMap<>();
         String path1 = "/MainUsers/"+ circle.getUser1() + "/currentAlert/";
         String path2 = "/MainUsers/"+ circle.getUser2() + "/currentAlert/";
-        childUpdates.put(path1, timeNow);
-        childUpdates.put(path2, timeNow);
+        String path3 = "/MainUsers/"+ circle.getUser1() + "/insideSession/";
+        String path4 = "/MainUsers/"+ circle.getUser2() + "/insideSession/";
+        String path5 = "/MainUsers/"+ circle.getUser1() + "/onGoingSession/";
+        String path6 = "/MainUsers/"+ circle.getUser2() + "/onGoingSession/";
+        childUpdates.put(path1, "");
+        childUpdates.put(path2, "");
+        childUpdates.put(path3, false);
+        childUpdates.put(path4, false);
+        childUpdates.put(path5, false);
+        childUpdates.put(path6, false);
         database.updateChildren(childUpdates);
         try {
             timer.cancel();
@@ -502,17 +512,28 @@ public class SoundDetectorActivity extends AppCompatActivity {
 
         alert = new Alert(timeNow);
 
+        toggleCurrentResponder();
+
         Log.d(TAG, "Inside declareAlert, activityCurrentResponder:" + activityCurrentResponder);
         Log.d(TAG, "Inside declareAlert, sleepSession.getFirstResponder():" + sleepSession.getFirstResponder());
         Log.d(TAG, "Inside declareAlert, sleepSession.getSecondResponder():" + sleepSession.getSecondResponder());
 
-        if(activityCurrentResponder.equals(sleepSession.getFirstResponder())){
-            alert.setFirstResponderId(sleepSession.getFirstResponder());
-            alert.setSecondResponderId(sleepSession.getSecondResponder());
+        if(activityCurrentResponder != null ){
+            Log.d(TAG, "activityCurrentResponder != null");
+            alert.setFirstResponderId(activityCurrentResponder);
+            String secondResp = activityCurrentResponder == activityFirstResponder ? activitySecondResponder : activityFirstResponder;
+            alert.setSecondResponderId(secondResp);
+            Log.d(TAG, "activityCurrentResponder:" + activityCurrentResponder);
+            Log.d(TAG, "secondResp:" + secondResp);
         }else{
-            alert.setFirstResponderId(sleepSession.getSecondResponder());
-            alert.setSecondResponderId(sleepSession.getFirstResponder());
+            Log.d(TAG, "activityCurrentResponder == null");
+            activityCurrentResponder = activitySecondResponder;
+            alert.setFirstResponderId(activitySecondResponder);
+            alert.setSecondResponderId(activityFirstResponder);
+            Log.d(TAG, "activitySecondResponder:" + activitySecondResponder);
+            Log.d(TAG, "activityFirstResponder:" + activityFirstResponder);
         }
+
 
         Log.d(TAG, "Inside declareAlert, alert:" + alert);
         // Add alert to database for each user
@@ -541,7 +562,6 @@ public class SoundDetectorActivity extends AppCompatActivity {
 
         updateCurrent(circle.getUser1());
         updateCurrent(circle.getUser2());
-        toggleCurrentResponder();
 
 
         countDownForResponse();
@@ -744,7 +764,6 @@ public class SoundDetectorActivity extends AppCompatActivity {
         updateOnGoingAlertDb(false,  circle.getUser2());
         updateCurrent(circle.getUser1());
         updateCurrent(circle.getUser2());
-        toggleCurrentResponder();
 
 
 
@@ -820,6 +839,11 @@ public class SoundDetectorActivity extends AppCompatActivity {
         database.updateChildren(childUpdates);
     }
     public void toggleCurrentResponder(){
+
+        Log.d(TAG, "Inside toggleCurrentResponder");
+        Log.d(TAG, "activityCurrentResponder: " + activityCurrentResponder);
+        Log.d(TAG, "sleepSession.getFirstResponder(): " + sleepSession.getFirstResponder());
+        Log.d(TAG, "sleepSession.getSecondResponder() " + sleepSession.getSecondResponder());
 
         if (activityCurrentResponder.equals(sleepSession.getFirstResponder())){
             activityCurrentResponder = sleepSession.getSecondResponder();

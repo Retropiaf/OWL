@@ -166,16 +166,20 @@ public class OnGoingSleepSessionActivity extends AppCompatActivity {
                     final String alertStart = currentAlert;
 
                     // find session's current responder. If current user find alert
-                    DatabaseReference localSessionDatabase = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions").child(currentSession);
-                    Log.d(TAG, "localSessionDatabase: " + localSessionDatabase);
+                    final Query localSessionDatabase2 = FirebaseDatabase.getInstance().getReference().child("MainUsers").child(userUid).child("SleepSessions").equalTo(currentSession);
+                    Log.d(TAG, "localSessionDatabase: " + localSessionDatabase2);
                     ValueEventListener localSessionListener = new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             Log.d(TAG, "onDatachange 2");
+                            Log.d(TAG, "onDatachange 2, dataSnapshot:" + dataSnapshot);
                             final SleepSession localSession = dataSnapshot.getValue(SleepSession.class);
-                            Log.d(TAG, "localSession.getCurrentResponder(): " + localSession.getCurrentResponder());
-                            Log.d(TAG, "userUid: " + userUid);
-                            if(localSession.getCurrentResponder() != null && localSession.getCurrentResponder().equals(userUid)){
+                            if(localSession != null && !localSession.equals("")){
+                                Log.d(TAG, "localSession.getCurrentResponder(): " + localSession.getCurrentResponder());
+                                Log.d(TAG, "userUid: " + userUid);
+                            }
+
+                            if(localSession != null && !localSession.equals("") && localSession.getCurrentResponder() != null && localSession.getCurrentResponder().equals(userUid)){
 
                                 Log.d(TAG, "I'm the current responder");
 
@@ -212,7 +216,7 @@ public class OnGoingSleepSessionActivity extends AppCompatActivity {
                             // ...
                         }
                     };
-                    localSessionDatabase.addValueEventListener(localSessionListener);
+                    localSessionDatabase2.addValueEventListener(localSessionListener);
 
 
 
